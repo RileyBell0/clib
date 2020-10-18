@@ -1,2 +1,0 @@
-the existance of this file within 'std' simply stops
-vscode from collapsing the file structure

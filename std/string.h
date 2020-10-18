@@ -12,7 +12,7 @@
 #ifndef CLIB_STRING_H
 #define CLIB_STRING_H
 
-#include "../general/general.h"
+#include "general.h"
 #include <string.h>
 
 #define SPACE_FOR_NULL 1
@@ -45,6 +45,12 @@ string new_string(unsigned int len);
  * Copies 'source' and returns it
 */
 string string_copy(string source);
+
+/*
+ * Takes a cstring as a source and converts it
+ * into a string struct
+*/
+string string_from_cstring(char* source);
 
 /*
  * Copies 'source' and returns it

@@ -4,5 +4,12 @@
 			"path": ".."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.exclude": {
+			".sconsign.dblite": true
+		},
+		"files.associations": {
+			"string": "c"
+		}
+	}
 }

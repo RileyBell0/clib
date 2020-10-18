@@ -3,9 +3,9 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "../general/general.h"
-#include "../bool/bool.h"
-#include "../string/string.h"
+#include "general.h"
+#include "bool.h"
+#include "string.h"
 
 #define MODE_READ "r\0"
 #define MODE_WRITE "w\0"

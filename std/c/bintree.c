@@ -1,4 +1,4 @@
-#include "bintree.h"
+#include "../bintree.h"
 
 static tree_node *tree_new_node(void *data);
 static void tree_insert_to_node(tree_node *node, void *data, int (*compare)(void *first, void *second));

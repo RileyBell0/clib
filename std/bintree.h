@@ -8,8 +8,8 @@
 #ifndef CLIB_TREE_H
 #define CLIB_TREE_H
 
-#include "../general/general.h"
-#include "../list/list.h"
+#include "general.h"
+#include "list.h"
 
 #define RIGHT 1
 #define LEFT -1

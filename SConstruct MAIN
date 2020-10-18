@@ -67,12 +67,8 @@ def endSetup():
 # Main program information - no main file, all objects
 extension = 'c'
 
-mainSRC = '.'
-mainNAME = 'getFileList'
-mainEXTENSION = 'c'
-
 # CLIB Dependencies
-stdSrc = './std'
+stdSrc = '/std'
 stdFiles = [
     'array',
     'string',
@@ -89,10 +85,8 @@ stdFiles = [
 
 title("SCONS - Setup START")
 
-addFileA(mainSRC, mainNAME, mainEXTENSION);
-
 subtitle("Adding CLIB Files")
 addFiles(stdFiles, stdSrc, extension)
 
 endSetup()
-Program(source = files, LIBS = libs)
+Object(source = files, LIBS = libs)

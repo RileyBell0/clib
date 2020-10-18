@@ -1,7 +1,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include "../general/general.h"
+#include "general.h"
 #include <string.h>
 
 

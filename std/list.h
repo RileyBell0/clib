@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "../general/general.h"
-#include "../bool/bool.h"
+#include "general.h"
+#include "bool.h"
 
 #define ERROR -1
 

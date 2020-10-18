@@ -1,4 +1,4 @@
-#include "array.h"
+#include "../array.h"
 
 static int dynamic_array_extend(dynamicArray *base);
 

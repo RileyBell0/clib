@@ -1,4 +1,4 @@
-#include "string.h"
+#include "../string.h"
 
 static void string_lengthen(string *toExtend, unsigned int len);
 static void string_extend(string *toExtend);
@@ -14,6 +14,17 @@ string new_string(unsigned int len)
     str.str[0] = '\0';
 
     return str;
+}
+
+string string_from_cstring(char* source)
+{
+    string newString;
+    
+    newString.str = source;
+    newString.len = strlen(newString.str);
+    newString.max_len = newString.len;
+
+    return newString;
 }
 
 static void string_extend(string *toExtend)
@@ -112,18 +123,23 @@ void string_concat(string *base, string extension)
 
 string string_copy(string source)
 {
-    string newString = new_string(source.len);
+    string newString;
+
+    // Updating string length field
+    newString.len = source.len;
+    newString.max_len = source.len;
+
+    // Allocating space for the string
+    newString.str = (char*)safe_malloc(sizeof(char)*source.len + SPACE_FOR_NULL);
 
     // copying 'source' onto the new string
     for (int i = 0; i < source.len; i++)
     {
         newString.str[i] = source.str[i];
     }
+    
     // null terminating
     newString.str[newString.len] = '\0';
-
-    // Updating string length field
-    newString.len = newString.max_len;
 
     return newString;
 }

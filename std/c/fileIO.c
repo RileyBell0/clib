@@ -1,4 +1,4 @@
-#include "fileIO.h"
+#include "../fileIO.h"
 
 FILE* fileio_open_safe(char* filePath, int isReading){
     FILE* newFile = NULL;

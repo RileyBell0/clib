@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include "../bool/bool.h"
+#include "bool.h"
 
 void *safe_malloc(unsigned int size);
 
