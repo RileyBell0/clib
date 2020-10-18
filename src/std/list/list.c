@@ -14,7 +14,7 @@ list new_list(unsigned int elementSize)
 
 static list_node *list_new_node(void *data, unsigned int dataSize)
 {
-    list_node *newNode = (list_node *)safe_malloc(sizeof(list_node));
+    list_node *newNode = (list_node *)safe_calloc(sizeof(list_node));
 
     // Create space for the data
     newNode->data = safe_malloc(dataSize);
@@ -56,9 +56,12 @@ void *list_remove_element(list *list, void *toRemove)
     {
         if (current_node->data == toRemove)
         {
-            return list_remove_node(current_node);
+            return list_remove_node(list, current_node);
         }
+
+        current_node = current_node->next;
     }
+    return NULL;
 }
 
 /*
@@ -66,7 +69,7 @@ void *list_remove_element(list *list, void *toRemove)
  * patches surrounding references. If a delete_data function is 
  * provided, the node's associated data is deleted
 */
-void *list_remove_node(list_node *toRemove)
+void *list_remove_node(list *list, list_node *toRemove)
 {
     if (toRemove == NULL)
     {
@@ -76,14 +79,29 @@ void *list_remove_node(list_node *toRemove)
     list_node *prev = toRemove->prev;
     list_node *next = toRemove->next;
 
+    // list gymnastics
+    list->size -= 1;
+
     if (prev != NULL)
     {
+        list->first_node = prev;
         prev->next = next;
     }
+    else
+    {
+        list->first_node = next;
+    }
+    
     if (next != NULL)
     {
+        list->last_node = next;
         next->prev = prev;
     }
+    else
+    {
+        list->last_node = prev;
+    }
+    
 
     void *data = toRemove->data;
 
@@ -115,7 +133,7 @@ void *list_remove_at(list *list, int index)
         {
             if (pos == index)
             {
-                return list_remove_node(currentNode);
+                return list_remove_node(list, currentNode);
             }
             currentNode = currentNode->prev;
         }
@@ -129,7 +147,7 @@ void *list_remove_at(list *list, int index)
         {
             if (pos == index)
             {
-                return list_remove_node(currentNode);
+                return list_remove_node(list, currentNode);
             }
             currentNode = currentNode->next;
         }

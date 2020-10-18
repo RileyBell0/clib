@@ -83,6 +83,8 @@ int dynamic_array_append(dynamicArray *base, void* element)
     // Copies data from the address 'element' to the array
     memcpy(&((char*)base->dat)[(base->len * base->elementSize)], element, base->elementSize);
 
+    base->len += 1;
+
     return TRUE;
 }
 
