@@ -6,7 +6,7 @@ static list_node *list_new_node(void *data, unsigned int dataSize);
 list new_list(unsigned int elementSize)
 {
     list new_list = {0};
-
+    
     new_list.elementSize = elementSize;
 
     return new_list;

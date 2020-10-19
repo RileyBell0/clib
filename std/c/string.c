@@ -21,10 +21,38 @@ string string_from_cstring(char* source)
     string newString;
     
     newString.str = source;
-    newString.len = strlen(newString.str);
+    if (source)
+    {
+        newString.len = strlen(newString.str);
+    }
+    else
+    {
+        newString.len = 0;
+    }
     newString.max_len = newString.len;
 
     return newString;
+}
+
+#include <stdio.h>
+// TODO
+// not sure if this works
+void string_write(string* base, string source)
+{
+    if (base->max_len < base->len + source.len)
+    {
+        string_lengthen(base, base->len + source.len - base->max_len);
+    }
+
+    int sourcePos = 0;
+    unsigned int startLen = base->len;
+    unsigned int finalLen = startLen + source.len;
+    for (unsigned int i = startLen; i < finalLen; i++)
+    {
+        base->str[i] = source.str[sourcePos++];
+        base->len += 1;
+    }
+    base->str[base->len] = '\0';
 }
 
 static void string_extend(string *toExtend)
@@ -88,38 +116,6 @@ string string_new_concat(string base, string extension)
     return combined;
 }
 
-// Writes onto the base string with the extension string appended
-void string_concat(string *base, string extension)
-{
-    // Ensuring there is enough space for the new string
-
-    // If there is not enough room in 'base' for the extension
-    if (base->max_len < base->len + extension.len)
-    {  
-        // If the string_extend method won't be enough
-        if (base->len + extension.len > base->max_len * REALLOC_MULTIPLIER)
-        {
-            string_lengthen(base, base->len + extension.len);
-        }
-        else
-        {
-            string_extend(base);
-        }
-    }  
-
-    int baseStrPos = base->len;
-
-    // Writing the contents of 'extension' to the end of 'base'
-    for (int i = 0; i < extension.len; i++)
-    {
-        base->str[baseStrPos++] = extension.str[i];
-    }
-
-    base->len = base->len + extension.len;
-
-    // null-terminating the string
-    base->str[base->len] = '\0';
-}
 
 string string_copy(string source)
 {

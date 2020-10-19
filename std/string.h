@@ -47,8 +47,15 @@ string new_string(unsigned int len);
 string string_copy(string source);
 
 /*
+ * 
+*/
+void string_write(string* base, string source);
+
+/*
  * Takes a cstring as a source and converts it
  * into a string struct
+ * 
+ * Does not allocate memory
 */
 string string_from_cstring(char* source);
 
@@ -63,10 +70,6 @@ char *cstring_copy(const char *source);
 */
 string string_new_concat(string base, string extension);
 
-/*
- * Concatenates 'extension' onto 'base', modifying 'base'
-*/
-void string_concat(string *base, string extension);
 
 // murders a string in cold blood
 void string_destroy(string toDestroy);

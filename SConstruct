@@ -79,7 +79,8 @@ stdFiles = [
     'list',
     'general',
     'fileIO',
-    'bintree'
+    'bintree',
+    'directory'
 ]
 
 
