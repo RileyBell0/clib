@@ -1,0 +1,3 @@
+glassCompile
+glassSetup
+main

@@ -5,8 +5,8 @@
  * the node at which the collision occurs. 
 */
 
-#ifndef CLIB_TREE_H
-#define CLIB_TREE_H
+#ifndef CLIB_STD_TREE_H
+#define CLIB_STD_TREE_H
 
 #include "general.h"
 #include "list.h"

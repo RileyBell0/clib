@@ -1,5 +1,5 @@
-#ifndef CLIB_LIST_H
-#define CLIB_LIST_H
+#ifndef CLIB_STD_LIST_H
+#define CLIB_STD_LIST_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -45,6 +45,8 @@ void *list_remove_at(list *list, int index);
 void *list_remove_element(list *list, void *toRemove);
 
 void *list_remove_node(list *list, list_node *toRemove);
+
+void list_combine(list *base, list *extension);
 
 // frees all dynamically allocated data in a list.
 // IMPORTANT: Send a 'delete_data' function IF your data cannot be freed just by calling free() on it's pointer

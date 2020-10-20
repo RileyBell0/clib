@@ -26,6 +26,20 @@ char* getFileExtension(char *fileName)
     return extension;
 }
 
+char *removeFileExtension(char *fileName)
+{
+    int i = 0;
+    for (unsigned int i = strlen(fileName); i >= 0; i--)
+    {
+        if (fileName[i] == EXTENSION_SEPERATING_CHAR)
+        {
+            fileName[i] = '\0';
+            return fileName;
+        }
+    }
+    return fileName;
+}
+
 dynamicArray getAllFiles(DIR* d)
 {
     dynamicArray files = new_dynamic_array(sizeof(struct dirent));
@@ -44,7 +58,7 @@ dynamicArray getAllFiles(DIR* d)
 /*
  * Returns an array of 'struct dirent' from <dirent.h>
 */
-dynamicArray getFilesWithExtension(DIR* d, string extension)
+dynamicArray array_GetFilesWithExtension(DIR* d, string extension)
 {
     struct dirent *file;
     dynamicArray matchingFiles = new_dynamic_array(sizeof(struct dirent));
@@ -60,11 +74,42 @@ dynamicArray getFilesWithExtension(DIR* d, string extension)
         string fileExtension = string_from_cstring(getFileExtension(file->d_name));
     
         // Extension matches the requested extension
-        if (fileExtension.len != 0 && strcmp(fileExtension.str,extension.str) == 0)
+        if (((extension.str == NULL || extension.len == 0) && fileExtension.len == 0) || 
+            (fileExtension.len != 0 && strcmp(fileExtension.str,extension.str) == 0))
         {
             dynamic_array_append(&matchingFiles, file);
         }
     }
+
+    dynamic_array_destroy(allFiles);
+
+    return matchingFiles;
+}
+
+list list_GetFilesWithExtension(DIR* d, string extension)
+{
+    struct dirent *file;
+    list matchingFiles = new_list(sizeof(struct dirent));
+
+    // Get all files in the directory
+    dynamicArray allFiles = getAllFiles(d);
+
+    for (unsigned int i = 0; i < allFiles.len; i++)
+    {
+        // Get the next file
+        file = &((struct dirent*)allFiles.dat)[i];
+
+        string fileExtension = string_from_cstring(getFileExtension(file->d_name));
+    
+        // Extension matches the requested extension
+        if (((extension.str == NULL || extension.len == 0) && fileExtension.len == 0) || 
+            (fileExtension.len != 0 && strcmp(fileExtension.str,extension.str) == 0))
+        {
+            list_append(&matchingFiles, file);
+        }
+    }
+
+    dynamic_array_destroy(allFiles);
 
     return matchingFiles;
 }

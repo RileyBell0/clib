@@ -7,10 +7,15 @@
 	"settings": {
 		"files.exclude": {
 			".sconsign.dblite": true,
-			"**/*.o": true
+			"**/*.o": true,
+			"unused": true
 		},
 		"files.associations": {
-			"string": "c"
+			"string": "c",
+			"array": "c",
+			"string_view": "c",
+			"initializer_list": "c",
+			"utility": "c"
 		}
 	}
 }

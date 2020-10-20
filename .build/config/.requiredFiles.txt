@@ -1,0 +1,7 @@
+std/c/list.c
+std/c/directory.c
+std/c/string.c
+std/c/general.c
+std/c/array.c
+std/c/fileIO.c
+std/c/bintree.c

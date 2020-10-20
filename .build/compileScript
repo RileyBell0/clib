@@ -1,0 +1,8 @@
+
+echo "--------------------------------------------------"
+echo "Getting paths to required files for compilation..."
+echo "--------------------------------------------------"
+
+./.build/glassCompile main c .build/config/.mainFiles.txt 0
+./.build/glassCompile main c .build/config/.mainNames.txt 1
+./.build/glassCompile std c .build/config/.requiredFiles.txt 0

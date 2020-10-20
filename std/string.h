@@ -9,8 +9,8 @@
  * any tangible performance benefit could arise as a result
 */
 
-#ifndef CLIB_STRING_H
-#define CLIB_STRING_H
+#ifndef CLIB_STD_STRING_H
+#define CLIB_STD_STRING_H
 
 #include "general.h"
 #include <string.h>

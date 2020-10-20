@@ -215,3 +215,34 @@ void list_destroy(list *list, void (*delete_data)(void *data))
 
     list->size = 0;
 }
+
+void list_combine(list *base, list *extension)
+{
+    if (!base || !extension)
+    {
+        return;
+    }
+    if (extension->size == 0)
+    {
+        return;
+    }
+    
+    if (base->size == 0)
+    {
+        base->first_node = extension->first_node;
+        base->last_node = extension->last_node;
+    }
+    else
+    {
+        // Patch endings
+        base->last_node->next = extension->first_node;
+        extension->first_node->prev = base->last_node->next;
+    }
+    
+
+    // Update the last element of the list
+    base->last_node = extension->last_node;
+
+    // Update the new list size
+    base->size = base->size + extension->size;
+}

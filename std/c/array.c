@@ -2,6 +2,16 @@
 
 static int dynamic_array_extend(dynamicArray *base);
 
+void array_set_element(void* array, void* data, unsigned int element, unsigned int elementSize)
+{    
+    memcpy(((char*)array + (elementSize * element)), data, elementSize);
+}
+
+void *array_get_element(void* array, unsigned int element, unsigned int elementSize)
+{
+    return (void*)((char*)array + (element * elementSize)); 
+}
+
 array new_array(unsigned int elements, unsigned int element_size)
 {
     array newArray;
@@ -123,6 +133,12 @@ static int dynamic_array_extend(dynamicArray *base)
 
 // Wrapper function to destroy the contents of an array
 void array_destroy(array toDestroy)
+{
+    destroy(toDestroy.dat);
+}
+
+// Wrapper function to destroy the contents of an array
+void dynamic_array_destroy(dynamicArray toDestroy)
 {
     destroy(toDestroy.dat);
 }

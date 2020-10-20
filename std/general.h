@@ -1,5 +1,5 @@
-#ifndef CLIB_GENERAL_H
-#define CLIB_GENERAL_H
+#ifndef CLIB_STD_GENERAL_H
+#define CLIB_STD_GENERAL_H
 
 #include <stdlib.h>
 #include <assert.h>

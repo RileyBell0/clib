@@ -1,5 +1,5 @@
-#ifndef CLIB_FILEIO_H
-#define CLIB_FILEIO_H
+#ifndef CLIB_STD_FILEIO_H
+#define CLIB_STD_FILEIO_H
 
 #include <stdio.h>
 #include <assert.h>
