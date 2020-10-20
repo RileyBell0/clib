@@ -72,6 +72,7 @@ string string_new_concat(string base, string extension);
 
 
 // murders a string in cold blood
-void string_destroy(string toDestroy);
+void string_destroy(string *toDestroy);
+void void_string_destroy(void *toDestroy);
 
 #endif

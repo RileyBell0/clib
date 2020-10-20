@@ -11,4 +11,6 @@ void *safe_calloc(unsigned int size);
 
 void destroy(void *toDestroy);
 
+void ptr_destroy(void* data);
+
 #endif

@@ -2,6 +2,8 @@
 
 /*
  * if (extension == NULL || extension[0] == NULL) then there is no extension
+ * 
+ * Does not allocate memory
 */
 char* getFileExtension(char *fileName)
 {
@@ -26,10 +28,11 @@ char* getFileExtension(char *fileName)
     return extension;
 }
 
+#include <stdio.h>
 char *removeFileExtension(char *fileName)
 {
     int i = 0;
-    for (unsigned int i = strlen(fileName); i >= 0; i--)
+    for (int i = strlen(fileName); i >= 0; i--)
     {
         if (fileName[i] == EXTENSION_SEPERATING_CHAR)
         {
@@ -40,64 +43,88 @@ char *removeFileExtension(char *fileName)
     return fileName;
 }
 
-dynamicArray getAllFiles(DIR* d)
+list getAllDirectoryEntries(DIR *d)
 {
-    dynamicArray files = new_dynamic_array(sizeof(struct dirent));
+    list entries = new_list(sizeof(struct dirent));
+
+    struct dirent * entry;
+
+    while ((entry = readdir(d)) != NULL) {
+        // Copy the contents of 'entry'
+        list_append(&entries, entry);
+    }
+    
+    return entries;
+}
+
+// Allocates memory, returns a list of (char*)
+list getAllDirectoryEntryNames(DIR *d)
+{
+    list entries = new_list(sizeof(char*));
+
+    struct dirent * entry;
+
+    while ((entry = readdir(d)) != NULL) {
+        // Copy the contents of 'entry'
+        char* name = cstring_copy(entry->d_name);
+        list_append(&entries, &name);
+    }
+    
+    return entries;
+}
+
+list getAllFiles(DIR* d)
+{
+    list files = new_list(sizeof(struct dirent));
 
     struct dirent * entry;
 
     while ((entry = readdir(d)) != NULL) {
         if (entry->d_type == DT_REG) { /* If the entry is a regular file */
-            dynamic_array_append(&files, entry);
+            list_append(&files, &entry);
         }
     }
     
     return files;
 }
 
-/*
- * Returns an array of 'struct dirent' from <dirent.h>
-*/
-dynamicArray array_GetFilesWithExtension(DIR* d, string extension)
+
+list getFoldersInDir(DIR* d)
 {
-    struct dirent *file;
-    dynamicArray matchingFiles = new_dynamic_array(sizeof(struct dirent));
+    struct dirent *entry;
+    list folders = new_list(sizeof(struct dirent));
 
-    // Get all files in the directory
-    dynamicArray allFiles = getAllFiles(d);
+    list allEntries = getAllDirectoryEntries(d);
     
-    for (unsigned int i = 0; i < allFiles.len; i++)
+    list_node *node = allEntries.first_node;
+    while (node)
     {
-        // Get the next file
-        file = &((struct dirent*)allFiles.dat)[i];
-
-        string fileExtension = string_from_cstring(getFileExtension(file->d_name));
-    
-        // Extension matches the requested extension
-        if (((extension.str == NULL || extension.len == 0) && fileExtension.len == 0) || 
-            (fileExtension.len != 0 && strcmp(fileExtension.str,extension.str) == 0))
+        entry = (struct dirent*)node->data;
+        if (entry->d_type == DT_DIR)
         {
-            dynamic_array_append(&matchingFiles, file);
+            list_append(&folders, entry);
         }
+        node = node->next;
     }
 
-    dynamic_array_destroy(allFiles);
+    list_destroy(&allEntries, NULL);
 
-    return matchingFiles;
+    return folders;
 }
 
-list list_GetFilesWithExtension(DIR* d, string extension)
+list getFilesWithExtension(DIR* d, string extension)
 {
     struct dirent *file;
     list matchingFiles = new_list(sizeof(struct dirent));
 
     // Get all files in the directory
-    dynamicArray allFiles = getAllFiles(d);
+    list allFiles = getAllFiles(d);
 
-    for (unsigned int i = 0; i < allFiles.len; i++)
+    list_node *node = allFiles.first_node;
+    while (node)
     {
         // Get the next file
-        file = &((struct dirent*)allFiles.dat)[i];
+        file = (struct dirent*)node->data;
 
         string fileExtension = string_from_cstring(getFileExtension(file->d_name));
     
@@ -107,9 +134,10 @@ list list_GetFilesWithExtension(DIR* d, string extension)
         {
             list_append(&matchingFiles, file);
         }
+        node = node->next;
     }
 
-    dynamic_array_destroy(allFiles);
+    list_destroy(&allFiles, NULL);
 
     return matchingFiles;
 }
@@ -123,4 +151,70 @@ string getSubDirectory(string basePath, string pathSeperator, string dirName)
     string_write(&sourceFiles, dirName);
 
     return sourceFiles;
+}
+
+list getFilesWithExtensionRecursive(DIR *d, string path, string pathSeperator, string extension)
+{
+    list filesWithExtension = new_list(sizeof(string));
+
+    if (d)
+    {
+        // Get all files wihtin the current directory
+        list allFiles = getAllDirectoryEntryNames(d);
+
+        list_node *node = allFiles.first_node;
+
+        // Go through the list of directory entires
+        while (node)
+        {
+            DIR *sub = NULL;
+
+            // Save the location of the directory name for easier access
+            string entryName = string_from_cstring(*(char **)node->data);
+
+            // Construct a string for the path to the given entry
+            string entryPath = getSubDirectory(path, pathSeperator, entryName);
+
+            // If it is a sub directory
+            if (strcmp(entryName.str, ".") != 0 && strcmp(entryName.str, "..") != 0)
+            {
+                sub = opendir(entryPath.str);
+            }
+
+            // Gets a reference to the extension on the current directory
+            string fileExtension = string_from_cstring(getFileExtension(entryName.str));
+
+            if (sub)
+            {
+                // Re-call this same method
+                list subFiles = getFilesWithExtensionRecursive(sub, entryPath, pathSeperator, extension);
+                // Close the sub directory
+                closedir(sub);
+                // Add the results from the next folder to this one
+                list_combine(&filesWithExtension, &subFiles);
+                // Destroy the string to the path of the file
+                string_destroy(&entryPath);
+            }
+            else if (((extension.str == NULL || extension.len == 0) && fileExtension.len == 0) ||
+                     (fileExtension.len != 0 && strcmp(fileExtension.str, extension.str) == 0))
+            {
+                // Extension matches the requested extension
+                // Save the string's information into the list
+                list_append(&filesWithExtension, &entryPath);
+            }
+            else
+            {
+                // it was not a directory or a file wiht the extension we want - we no longer need this path
+                string_destroy(&entryPath);
+            }
+
+            // Go to the next element
+            node = node->next;
+        }
+
+        // Destroy the pain
+        list_destroy(&allFiles, ptr_destroy);
+    }
+    // Return a list of all matching files in this and any sub directories
+    return filesWithExtension;
 }

@@ -5,6 +5,7 @@
 #include <string.h>
 #include "general.h"
 #include "bool.h"
+#include "array.h"
 
 #define ERROR -1
 
@@ -24,6 +25,8 @@ typedef struct list
     unsigned int size;
     unsigned int elementSize;
 } list;
+
+array list_to_array(list list);
 
 // Returns a new list where the stored elements will be of size (elementSize)
 list new_list(unsigned int elementSize);

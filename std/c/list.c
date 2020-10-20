@@ -3,10 +3,25 @@
 // Returns a pointer to a new list Node with the relevant data attached
 static list_node *list_new_node(void *data, unsigned int dataSize);
 
+array list_to_array(list list)
+{
+    array converted = new_array(list.size, list.elementSize);
+
+    unsigned int element = 0;
+    list_node *node = list.first_node;
+    while (node)
+    {
+        array_set_element(&converted, node->data, element++, list.elementSize);
+        node = node->next;
+    }
+
+    return converted;
+}
+
 list new_list(unsigned int elementSize)
 {
     list new_list = {0};
-    
+
     new_list.elementSize = elementSize;
 
     return new_list;
@@ -91,7 +106,7 @@ void *list_remove_node(list *list, list_node *toRemove)
     {
         list->first_node = next;
     }
-    
+
     if (next != NULL)
     {
         list->last_node = next;
@@ -101,7 +116,6 @@ void *list_remove_node(list *list, list_node *toRemove)
     {
         list->last_node = prev;
     }
-    
 
     void *data = toRemove->data;
 
@@ -172,45 +186,24 @@ void list_destroy(list *list, void (*delete_data)(void *data))
     list_node *current_node = list->first_node;
     list_node *next_node = NULL;
 
-    // TODO
-    // Method can be shortened for readability by
-    // putting the if statement around the line
-    //  'delete_data(current_node->data)'
-    // but this would make it slightly, every so slightly slower
-    if (delete_data)
+    while (current_node != NULL)
     {
-        // Freeing the Dynamically Allocated Data in the node
-        delete_data(current_node->data);
-        while (current_node != NULL)
-        {
-            next_node = current_node->next;
+        next_node = current_node->next;
 
-            // Destroying the Data
+        // Freeing the dynamically allocated node structure
+        if (delete_data)
+        {
             delete_data(current_node->data);
             free(current_node->data);
-            
-            // Freeing the dynamically allocated node structure
-            free(current_node);
-            
-            current_node = next_node;
         }
-    }
-    else
-    {
-        // Freeing the Dynamically Allocated Data in the node
-        delete_data(current_node->data);
-        while (current_node != NULL)
+        else
         {
-            next_node = current_node->next;
-
-            // Destroying the Data
             free(current_node->data);
-
-            // Freeing the dynamically allocated node structure
-            free(current_node);
-            
-            current_node = next_node;
         }
+
+        free(current_node);
+
+        current_node = next_node;
     }
 
     list->size = 0;
@@ -226,7 +219,7 @@ void list_combine(list *base, list *extension)
     {
         return;
     }
-    
+
     if (base->size == 0)
     {
         base->first_node = extension->first_node;
@@ -238,7 +231,6 @@ void list_combine(list *base, list *extension)
         base->last_node->next = extension->first_node;
         extension->first_node->prev = base->last_node->next;
     }
-    
 
     // Update the last element of the list
     base->last_node = extension->last_node;

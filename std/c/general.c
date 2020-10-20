@@ -21,3 +21,9 @@ void destroy(void *toDestroy)
         free(toDestroy);
     }
 }
+
+void ptr_destroy(void* data)
+{
+    void** data2 = (void**)data;
+    destroy(*data2);
+}

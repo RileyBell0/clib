@@ -158,7 +158,12 @@ char* cstring_copy(const char* source)
 }
 
 // Wrapper that destroys the given string
-void string_destroy(string toDestroy)
+void string_destroy(string *toDestroy)
 {
-    destroy(toDestroy.str);
+    destroy(toDestroy->str);
+}
+
+void void_string_destroy(void *toDestroy)
+{
+    destroy(((string*)toDestroy)->str);
 }
