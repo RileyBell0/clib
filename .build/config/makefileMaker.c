@@ -19,6 +19,8 @@
 #define DEFAULT_BUFFER_LEN 128
 #define EXTRA_CHARS 9
 
+void write_string_list(FILE* outFile, list_t list);
+string_t concat_string_list(list_t list);
 
 int main(int argc, char **argv)
 {
@@ -30,7 +32,7 @@ int main(int argc, char **argv)
     }
 
     // Making input args more usable
-    string_t outFilePath = string_from_cstring("build/makefile");
+    string_t outFilePath = string_from_cstring("makefile");
     string_t requiredFilesPath = string_from_cstring(argv[ARG_REQ_FILES]);
     string_t programFilesPath = string_from_cstring(argv[ARG_PROG_FILES]);
 
@@ -102,23 +104,8 @@ int main(int argc, char **argv)
         node = node->next;
     }
 
-    string_t allObjectPaths = new_string(0);
-    node = objectPaths.first_node;
-    while (node)
-    {
-        string_write(&allObjectPaths, *((string_t*)node->data));
-        string_write(&allObjectPaths, string_from_cstring(" "));
-        node = node->next;
-    }
-    
-    string_t allObjects = new_string(0);
-    node = objectNames.first_node;
-    while (node)
-    {
-        string_write(&allObjects, *((string_t*)node->data));
-        string_write(&allObjects, string_from_cstring(" "));
-        node = node->next;
-    }
+    string_t allObjectPaths = concat_string_list(objectPaths);    
+    string_t allObjects = concat_string_list(objectNames);
 
     // Creating strings for the make instructions for each executable
     FILE *programFiles = fileio_open_safe(programFilesPath.str, TRUE);
@@ -184,46 +171,22 @@ int main(int argc, char **argv)
 
     fileio_close(programFiles);
 
-    FILE *outFile = fileio_open_safe(outFilePath.str, FALSE);
     string_t allCmd = new_string(strlen("all: "));
+    string_t names = concat_string_list(execNames);
     string_write(&allCmd, string_from_cstring("all: "));
-    node = execNames.first_node;
-    while (node)
-    {
-        string_write(&allCmd, *((string_t*)node->data));
-        string_write(&allCmd, string_from_cstring(" "));
-        node = node->next;
-    }
+    string_write(&allCmd, names);
     string_write(&allCmd, string_from_cstring("\n"));
-    printf("%s\n", allCmd.str);
+    string_destroy(&names);
+    
+    FILE *outFile = fileio_open_safe(outFilePath.str, FALSE);
+
     fprintf(outFile, "%s\n", allCmd.str);
 
-    // Print the object creation code
-    node = execInstructions.first_node;
-    while (node)
-    {
-        printf("%s\n",((string_t*)node->data)->str);
-        fprintf(outFile, "%s\n",((string_t*)node->data)->str);
-        node = node->next;
-    } 
 
     // Print the object creation code
-    node = execBuildInstructions.first_node;
-    while (node)
-    {
-        printf("%s\n",((string_t*)node->data)->str);
-        fprintf(outFile, "%s\n",((string_t*)node->data)->str);
-        node = node->next;
-    } 
-
-    // Print the object creation code
-    node = objMakeLines.first_node;
-    while (node)
-    {
-        printf("%s\n",((string_t*)node->data)->str);
-        fprintf(outFile, "%s\n",((string_t*)node->data)->str);
-        node = node->next;
-    } 
+    write_string_list(outFile, execInstructions);
+    write_string_list(outFile, execBuildInstructions);
+    write_string_list(outFile, objMakeLines);
 
     string_destroy(&allCmd);
     string_destroy(&allObjectPaths);
@@ -239,4 +202,39 @@ int main(int argc, char **argv)
     fileio_close(outFile);
 
     return (0);
+}
+
+string_t concat_string_list(list_t list)
+{
+    list_node_t *node = list.first_node;
+    unsigned int totalLen = 0;
+    while (node)
+    {
+        totalLen += ((string_t*)node->data)->len;
+        ++totalLen;
+        node = node->next;
+    }
+
+    string_t finalised = new_string(totalLen);
+
+    node = list.first_node;
+    while (node)
+    {
+        string_write(&finalised, *((string_t*)node->data));
+        string_write(&finalised, string_from_cstring(" "));
+        node = node->next;
+    }
+
+    return finalised;
+}
+
+void write_string_list(FILE* outFile, list_t list)
+{
+    // Print the object creation code
+    list_node_t *node = list.first_node;
+    while (node)
+    {
+        fprintf(outFile, "%s\n",((string_t*)node->data)->str);
+        node = node->next;
+    } 
 }
