@@ -1,0 +1,8 @@
+I (Riley Bell) wrote all this clib stuff, all the code
+is my own, just wanted to save myself some pain in the 
+future so i dont have to re-write data-structures each
+time.
+
+Also working with strings can be a pain and i wanted
+to make some nice helper functions to do generic
+actions. 

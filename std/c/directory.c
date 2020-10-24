@@ -5,7 +5,7 @@
  * 
  * Does not allocate memory
 */
-char* getFileExtension(char *fileName)
+char *getFileExtension(char *fileName)
 {
     char *extension = NULL;
 
@@ -28,78 +28,66 @@ char* getFileExtension(char *fileName)
     return extension;
 }
 
-#include <stdio.h>
-char *removeFileExtension(char *fileName)
+list_t getAllDirectoryEntries(DIR *d)
 {
-    int i = 0;
-    for (int i = strlen(fileName); i >= 0; i--)
+    list_t entries = new_list(sizeof(struct dirent));
+
+    struct dirent *entry;
+
+    while ((entry = readdir(d)) != NULL)
     {
-        if (fileName[i] == EXTENSION_SEPERATING_CHAR)
-        {
-            fileName[i] = '\0';
-            return fileName;
-        }
-    }
-    return fileName;
-}
-
-list getAllDirectoryEntries(DIR *d)
-{
-    list entries = new_list(sizeof(struct dirent));
-
-    struct dirent * entry;
-
-    while ((entry = readdir(d)) != NULL) {
         // Copy the contents of 'entry'
         list_append(&entries, entry);
     }
-    
+
     return entries;
 }
 
 // Allocates memory, returns a list of (char*)
-list getAllDirectoryEntryNames(DIR *d)
+list_t getAllDirectoryEntryNames(DIR *d)
 {
-    list entries = new_list(sizeof(char*));
+    list_t entries = new_list(sizeof(char *));
 
-    struct dirent * entry;
+    struct dirent *entry;
 
-    while ((entry = readdir(d)) != NULL) {
+    while ((entry = readdir(d)) != NULL)
+    {
         // Copy the contents of 'entry'
-        char* name = cstring_copy(entry->d_name);
+        char *name = cstring_copy(entry->d_name);
         list_append(&entries, &name);
     }
-    
+
     return entries;
 }
 
-list getAllFiles(DIR* d)
+list_t getAllFiles(DIR *d)
 {
-    list files = new_list(sizeof(struct dirent));
+    list_t files = new_list(sizeof(struct dirent));
 
-    struct dirent * entry;
+    struct dirent *entry;
 
-    while ((entry = readdir(d)) != NULL) {
-        if (entry->d_type == DT_REG) { /* If the entry is a regular file */
+    while ((entry = readdir(d)) != NULL)
+    {
+        if (entry->d_type == DT_REG)
+        { /* If the entry is a regular file */
             list_append(&files, &entry);
         }
     }
-    
+
     return files;
 }
 
-
-list getFoldersInDir(DIR* d)
+list_t getFoldersInDir(DIR *d)
 {
     struct dirent *entry;
-    list folders = new_list(sizeof(struct dirent));
+    list_t folders = new_list(sizeof(struct dirent));
 
-    list allEntries = getAllDirectoryEntries(d);
-    
-    list_node *node = allEntries.first_node;
+    list_t allEntries = getAllDirectoryEntries(d);
+
+    list_node_t *node = allEntries.first_node;
     while (node)
     {
-        entry = (struct dirent*)node->data;
+        entry = (struct dirent *)node->data;
         if (entry->d_type == DT_DIR)
         {
             list_append(&folders, entry);
@@ -112,25 +100,25 @@ list getFoldersInDir(DIR* d)
     return folders;
 }
 
-list getFilesWithExtension(DIR* d, string extension)
+list_t getFilesWithExtension(DIR *d, string_t extension)
 {
     struct dirent *file;
-    list matchingFiles = new_list(sizeof(struct dirent));
+    list_t matchingFiles = new_list(sizeof(struct dirent));
 
     // Get all files in the directory
-    list allFiles = getAllFiles(d);
+    list_t allFiles = getAllFiles(d);
 
-    list_node *node = allFiles.first_node;
+    list_node_t *node = allFiles.first_node;
     while (node)
     {
         // Get the next file
-        file = (struct dirent*)node->data;
+        file = (struct dirent *)node->data;
 
-        string fileExtension = string_from_cstring(getFileExtension(file->d_name));
-    
+        string_t fileExtension = string_from_cstring(getFileExtension(file->d_name));
+
         // Extension matches the requested extension
-        if (((extension.str == NULL || extension.len == 0) && fileExtension.len == 0) || 
-            (fileExtension.len != 0 && strcmp(fileExtension.str,extension.str) == 0))
+        if (((extension.str == NULL || extension.len == 0) && fileExtension.len == 0) ||
+            (fileExtension.len != 0 && strcmp(fileExtension.str, extension.str) == 0))
         {
             list_append(&matchingFiles, file);
         }
@@ -142,9 +130,9 @@ list getFilesWithExtension(DIR* d, string extension)
     return matchingFiles;
 }
 
-string getSubDirectory(string basePath, string pathSeperator, string dirName)
+string_t getSubDirectory(string_t basePath, string_t pathSeperator, string_t dirName)
 {
-    string sourceFiles = new_string(basePath.len + pathSeperator.len + dirName.len);
+    string_t sourceFiles = new_string(basePath.len + pathSeperator.len + dirName.len);
 
     string_write(&sourceFiles, basePath);
     string_write(&sourceFiles, pathSeperator);
@@ -153,16 +141,16 @@ string getSubDirectory(string basePath, string pathSeperator, string dirName)
     return sourceFiles;
 }
 
-list getFilesWithExtensionRecursive(DIR *d, string path, string pathSeperator, string extension)
+list_t getFilesWithExtensionRecursive(DIR *d, string_t path, string_t pathSeperator, string_t extension)
 {
-    list filesWithExtension = new_list(sizeof(string));
+    list_t filesWithExtension = new_list(sizeof(string_t));
 
     if (d)
     {
         // Get all files wihtin the current directory
-        list allFiles = getAllDirectoryEntryNames(d);
+        list_t allFiles = getAllDirectoryEntryNames(d);
 
-        list_node *node = allFiles.first_node;
+        list_node_t *node = allFiles.first_node;
 
         // Go through the list of directory entires
         while (node)
@@ -170,10 +158,10 @@ list getFilesWithExtensionRecursive(DIR *d, string path, string pathSeperator, s
             DIR *sub = NULL;
 
             // Save the location of the directory name for easier access
-            string entryName = string_from_cstring(*(char **)node->data);
+            string_t entryName = string_from_cstring(*(char **)node->data);
 
             // Construct a string for the path to the given entry
-            string entryPath = getSubDirectory(path, pathSeperator, entryName);
+            string_t entryPath = getSubDirectory(path, pathSeperator, entryName);
 
             // If it is a sub directory
             if (strcmp(entryName.str, ".") != 0 && strcmp(entryName.str, "..") != 0)
@@ -182,12 +170,12 @@ list getFilesWithExtensionRecursive(DIR *d, string path, string pathSeperator, s
             }
 
             // Gets a reference to the extension on the current directory
-            string fileExtension = string_from_cstring(getFileExtension(entryName.str));
+            string_t fileExtension = string_from_cstring(getFileExtension(entryName.str));
 
             if (sub)
             {
                 // Re-call this same method
-                list subFiles = getFilesWithExtensionRecursive(sub, entryPath, pathSeperator, extension);
+                list_t subFiles = getFilesWithExtensionRecursive(sub, entryPath, pathSeperator, extension);
                 // Close the sub directory
                 closedir(sub);
                 // Add the results from the next folder to this one

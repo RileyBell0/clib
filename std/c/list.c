@@ -1,14 +1,14 @@
 #include "../list.h"
 
 // Returns a pointer to a new list Node with the relevant data attached
-static list_node *list_new_node(void *data, unsigned int dataSize);
+static list_node_t *list_new_node(void *data, unsigned int dataSize);
 
-array list_to_array(list list)
+array_t list_to_array(list_t list)
 {
-    array converted = new_array(list.size, list.elementSize);
+    array_t converted = new_array(list.size, list.elementSize);
 
     unsigned int element = 0;
-    list_node *node = list.first_node;
+    list_node_t *node = list.first_node;
     while (node)
     {
         array_set_element(&converted, node->data, element++, list.elementSize);
@@ -18,18 +18,18 @@ array list_to_array(list list)
     return converted;
 }
 
-list new_list(unsigned int elementSize)
+list_t new_list(unsigned int elementSize)
 {
-    list new_list = {0};
+    list_t new_list = {0};
 
     new_list.elementSize = elementSize;
 
     return new_list;
 }
 
-static list_node *list_new_node(void *data, unsigned int dataSize)
+static list_node_t *list_new_node(void *data, unsigned int dataSize)
 {
-    list_node *newNode = (list_node *)safe_calloc(sizeof(list_node));
+    list_node_t *newNode = (list_node_t *)safe_calloc(sizeof(list_node_t));
 
     // Create space for the data
     newNode->data = safe_malloc(dataSize);
@@ -43,9 +43,9 @@ static list_node *list_new_node(void *data, unsigned int dataSize)
     return newNode;
 }
 
-void list_append(list *list, void *data)
+void list_append(list_t *list, void *data)
 {
-    list_node *new_node = list_new_node(data, list->elementSize);
+    list_node_t *new_node = list_new_node(data, list->elementSize);
 
     // patching references to add to end of list
     if (list->size == 0)
@@ -63,9 +63,9 @@ void list_append(list *list, void *data)
     ++(list->size);
 }
 
-void *list_remove_element(list *list, void *toRemove)
+void *list_remove_element(list_t *list, void *toRemove)
 {
-    list_node *current_node = list->first_node;
+    list_node_t *current_node = list->first_node;
 
     while (current_node)
     {
@@ -84,15 +84,15 @@ void *list_remove_element(list *list, void *toRemove)
  * patches surrounding references. If a delete_data function is 
  * provided, the node's associated data is deleted
 */
-void *list_remove_node(list *list, list_node *toRemove)
+void *list_remove_node(list_t *list, list_node_t *toRemove)
 {
     if (toRemove == NULL)
     {
         return NULL;
     }
 
-    list_node *prev = toRemove->prev;
-    list_node *next = toRemove->next;
+    list_node_t *prev = toRemove->prev;
+    list_node_t *next = toRemove->next;
 
     // list gymnastics
     list->size -= 1;
@@ -124,7 +124,7 @@ void *list_remove_node(list *list, list_node *toRemove)
     return data;
 }
 
-void *list_remove_at(list *list, int index)
+void *list_remove_at(list_t *list, int index)
 {
     if (index >= list->size)
     {
@@ -142,7 +142,7 @@ void *list_remove_at(list *list, int index)
     if (index > list->size / 2)
     {
         int pos = list->size - 1;
-        list_node *currentNode = list->last_node;
+        list_node_t *currentNode = list->last_node;
         while (pos >= index)
         {
             if (pos == index)
@@ -156,7 +156,7 @@ void *list_remove_at(list *list, int index)
     else
     {
         int pos = 0;
-        list_node *currentNode = list->first_node;
+        list_node_t *currentNode = list->first_node;
         while (pos <= index)
         {
             if (pos == index)
@@ -176,15 +176,15 @@ void *list_remove_at(list *list, int index)
  * a 'delete_data' function which will be responsible
  * for destroying your dynamically allocated data 
 */
-void list_destroy(list *list, void (*delete_data)(void *data))
+void list_destroy(list_t *list, void (*delete_data)(void *data))
 {
     if (list->size <= 0)
     {
         return;
     }
 
-    list_node *current_node = list->first_node;
-    list_node *next_node = NULL;
+    list_node_t *current_node = list->first_node;
+    list_node_t *next_node = NULL;
 
     while (current_node != NULL)
     {
@@ -209,7 +209,7 @@ void list_destroy(list *list, void (*delete_data)(void *data))
     list->size = 0;
 }
 
-void list_combine(list *base, list *extension)
+void list_combine(list_t *base, list_t *extension)
 {
     if (!base || !extension)
     {

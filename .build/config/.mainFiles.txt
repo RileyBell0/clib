@@ -1,3 +1,2 @@
-main/glassCompile.c
 main/testing.c
-main/glassSetup.c
+main/makefileMaker.c

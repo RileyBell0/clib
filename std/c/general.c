@@ -22,8 +22,8 @@ void destroy(void *toDestroy)
     }
 }
 
-void ptr_destroy(void* data)
+void ptr_destroy(void *data)
 {
-    void** data2 = (void**)data;
+    void **data2 = (void **)data;
     destroy(*data2);
 }

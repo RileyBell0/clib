@@ -1,25 +1,36 @@
+/*
+ * Author:          Riley Bell
+ * Creation Date:   16/10/2020
+*/
+
+/*
+ * For dealing with directories
+ * 
+ * Verified to work with Linux file systems
+*/
+
 #ifndef CLIB_STD_DIRECTORY_H
 #define CLIB_STD_DIRECTORY_H
 
 #include <dirent.h>
 
+#include "path.h"
 #include "string.h"
 #include "list.h"
+#include "fileIO.h"
 
-#define EXTENSION_SEPERATING_CHAR '.'
+char *getFileExtension(char *fileName);
+char *removeFileExtension(char *fileName);
 
-char* getFileExtension(char *fileName);
-char* removeFileExtension(char *fileName);
+list_t getAllFiles(DIR *d);
+list_t getAllDirectoryEntries(DIR *d);
 
-list getAllFiles(DIR* d);
-list getAllDirectoryEntries(DIR *d);
+list_t getFilesWithExtension(DIR *d, string_t extension);
+list_t getFoldersInDir(DIR *d);
 
-list getFilesWithExtension(DIR* d, string extension);
-list getFoldersInDir(DIR* d);
+string_t getSubDirectory(string_t basePath, string_t pathSeperator, string_t dirName);
+list_t getAllDirectoryEntryNames(DIR *d);
 
-string getSubDirectory(string basePath, string pathSeperator, string dirName);
-list getAllDirectoryEntryNames(DIR *d);
-
-list getFilesWithExtensionRecursive(DIR *d, string path, string pathSeperator, string extension);
+list_t getFilesWithExtensionRecursive(DIR *d, string_t path, string_t pathSeperator, string_t extension);
 
 #endif

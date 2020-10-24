@@ -1,20 +1,20 @@
 #include "../array.h"
 
-static int dynamic_array_extend(dynamicArray *base);
+static int dynamic_array_extend(dynamicArray_t *base);
 
-void array_set_element(void* array, void* data, unsigned int element, unsigned int elementSize)
-{    
-    memcpy(((char*)array + (elementSize * element)), data, elementSize);
+void array_set_element(void *array, void *data, unsigned int element, unsigned int elementSize)
+{
+    memcpy(((char *)array + (elementSize * element)), data, elementSize);
 }
 
-void *array_get_element(void* array, unsigned int element, unsigned int elementSize)
+void *array_get_element(void *array, unsigned int element, unsigned int elementSize)
 {
-    return (void*)((char*)array + (element * elementSize)); 
+    return (void *)((char *)array + (element * elementSize));
 }
 
-array new_array(unsigned int elements, unsigned int element_size)
+array_t new_array(unsigned int elements, unsigned int element_size)
 {
-    array newArray;
+    array_t newArray;
 
     if (elements != 0)
     {
@@ -24,13 +24,13 @@ array new_array(unsigned int elements, unsigned int element_size)
     {
         newArray.dat = NULL;
     }
-    
+
     newArray.len = elements;
 
     return newArray;
 }
 
-int array_extend(array *base, unsigned int elementSize, unsigned int extraSpace)
+int array_extend(array_t *base, unsigned int elementSize, unsigned int extraSpace)
 {
     if (base == NULL)
     {
@@ -43,7 +43,7 @@ int array_extend(array *base, unsigned int elementSize, unsigned int extraSpace)
     return TRUE;
 }
 
-int array_resize(array *base, unsigned int elementSize, unsigned int newLength)
+int array_resize(array_t *base, unsigned int elementSize, unsigned int newLength)
 {
     // cannot resize to be smaller
     if (base == NULL || base->len >= newLength)
@@ -52,7 +52,7 @@ int array_resize(array *base, unsigned int elementSize, unsigned int newLength)
     }
 
     // Resize
-    base->dat = realloc(base->dat, elementSize*newLength);
+    base->dat = realloc(base->dat, elementSize * newLength);
 
     // Updating the size of the array
     base->len = newLength;
@@ -63,22 +63,16 @@ int array_resize(array *base, unsigned int elementSize, unsigned int newLength)
     return TRUE;
 }
 
-
-dynamicArray new_dynamic_array(unsigned int element_size)
+dynamicArray_t new_dynamic_array(unsigned int element_size)
 {
-    dynamicArray newArray;
-
-    newArray.dat = NULL;
-    
-    newArray.maxLen = 0;
-    newArray.len = 0;
+    dynamicArray_t newArray = {0};
 
     newArray.elementSize = element_size;
 
     return newArray;
 }
 
-int dynamic_array_append(dynamicArray *base, void* element)
+int dynamic_array_append(dynamicArray_t *base, void *element)
 {
     if (base == NULL)
     {
@@ -90,8 +84,9 @@ int dynamic_array_append(dynamicArray *base, void* element)
     {
         dynamic_array_extend(base);
     }
+
     // Copies data from the address 'element' to the array
-    memcpy(&((char*)base->dat)[(base->len * base->elementSize)], element, base->elementSize);
+    memcpy(&((char *)base->dat)[(base->len * base->elementSize)], element, base->elementSize);
 
     base->len += 1;
 
@@ -99,7 +94,7 @@ int dynamic_array_append(dynamicArray *base, void* element)
 }
 
 // Extends an array (if it is full)
-static int dynamic_array_extend(dynamicArray *base)
+static int dynamic_array_extend(dynamicArray_t *base)
 {
     if (base == NULL || base->len < base->maxLen)
     {
@@ -116,9 +111,9 @@ static int dynamic_array_extend(dynamicArray *base)
     else
     {
         // 1.5x extension factor (maxLen + maxLen/2)
-        newLen = base->maxLen + (base->maxLen/2);
+        newLen = base->maxLen + (base->maxLen / 2);
     }
-    
+
     // Extend the array
     base->dat = realloc(base->dat, newLen * base->elementSize);
     if (base->dat == NULL)
@@ -132,13 +127,13 @@ static int dynamic_array_extend(dynamicArray *base)
 }
 
 // Wrapper function to destroy the contents of an array
-void array_destroy(array toDestroy)
+void array_destroy(array_t toDestroy)
 {
     destroy(toDestroy.dat);
 }
 
 // Wrapper function to destroy the contents of an array
-void dynamic_array_destroy(dynamicArray toDestroy)
+void dynamic_array_destroy(dynamicArray_t toDestroy)
 {
     destroy(toDestroy.dat);
 }

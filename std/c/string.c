@@ -1,11 +1,10 @@
 #include "../string.h"
 
-static void string_lengthen(string *toExtend, unsigned int len);
-static void string_extend(string *toExtend);
+static void string_lengthen(string_t *toExtend, unsigned int len);
 
-string new_string(unsigned int len)
+string_t new_string(unsigned int len)
 {
-    string str;
+    string_t str;
 
     str.len = 0;
     str.max_len = len;
@@ -16,10 +15,10 @@ string new_string(unsigned int len)
     return str;
 }
 
-string string_from_cstring(char* source)
+string_t string_from_cstring(char *source)
 {
-    string newString;
-    
+    string_t newString;
+
     newString.str = source;
     if (source)
     {
@@ -37,7 +36,7 @@ string string_from_cstring(char* source)
 #include <stdio.h>
 // TODO
 // not sure if this works
-void string_write(string* base, string source)
+void string_write(string_t *base, string_t source)
 {
     if (base->max_len < base->len + source.len)
     {
@@ -55,7 +54,7 @@ void string_write(string* base, string source)
     base->str[base->len] = '\0';
 }
 
-static void string_extend(string *toExtend)
+void string_extend(string_t *toExtend)
 {
     // multiplying by 1.5 then adding 1 to account for cases where strlen is 0 or 1
     int newLen = REALLOC_MULTIPLIER * toExtend->max_len;
@@ -76,7 +75,7 @@ static void string_extend(string *toExtend)
     toExtend->max_len = newLen;
 }
 
-static void string_lengthen(string *toExtend, unsigned int len)
+static void string_lengthen(string_t *toExtend, unsigned int len)
 {
     // multiplying by 1.5 then adding 1 to account for cases where strlen is 0 or 1
     int newLen = toExtend->max_len + len;
@@ -92,13 +91,12 @@ static void string_lengthen(string *toExtend, unsigned int len)
     toExtend->max_len = newLen;
 }
 
-
 // returns a new string that is the concatenation of the two inputs
-string string_new_concat(string base, string extension)
+string_t string_new_concat(string_t base, string_t extension)
 {
-    string combined = new_string(base.len + extension.len);
+    string_t combined = new_string(base.len + extension.len);
 
-    // Writing 
+    // Writing
     for (int i = 0; i < base.len; i++)
     {
         combined.str[combined.len++] = base.str[i];
@@ -116,35 +114,33 @@ string string_new_concat(string base, string extension)
     return combined;
 }
 
-
-string string_copy(string source)
+string_t string_copy(string_t source)
 {
-    string newString;
+    string_t newString;
 
     // Updating string length field
     newString.len = source.len;
     newString.max_len = source.len;
 
     // Allocating space for the string
-    newString.str = (char*)safe_malloc(sizeof(char)*source.len + SPACE_FOR_NULL);
+    newString.str = (char *)safe_malloc(sizeof(char) * source.len + SPACE_FOR_NULL);
 
     // copying 'source' onto the new string
     for (int i = 0; i < source.len; i++)
     {
         newString.str[i] = source.str[i];
     }
-    
+
     // null terminating
     newString.str[newString.len] = '\0';
 
     return newString;
 }
 
-
-char* cstring_copy(const char* source)
+char *cstring_copy(const char *source)
 {
     int sLen = strlen(source);
-    char *newString =  safe_malloc(sLen * sizeof(char) + SPACE_FOR_NULL);
+    char *newString = safe_malloc(sLen * sizeof(char) + SPACE_FOR_NULL);
 
     // copying 'source' onto the new string
     for (int i = 0; i < sLen; i++)
@@ -158,12 +154,12 @@ char* cstring_copy(const char* source)
 }
 
 // Wrapper that destroys the given string
-void string_destroy(string *toDestroy)
+void string_destroy(string_t *toDestroy)
 {
     destroy(toDestroy->str);
 }
 
 void void_string_destroy(void *toDestroy)
 {
-    destroy(((string*)toDestroy)->str);
+    destroy(((string_t *)toDestroy)->str);
 }

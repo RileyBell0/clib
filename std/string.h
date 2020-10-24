@@ -1,5 +1,11 @@
+/*
+ * Author:          Riley Bell
+ * Creation Date:   16/10/2020
+*/
 
 /*
+ * im obsessed with optimisation ok
+ * 
  * The speed or, well, efficiency of these functinos may be improvable
  * through the replacement of the usage of 'string' with a pointer to a string
  * as there is passing of more data than needed. For instance, only the pointer to
@@ -30,26 +36,27 @@
  * just keep in mind that all below methods ASSUME that len is correct
  * if it isnt you need to update it using the inbuilt strlen function
 */
-typedef struct string {
-    char* str;
+typedef struct string_t
+{
+    char *str;
     unsigned int len;
     unsigned int max_len;
-} string;
+} string_t;
 
 /*
  * returns a new empty string with the max length of 'len'
 */
-string new_string(unsigned int len);
+string_t new_string(unsigned int len);
 
 /*
  * Copies 'source' and returns it
 */
-string string_copy(string source);
+string_t string_copy(string_t source);
 
 /*
  * 
 */
-void string_write(string* base, string source);
+void string_write(string_t *base, string_t source);
 
 /*
  * Takes a cstring as a source and converts it
@@ -57,7 +64,7 @@ void string_write(string* base, string source);
  * 
  * Does not allocate memory
 */
-string string_from_cstring(char* source);
+string_t string_from_cstring(char *source);
 
 /*
  * Copies 'source' and returns it
@@ -68,11 +75,13 @@ char *cstring_copy(const char *source);
  * returns the concatenation of 'base' and 'extension' without
  * altering either strings
 */
-string string_new_concat(string base, string extension);
+string_t string_new_concat(string_t base, string_t extension);
 
+// Realloc's the given string, updating its length
+void string_extend(string_t *toExtend);
 
 // murders a string in cold blood
-void string_destroy(string *toDestroy);
+void string_destroy(string_t *toDestroy);
 void void_string_destroy(void *toDestroy);
 
 #endif

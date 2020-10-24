@@ -1,4 +1,0 @@
-#ifndef CLIB_TERMINAL_MENU_H
-#define CLIB_TERMINAL_MENU_H
-
-#endif

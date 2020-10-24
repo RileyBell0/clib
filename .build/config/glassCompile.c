@@ -36,10 +36,10 @@ int main(int argc, char **argv)
         nameOnly = TRUE;
     }
     // Making input args more usable
-    string path = string_from_cstring(argv[ARG_PATH]);
-    string extension = string_from_cstring(argv[ARG_EXTENSION]);
-    string outFilePath = string_from_cstring(argv[ARG_OUTFILE]);
-    string pathSeperator = string_from_cstring(PATH_SEPERATOR);
+    string_t path = string_from_cstring(argv[ARG_PATH]);
+    string_t extension = string_from_cstring(argv[ARG_EXTENSION]);
+    string_t outFilePath = string_from_cstring(argv[ARG_OUTFILE]);
+    string_t pathSeperator = string_from_cstring(PATH_SEPERATOR);
 
     // Outputting all files found
     FILE *outFile = fopen(outFilePath.str, "w");
@@ -47,18 +47,18 @@ int main(int argc, char **argv)
 
     DIR *main = opendir(path.str);
 
-    if (main)
+    if (main) 
     {
-        list files = getFilesRecursive(main, path, pathSeperator, extension);
+        list_t files = getFilesWithExtensionRecursive(main, path, pathSeperator, extension);
 
         // Print all files in the subdirectory
-        list_node *node = files.first_node;
+        list_node_t *node = files.first_node;
         while (node)
         {
-            string* current = ((string*)node->data);
+            string_t* current = ((string_t*)node->data);
             if (nameOnly)
             {
-                string toPrint = *current;
+                string_t toPrint = *current;
                 if (toPrint.str[toPrint.len-1] != PATH_SEPERATOR_CHAR)
                 {
                     for (unsigned int i = current->len-1; i >= 0; i--)

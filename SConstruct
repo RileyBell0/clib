@@ -2,7 +2,8 @@
 #   if you have libraries or stuff you need to link, add them to the 'libs' array
 
 import os
-
+env = Environment()
+env.Append( CCFLAGS=["-Wall"])
 
 # read in source files
 def readConfigFile(sources, config):
@@ -34,13 +35,13 @@ prognames = readConfigFile(mainnames, configDir)
 # Helper Functions (and pretty formatting)
 def obj(path):
     subtitle(("Registering build of: " + path))
-    Object(path)
+    env.Object(path)
 def prog(outName, path):
     subtitle(("Registering build of: " + path))
-    Program(outName, path)
+    env.Program(outName, path)
 def prog(path):
     subtitle(("Registering build of: " + path))
-    Program(outName, path)
+    env.Program(outName, path)
 def title(string):
     bar = ""
     for i in range(len(string)):
@@ -105,7 +106,7 @@ if (len(prognames) != 0):
     for prog in progfiles:
         targetName = prognames[index]
         subText("+ " + targetName)
-        Program(target = (buildDir + '/' + targetName), source = [prog] + files, LIBS = libs)
+        env.Program(target = (buildDir + '/' + targetName), source = [prog] + files, LIBS = libs)
 
         index += 1
 else:
@@ -113,5 +114,5 @@ else:
     subtitle("Adding Files to Compile...")
     for file in files:
         subText("+ " + file)
-        Object(source =  file, LIBS = libs)
+        env.Object(source =  file, LIBS = libs)
 print()
