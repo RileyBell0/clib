@@ -126,6 +126,14 @@ string_t getFileName(string_t path)
 
 char *removeFileExtension(char *fileName)
 {
+    // Was a valid string recieved?
+    if (!fileName)
+    {
+        return NULL;
+    }
+
+    // Start at the end of the string and work backwards
+    // until the extension seperating char is recieved
     for (unsigned int i = strlen(fileName); i >= 0; i--)
     {
         if (fileName[i] == EXTENSION_SEPERATING_CHAR)

@@ -24,6 +24,10 @@ void destroy(void *toDestroy)
 
 void ptr_destroy(void *data)
 {
-    void **data2 = (void **)data;
-    destroy(*data2);
+    // if not-null;
+    if (data)
+    {
+        void **data2 = (void **)data;
+        destroy(*data2);
+    }
 }

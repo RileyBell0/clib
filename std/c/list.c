@@ -34,8 +34,15 @@ static list_node_t *list_new_node(void *data, unsigned int dataSize)
     // Create space for the data
     newNode->data = safe_malloc(dataSize);
 
-    // Copy the data into the generated space
-    newNode->data = memcpy(newNode->data, data, dataSize);
+    // The recieved pointer is not-null
+    // TODO im not sure how to handle null data just yet
+    // for these functions, may have to re-work this later
+    // FUTURE RILEY - get on it
+    if (data)
+    {
+        // Copy the data into the generated space
+        newNode->data = memcpy(newNode->data, data, dataSize);
+    }
 
     // Ensure the copy succeded
     assert(newNode->data);
@@ -45,6 +52,11 @@ static list_node_t *list_new_node(void *data, unsigned int dataSize)
 
 void list_append(list_t *list, void *data)
 {
+    if (!list)
+    {
+        return;
+    }
+
     list_node_t *new_node = list_new_node(data, list->elementSize);
 
     // patching references to add to end of list
@@ -63,8 +75,15 @@ void list_append(list_t *list, void *data)
     ++(list->size);
 }
 
+// TODO
+// should this also chcek if toRemove is non-null?
 void *list_remove_element(list_t *list, void *toRemove)
 {
+    if (!list)
+    {
+        return NULL;
+    }
+
     list_node_t *current_node = list->first_node;
 
     while (current_node)
@@ -237,4 +256,11 @@ void list_combine(list_t *base, list_t *extension)
 
     // Update the new list size
     base->size = base->size + extension->size;
+
+    // TODO future riley should we even include this code?
+    // Encouraging the person using this function to not use the 'extension' list again
+    extension->elementSize = 0;
+    extension->first_node = NULL;
+    extension->last_node = NULL;
+    extension->size = 0;
 }

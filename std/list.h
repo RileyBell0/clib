@@ -3,6 +3,20 @@
  * Creation Date:   16/10/2020
 */
 
+/* TODO
+ * FUTURE RILEY - fix this
+ * 
+ * Undefined behaviour when
+ * NULL values are recieved for any field
+ * that is not a list_t* field
+ * 
+ * This functionality and checking
+ * is yet to be implemented. not sure
+ * whether to copy in a null value when
+ * null is recieved or just to do nothing
+ * and throw an error
+*/
+
 #ifndef CLIB_STD_LIST_H
 #define CLIB_STD_LIST_H
 
@@ -31,6 +45,9 @@ typedef struct list_t
     unsigned int elementSize;
 } list_t;
 
+/*
+ * Converts the given list into an array
+*/
 array_t list_to_array(list_t list);
 
 // Returns a new list where the stored elements will be of size (elementSize)
@@ -49,11 +66,21 @@ void *list_remove_at(list_t *list, int index);
  *  Requires
  *      - List in which the item is contained
  *      - A pointer to the item
+ * removes the element at the given position in the list
+ * if it can be found
 */
 void *list_remove_element(list_t *list, void *toRemove);
 
+/*
+ * Removes the given node from the list, updates list size and pointers
+ * accordingly
+*/
 void *list_remove_node(list_t *list, list_node_t *toRemove);
 
+/*
+ * Combines the two given lists, appending the list 'extension'
+ * to the end of the list 'base'
+*/
 void list_combine(list_t *base, list_t *extension);
 
 // frees all dynamically allocated data in a list.
@@ -61,3 +88,6 @@ void list_combine(list_t *base, list_t *extension);
 void list_destroy(list_t *list, void (*delete_data)(void *data));
 
 #endif
+
+// TODO
+// should this also chcek if toRemove is non-null, or well, the data being recieved is not-null

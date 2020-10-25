@@ -9,9 +9,12 @@
 #ifdef _WIN32
 #define PATH_SEPERATOR_CHAR '\\'
 #define PATH_SEPERATOR "\\"
+
 #else
+// Assume Linux's file seperating char as a default
 #define PATH_SEPERATOR_CHAR '/'
 #define PATH_SEPERATOR "/"
+
 #endif
 
 #endif

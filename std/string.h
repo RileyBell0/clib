@@ -53,10 +53,16 @@ string_t new_string(unsigned int len);
 */
 string_t string_copy(string_t source);
 
+/*
+ * Wrapper for string_write which allows
+ * directly appending cstrings to a string_t
+ * without first calling string_from_cstring
+*/
 void string_write_c(string_t *base, char* source);
 
 /*
- * 
+ * Appends the given string 'source' to the end of 'base'
+ * Extends the string where necessary
 */
 void string_write(string_t *base, string_t source);
 
@@ -69,7 +75,7 @@ void string_write(string_t *base, string_t source);
 string_t string_from_cstring(char *source);
 
 /*
- * Copies 'source' and returns it
+ * Copies the recieved cstring and returns it
 */
 char *cstring_copy(const char *source);
 
@@ -84,6 +90,14 @@ void string_extend(string_t *toExtend);
 
 // murders a string in cold blood
 void string_destroy(string_t *toDestroy);
+
+/*
+ * Same as string_destroy but doesnt throw errors
+ * when using for stuff like list_t which takes
+ * data_destruction functions with void* as a parameter
+ * 
+ * Primarily, this just quietens compiler warnings
+*/
 void void_string_destroy(void *toDestroy);
 
 #endif

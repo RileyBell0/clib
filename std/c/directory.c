@@ -7,6 +7,10 @@
 */
 char *getFileExtension(char *fileName)
 {
+    if (!fileName)
+    {
+        return NULL;
+    }
     char *extension = NULL;
 
     int i = 0;
@@ -18,6 +22,7 @@ char *getFileExtension(char *fileName)
             if (fileName[i + 1] != '\0')
             {
                 // We have the start of what could be a valid extension
+                // The last valid potential extension start-point is returned
                 extension = &fileName[i + 1];
             }
         }
@@ -130,7 +135,7 @@ list_t getFilesWithExtension(DIR *d, string_t extension)
     return matchingFiles;
 }
 
-string_t getSubDirectory(string_t basePath, string_t pathSeperator, string_t dirName)
+string_t getSubDirectoryStr(string_t basePath, string_t pathSeperator, string_t dirName)
 {
     string_t sourceFiles = new_string(basePath.len + pathSeperator.len + dirName.len);
 
