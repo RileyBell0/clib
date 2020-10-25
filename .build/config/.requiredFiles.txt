@@ -1,8 +1,7 @@
-std/c/list.c
-std/c/directory.c
-std/c/string.c
-std/c/general.c
-std/c/array.c
-std/c/fileIO.c
-std/c/binaryTree.c
-src/cool.c
+/usr/include/clib/std/c/list.c
+/usr/include/clib/std/c/directory.c
+/usr/include/clib/std/c/string.c
+/usr/include/clib/std/c/general.c
+/usr/include/clib/std/c/array.c
+/usr/include/clib/std/c/fileIO.c
+/usr/include/clib/std/c/binaryTree.c
