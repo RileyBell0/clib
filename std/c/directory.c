@@ -135,7 +135,7 @@ list_t getFilesWithExtension(DIR *d, string_t extension)
     return matchingFiles;
 }
 
-string_t getSubDirectoryStr(string_t basePath, string_t pathSeperator, string_t dirName)
+string_t getSubDirectory(string_t basePath, string_t pathSeperator, string_t dirName)
 {
     string_t sourceFiles = new_string(basePath.len + pathSeperator.len + dirName.len);
 
