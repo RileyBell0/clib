@@ -126,6 +126,70 @@ static int dynamic_array_extend(dynamicArray_t *base)
     return TRUE;
 }
 
+int dynamic_array_safe_resize(dynamicArray_t *array, unsigned int newLen)
+{
+    // If less than the current array length - FAIL
+    if (newLen <= array->len)
+    {
+        return FALSE;
+    }
+    
+    // If greater than the current array length but less than or equal
+    // to the current maximum length of the array
+    if (newLen <= array->maxLen)
+    {
+        return TRUE;
+    }
+
+    // Resize the array
+    array->dat = realloc(array->dat, array->elementSize * newLen);
+    assert(array->dat);
+
+    // Update the length of the array
+    array->len = newLen;
+    array->maxLen = newLen;
+}
+
+void dynamic_array_set_element(dynamicArray_t *array, unsigned int element, void *data)
+{
+    // Gets a pointer to the start of the required element
+    if (array->maxLen < element)
+    {
+        // If the length of the array when extended is less than
+        // the required length to place the new element at
+        if (element > array->maxLen + (array->maxLen / 2))
+        {
+            dynamic_array_safe_resize(array, element);
+        }
+        else
+        {
+            dynamic_array_extend(array);
+        }
+    }
+
+    // Update the length of the array (if the element was placed past the current length)
+    if (element > array->len)
+    {
+        array->len = element;
+    }
+
+    // Set the element in the array at the given position to the data recieved
+    memcpy((((char *)array->dat) + (array->elementSize * element)), data, array->elementSize);
+}
+
+void *dynamic_array_get_element(dynamicArray_t *array, unsigned int element)
+{
+    // If the required element is outside the bounds of the array
+    if (element > array->len)
+    {
+        return NULL;
+    }
+
+    // Return a pointer to the start of the element in the array
+    // by using pointer arithmetic to shift the pointer along the array
+    return (void *)((char *)array->dat + (element * array->elementSize));
+}
+
 // Wrapper function to destroy the contents of an array
 void array_destroy(array_t toDestroy)
 {

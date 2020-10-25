@@ -1,2 +1,0 @@
-./compile
-./build/makefileMaker /usr/include/clib/.build/config/.requiredFiles.txt /usr/include/clib/.build/config/.mainFiles.txt

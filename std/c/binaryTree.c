@@ -10,7 +10,8 @@ binary_tree_t new_binary_tree(unsigned int elementSize, int (*compareFunc)(void 
 
     newTree.elementSize = elementSize;
 
-    // TODO is this legit?
+    // Compare function is required
+    assert(compareFunc);
     newTree.compare = compareFunc;
 
     return newTree;

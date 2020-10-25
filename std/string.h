@@ -53,6 +53,8 @@ string_t new_string(unsigned int len);
 */
 string_t string_copy(string_t source);
 
+void string_write_c(string_t *base, char* source);
+
 /*
  * 
 */

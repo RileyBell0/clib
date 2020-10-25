@@ -28,6 +28,7 @@ typedef struct binary_tree_node_t
 } binary_tree_node_t;
 
 // Stores a reference to a single tree
+// Every tree requires a compare function, this cannot be null
 typedef struct binary_tree_t
 {
     binary_tree_node_t *root;
@@ -39,6 +40,8 @@ typedef struct binary_tree_t
 // returns a new tree struct with its values initialized to 0
 binary_tree_t new_binary_tree(unsigned int elementSize, int (*compareFunc)(void *first, void *second));
 
+// Inserts the given data into the tree using the search function
+// stored in the tree
 void binary_tree_insert(binary_tree_t *tree, void *data);
 
 // destroys a tree, calling the delete_data function on every piece of stored data

@@ -8,6 +8,8 @@
 		"files.exclude": {
 			".sconsign.dblite": true,
 			"**/*.o": true,
+			"backup": true,
+			"objects": true,
 			"unused": true
 		},
 		"files.associations": {

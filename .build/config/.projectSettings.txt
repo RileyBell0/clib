@@ -1,0 +1,11 @@
+PROGRAM_TYPE = c
+OBJECTS_TO_LINK = 
+{
+    lm
+}
+SRC_DIRECTORIES = 
+{
+    ./std
+}
+OUTPUT_DIRECTORY = ./build
+CONFIG_DIRECTORY = ./.build/config

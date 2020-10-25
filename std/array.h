@@ -14,16 +14,19 @@
 /*
  * Array struct which knows its length
  * data-type stored must be maintained and known by the user
- * 
- * can cast 
 */
-
 typedef struct array_t
 {
     void *dat;
     unsigned int len;
 } array_t;
 
+/*
+ * Same as an array, but with append function with
+ * automatic resizing. Setting elements in this array
+ * is easier and doesnt require a cast since the array knows
+ * the size of its stored elements
+*/
 typedef struct dynamicArray_t
 {
     void *dat;
@@ -41,17 +44,32 @@ void array_set_element(void *array, void *data, unsigned int element, unsigned i
 // generic array get ptr to element
 void *array_get_element(void *array, unsigned int element, unsigned int elementSize);
 
-// Wrapper function to destroy the contents of an array
-void array_destroy(array_t toDestroy);
-void dynamic_array_destroy(dynamicArray_t toDestroy);
-
+// Extends the array to make space for the given number of elements
 int array_extend(array_t *base, unsigned int elementSize, unsigned int extraSpace);
 
+// Resizes the array to the given length. Must be larger than the current length
 int array_resize(array_t *base, unsigned int elementSize, unsigned int newLength);
 
 // ----------- Dynamic Array -------------
 dynamicArray_t new_dynamic_array(unsigned int element_size);
 
 int dynamic_array_append(dynamicArray_t *base, void *element);
+
+// If neccesary, extends the array to be exactly the given length
+// Returns FALSE if the new length is less than the current length
+// Does nothing if the maximum length is greater than the required
+// new length
+int dynamic_array_safe_resize(dynamicArray_t *array, unsigned int newLen);
+
+// Sets the value of the element in the array at the given index
+void dynamic_array_set_element(dynamicArray_t *array, unsigned int element, void *data);
+
+// Gets a pointer to the element at the given index in the array
+void *dynamic_array_get_element(dynamicArray_t *array, unsigned int element);
+
+// Destruction Functions
+void array_destroy(array_t toDestroy);
+
+void dynamic_array_destroy(dynamicArray_t toDestroy);
 
 #endif

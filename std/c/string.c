@@ -33,14 +33,28 @@ string_t string_from_cstring(char *source)
     return newString;
 }
 
-#include <stdio.h>
-// TODO
-// not sure if this works
+void string_write_c(string_t *base, char* source)
+{
+    string_t extension = string_from_cstring(source);
+    string_write(base, extension);
+}
+
 void string_write(string_t *base, string_t source)
 {
+    // If there isnt enough room to fit the extension
     if (base->max_len < base->len + source.len)
     {
-        string_lengthen(base, base->len + source.len - base->max_len);
+        int newLen = base->max_len * REALLOC_MULTIPLIER;
+
+        // If the new string is going to need more space than a normal extension
+        if (newLen < base->len + source.len)
+        {
+            string_lengthen(base, base->len + source.len - base->max_len);
+        }
+        else
+        {
+            string_extend(base);
+        }
     }
 
     int sourcePos = 0;
