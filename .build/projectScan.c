@@ -25,24 +25,38 @@ int main(int argc, char **argv)
     // Check Arguments
     if (argc < REQUIRED_ARGS + 1)
     {
-        printf("USAGE: \t  ./thisProgram   \"path\"   \"fileExtension\"   \"outFile name\"\n");
+        printf("USAGE: \t  ./thisProgram   \"path\"   \"fileExtension\"   \"outFile name\" \"<int>NameOnly\" \"<int>append\"\n");
         exit(EXIT_ERROR);
     }
 
     // ------------ SETTING UP VARAIBLES
     int nameOnly = FALSE;
+    int append = FALSE;
     if (argc > REQUIRED_ARGS + 1 && *argv[REQUIRED_ARGS + 1] == '1')
     {
         nameOnly = TRUE;
+    }
+    if (argc > REQUIRED_ARGS + 2 && *argv[REQUIRED_ARGS + 2] == '1')
+    {
+        append = TRUE;
     }
     // Making input args more usable
     string_t path = string_from_cstring(argv[ARG_PATH]);
     string_t extension = string_from_cstring(argv[ARG_EXTENSION]);
     string_t outFilePath = string_from_cstring(argv[ARG_OUTFILE]);
     string_t pathSeperator = string_from_cstring(PATH_SEPERATOR);
-
+    
+    FILE *outFile = NULL;
     // Outputting all files found
-    FILE *outFile = fopen(outFilePath.str, "w");
+    if (!append)
+    {
+        outFile = fopen(outFilePath.str, "w");
+    }
+    else
+    {
+        outFile = fopen(outFilePath.str, "a");
+    }
+    
     assert(outFile);
 
     DIR *main = opendir(path.str);
