@@ -1,7 +1,7 @@
 all: testing 
 
-testing: testing.o list.o directory.o string.o general.o array.o fileIO.o binaryTree.o 
-	gcc -Wall -o testing objects/testing.o objects/list.o objects/directory.o objects/string.o objects/general.o objects/array.o objects/fileIO.o objects/binaryTree.o  -g -lm
+testing: testing.o list.o directory.o string.o general.o array.o fileIO.o binaryTree.o cool.o 
+	gcc -Wall -o testing objects/testing.o objects/list.o objects/directory.o objects/string.o objects/general.o objects/array.o objects/fileIO.o objects/binaryTree.o objects/cool.o  -g -lm
 
 testing.o: main/testing.c
 	gcc -Wall -c -o objects/testing.o main/testing.c -g -lm
@@ -26,4 +26,7 @@ fileIO.o: std/c/fileIO.c
 
 binaryTree.o: std/c/binaryTree.c
 	gcc -Wall -c -o objects/binaryTree.o std/c/binaryTree.c -g -lm
+
+cool.o: src/cool.c
+	gcc -Wall -c -o objects/cool.o src/cool.c -g -lm
 

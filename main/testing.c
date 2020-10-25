@@ -15,7 +15,6 @@ void bar(char* toPrint);
 
 // Write your code here
 int code(int argc, char** argv){
-    
 
     return END_SUCCESS;
 }
