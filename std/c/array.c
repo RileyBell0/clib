@@ -148,6 +148,8 @@ int dynamic_array_safe_resize(dynamicArray_t *array, unsigned int newLen)
     // Update the length of the array
     array->len = newLen;
     array->maxLen = newLen;
+
+    return TRUE;
 }
 
 void dynamic_array_set_element(dynamicArray_t *array, unsigned int element, void *data)
