@@ -1,3 +1,3 @@
 ./run/scan
 
-./.build/glassMakeScript.sh
+./.build/projectMakeScript.sh
