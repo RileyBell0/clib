@@ -59,7 +59,7 @@ void list_append(list_t *list, void *data);
 
 // Finds and returns the node at the given index
 // If the index is invalid, exits with code (-1)
-void *list_remove_at(list_t *list, int index);
+void *list_remove_at(list_t *list, unsigned int index);
 
 /*
  * USAGE:

@@ -1,4 +1,4 @@
-#include "../list.h"
+#include "list.h"
 
 // Returns a pointer to a new list Node with the relevant data attached
 static list_node_t *list_new_node(void *data, unsigned int dataSize);
@@ -75,11 +75,29 @@ void list_append(list_t *list, void *data)
     ++(list->size);
 }
 
+void *list_remove_first(list_t* list)
+{
+    if (list->size == 0)
+    {
+        return NULL;
+    }
+    return list_remove_at(list, 0);
+}
+
+void *list_remove_last(list_t* list)
+{
+    if (list->size == 0)
+    {
+        return NULL;
+    }
+    return list_remove_at(list, list->size-1);
+}
+
 // TODO
 // should this also chcek if toRemove is non-null?
 void *list_remove_element(list_t *list, void *toRemove)
 {
-    if (!list)
+    if (!list || list->size == 0)
     {
         return NULL;
     }
@@ -105,7 +123,7 @@ void *list_remove_element(list_t *list, void *toRemove)
 */
 void *list_remove_node(list_t *list, list_node_t *toRemove)
 {
-    if (toRemove == NULL)
+    if (list == NULL || toRemove == NULL)
     {
         return NULL;
     }
@@ -116,9 +134,8 @@ void *list_remove_node(list_t *list, list_node_t *toRemove)
     // list gymnastics
     list->size -= 1;
 
-    if (prev != NULL)
+    if (prev)
     {
-        list->first_node = prev;
         prev->next = next;
     }
     else
@@ -126,9 +143,8 @@ void *list_remove_node(list_t *list, list_node_t *toRemove)
         list->first_node = next;
     }
 
-    if (next != NULL)
+    if (next)
     {
-        list->last_node = next;
         next->prev = prev;
     }
     else
@@ -143,11 +159,11 @@ void *list_remove_node(list_t *list, list_node_t *toRemove)
     return data;
 }
 
-void *list_remove_at(list_t *list, int index)
+void *list_remove_at(list_t *list, unsigned int index)
 {
-    if (index >= list->size)
+    if (list->size == 0 || index >= list->size)
     {
-        exit(ERROR);
+        return NULL;
     }
 
     /*
