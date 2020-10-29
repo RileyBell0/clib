@@ -9,6 +9,10 @@
 #include "general.h"
 #include <string.h>
 
+/*
+ * Ammount to extend a dynamic array whenever an element
+ * is appended to a full array
+*/
 #define EXTENSION_FACTOR 1.5f
 
 /*

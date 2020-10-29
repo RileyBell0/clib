@@ -28,7 +28,9 @@
 
 #define ERROR -1
 
-// Struct for storing a single noede
+/*
+ * Struct for storing a single noede
+ */
 typedef struct list_node_t
 {
     void *data;
@@ -36,7 +38,9 @@ typedef struct list_node_t
     struct list_node_t *prev;
 } list_node_t;
 
-// Struct for storing a single list
+/*
+ * Struct for storing a single list
+ */
 typedef struct list_t
 {
     list_node_t *first_node;
@@ -50,16 +54,25 @@ typedef struct list_t
 */
 array_t list_to_array(list_t list);
 
-// Returns a new list where the stored elements will be of size (elementSize)
+/*
+ * Returns a new list where the stored elements will be of size (elementSize)
+ */
 list_t new_list(unsigned int elementSize);
 
-// Adds the data to the end of the list
-// Requires a pointer to the element that is going to be added (element data gets copied in)
+/*
+ * Adds the data to the end of the list
+ * Requires a pointer to the element that is going to be added (element data gets copied in)
+ */
 void list_append(list_t *list, void *data);
 
-// Finds and returns the node at the given index
-// If the index is invalid, exits with code (-1)
+/*
+ * Finds and returns the node at the given index
+ * If the index is invalid, exits with code (-1)
+ */
 void *list_remove_at(list_t *list, unsigned int index);
+
+void *list_remove_first(list_t* list);
+void *list_remove_last(list_t* list);
 
 /*
  * USAGE:
@@ -83,8 +96,10 @@ void *list_remove_node(list_t *list, list_node_t *toRemove);
 */
 void list_combine(list_t *base, list_t *extension);
 
-// frees all dynamically allocated data in a list.
-// IMPORTANT: Send a 'delete_data' function IF your data cannot be freed just by calling free() on it's pointer
+/*
+ * frees all dynamically allocated data in a list.
+ * IMPORTANT: Send a 'delete_data' function IF your data cannot be freed just by calling free() on it's pointer
+ */
 void list_destroy(list_t *list, void (*delete_data)(void *data));
 
 #endif

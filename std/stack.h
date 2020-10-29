@@ -1,5 +1,5 @@
-#ifndef CLIB_STACK_H
-#define CLIB_STACK_H
+#ifndef CLIB_STD_STACK_H
+#define CLIB_STD_STACK_H
 
 #include "list.h"
 
