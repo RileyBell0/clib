@@ -1,16 +1,16 @@
-#include "../stack.h"
+#include "../stacklist.h"
 
-stack_t new_stack(unsigned int elementSize)
+stacklist_t new_stack(unsigned int elementSize)
 {
     return new_list(elementSize);
 }
 
-void stack_push(stack_t* stack, void *data)
+void stack_push(stacklist_t* stack, void *data)
 {
     list_append((list_t*)stack, data);
 }
 
-void* stack_pop(stack_t* stack)
+void* stack_pop(stacklist_t* stack)
 {
     if (stack == NULL || stack->size == 0)
     {
@@ -19,7 +19,7 @@ void* stack_pop(stack_t* stack)
     return list_remove_last((list_t*)stack);
 }
 
-void* stack_top(stack_t* stack)
+void* stacklist_top(stacklist_t* stack)
 {
     if (stack == NULL || stack->last_node == NULL)
     {
