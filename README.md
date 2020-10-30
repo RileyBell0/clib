@@ -1,3 +1,5 @@
+# very much a work in progress and just stuff ive needed to reuse all the time for uni n stuff :)
+
 # CLib
 
 CLib is a library of common functions and data-types that are often needed in coding. While not as efficient in all cases, it does make programming far easier in C by limiting how much re-inventing of the wheel is needed
