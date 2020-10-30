@@ -20,6 +20,7 @@
 
 #include "general.h"
 #include <string.h>
+#include "array.h"
 
 #define SPACE_FOR_NULL 1
 #define REALLOC_MULTIPLIER 1.5
@@ -52,6 +53,19 @@ string_t new_string(unsigned int len);
  * Copies 'source' and returns it
 */
 string_t string_copy(string_t source);
+
+/*
+ * Splits a string based on the given delimiting character
+ * returns an array of all split segments (there can be segments
+ * of length 0)
+*/
+array_t string_split(string_t source, char delim);
+
+/*
+ * Counts the number of times a given character appears within
+ * a string
+*/
+unsigned int string_count_occurances(string_t source, char delim);
 
 /*
  * Wrapper for string_write which allows

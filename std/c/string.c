@@ -33,6 +33,29 @@ string_t string_from_cstring(char *source)
     return newString;
 }
 
+unsigned int string_count_occurances(string_t source, char delim)
+{
+    unsigned int occurances = 0;
+    for (int i = 0; i < source.len; i++)
+    {
+        if (source.str[i] == delim)
+        {
+            ++occurances;
+        }
+    }
+    return occurances;
+}
+
+array_t string_split(string_t source, char delim)
+{
+    unsigned int segments = string_count_occurances(source, delim) + 1;
+    array_t split = new_array(segments, sizeof(string_t));
+
+    for (int i = 0; i < source.len; i++)
+    {
+    }
+}
+
 void string_write_c(string_t *base, char* source)
 {
     string_t extension = string_from_cstring(source);
