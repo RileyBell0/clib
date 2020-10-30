@@ -92,6 +92,26 @@ For example:
 
 # Usage
 
+You have three options:
+
+1) Compile with My Scripts
+2) Compile with Scons
+3) Make your own makefile
+
+If you know how to do number 3, go ahead, if you have scons already, have fun, otherwise use the scripts in the run folder, they'll sort you
+out.
+
+```bash
+cd "path_to_repository/clib"
+./run/compile
+```
+
+makes a makefile with no optimisation in the output for you, so change that if you want it to run faster
+
+# Compiling with SCons (if you have it)
+
+I'd reccomend it, its probably better than any of my compile scripts
+
 This library uses **SCons** to compile, with the intention of this being simpler and easier to understand than extensive makefiles.
 
 ## SCons
