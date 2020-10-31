@@ -30,6 +30,7 @@ array_t new_array(unsigned int elements, unsigned int element_size)
     return newArray;
 }
 
+
 int array_extend(array_t *base, unsigned int elementSize, unsigned int extraSpace)
 {
     if (base == NULL)
