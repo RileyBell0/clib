@@ -1,4 +1,4 @@
-#include "../array.h"
+#include "array.h"
 
 static int dynamic_array_extend(dynamicArray_t *base);
 
@@ -133,7 +133,7 @@ int dynamic_array_safe_resize(dynamicArray_t *array, unsigned int newLen)
     {
         return FALSE;
     }
-    
+
     // If greater than the current array length but less than or equal
     // to the current maximum length of the array
     if (newLen <= array->maxLen)

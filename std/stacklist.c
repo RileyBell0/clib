@@ -1,4 +1,4 @@
-#include "../stacklist.h"
+#include "stacklist.h"
 
 stacklist_t new_stack(unsigned int elementSize)
 {

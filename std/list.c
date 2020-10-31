@@ -1,4 +1,4 @@
-#include "../list.h"
+#include "list.h"
 
 // Returns a pointer to a new list Node with the relevant data attached
 static list_node_t *list_new_node(void *data, unsigned int dataSize);

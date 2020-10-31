@@ -1,4 +1,4 @@
-#include "../string.h"
+#include "string.h"
 
 static void string_lengthen(string_t *toExtend, unsigned int len);
 
@@ -54,6 +54,8 @@ array_t string_split(string_t source, char delim)
     for (int i = 0; i < source.len; i++)
     {
     }
+
+    return split;
 }
 
 void string_write_c(string_t *base, char* source)
