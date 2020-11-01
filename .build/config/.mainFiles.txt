@@ -1,1 +1,3 @@
+main/projectMake.c
 main/testing.c
+main/projectScan.c

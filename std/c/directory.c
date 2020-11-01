@@ -1,4 +1,4 @@
-#include "directory.h"
+#include "../directory.h"
 
 /*
  * if (extension == NULL || extension[0] == NULL) then there is no extension

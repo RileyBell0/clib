@@ -1,4 +1,4 @@
-#include "binaryTree.h"
+#include "../binaryTree.h"
 
 static binary_tree_node_t *binary_tree_new_node(binary_tree_t *tree, void *data);
 static void binary_tree_insert_to_node(binary_tree_t *tree, binary_tree_node_t *node, void *data);

@@ -1,4 +1,4 @@
-#include "general.h"
+#include "../general.h"
 
 void *safe_malloc(unsigned int size)
 {

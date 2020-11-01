@@ -1,4 +1,4 @@
-#include "string.h"
+#include "../string.h"
 
 static void string_lengthen(string_t *toExtend, unsigned int len);
 
