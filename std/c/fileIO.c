@@ -144,3 +144,42 @@ char *removeFileExtension(char *fileName)
     }
     return fileName;
 }
+
+
+list_t fileio_read_all_lines_list(char *fileName)
+{
+    list_t lines = new_list(sizeof(string_t));
+
+    // Open the given file
+    FILE *toRead = fopen(fileName, MODE_READ);
+
+    // If the file exists and could be opened
+    if (toRead)
+    {
+        /*
+         * Creating the buffer, will be resized automatically to fit lines if
+         * not large enough
+        */
+        string_t buffer = new_string(DEFAULT_BUFFER_LEN);
+
+        /*
+         * Reads all the lines of the file and appends them to the given list
+        */
+        while (fileio_next_line(toRead, &buffer))
+        {
+            if (buffer.len > 0)
+            {
+                string_t valid_string = string_copy(buffer);
+                list_append(&lines, &valid_string);
+            }
+        }
+
+        // Done with the file, close it
+        fileio_close(toRead);
+
+        string_destroy(&buffer);
+    }
+
+
+    return lines;
+}

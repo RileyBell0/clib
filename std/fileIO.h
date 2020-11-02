@@ -14,9 +14,11 @@
 #include "bool.h"
 #include "string.h"
 #include "path.h"
+#include "list.h"
 
 #define MODE_READ "r"
 #define MODE_WRITE "w"
+#define DEFAULT_BUFFER_LEN 511
 
 /* Attempts to open a file in the given mode
  * Quits the program on failure */
@@ -59,5 +61,7 @@ string_t getFileName(string_t path);
  * calls 
 */
 char *removeFileExtension(char *fileName);
+
+list_t fileio_read_all_lines_list(char *fileName);
 
 #endif
