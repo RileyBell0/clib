@@ -1,11 +1,28 @@
+# Use '#' for Single line Comments
+# if you need to have a \ at the end of a complex string
+# well, just dont do it but if you're in a pinch and you DESPERATELY
+# need one, just dont add a quote to the end of the line. Whatever is coloring the
+# config file is gonna freak out tho
+
 BASIC = basic
+
 COMPLEX = "\"complex \"string\" here\""
-TYPECHECK = "\"[]\""
-#this is a comment = true
-smallArr = [1 2] #comment
+
+TYPECHECK = "[]"
+
+smallArr = [
+    1 
+    2
+]
+
+"YEET SKI" = [
+    coloring
+    cool
+]
+
 ARRTEST = [     
-    "basic Complex"  #comment
-    basic  #comment
-    "complex \"with\" quotes and't apostropyes" #comment
-    "really" #comment
-    ]
+    "basic Complex"
+    basic
+    "complex \"with\" quotes and't apostropyes"
+    "really"
+]

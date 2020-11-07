@@ -86,7 +86,7 @@ int fileio_next_line(FILE *file, string_t *buffer)
     buffer->str[buffer->len] = '\0';
 
     // Failed to read anything
-    if (buffer->len == 0)
+    if (c == EOF)
     {
         return FALSE;
     }

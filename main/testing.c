@@ -16,24 +16,34 @@ void bar(char* toPrint);
 
 // Write your code here
 int code(int argc, char** argv){
-    array_t result = read_config_file("/usr/include/clib/configTest.txt");
+    config_t config = read_config_file("/usr/include/clib/configTest.txt");
 
-    for (int i = 0; i < result.len; i++)
+
+    string_t buffer = new_string(DEFAULT_BUFFER_LEN);
+
+    while (fileio_next_line(stdin, &buffer))
     {
-        config_var_t var = ((config_var_t*)result.dat)[i];
-        printf("\nname: %s\n",var.varName.str);
+        
+        config_var_t* vary = config_get_var(&config, buffer.str);
 
-        for (int i = 0; i < var.data.len; i++)
+        if (vary)
         {
-            string_t element = ((string_t*)var.data.dat)[i];
-            printf("\t- %s\n",element.str);
+            printf("Found the requested var\n");
+            printf("\nname: %s\n",vary->varName.str);
+
+            for (int i = 0; i < vary->len; i++)
+            {
+                string_t element = vary->data[i];
+                printf("\t- %s\n",element.str);
+            }
+        }
+        else
+        {
+            printf("Couldn't find the requested var\n");
         }
     }
 
-
-    config_destroy(result);
-    
-
+    config_destroy(config);
     return END_SUCCESS;
 }
 

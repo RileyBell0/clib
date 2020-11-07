@@ -9,7 +9,7 @@ void array_set_element(void *array, void *data, unsigned int element, unsigned i
 
 void *array_get_element(void *array, unsigned int element, unsigned int elementSize)
 {
-    return (void *)((char *)array + (element * elementSize));
+    return (void*)((char *)array + (element * elementSize));
 }
 
 array_t new_array(unsigned int elements, unsigned int element_size)

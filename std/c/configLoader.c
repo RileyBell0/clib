@@ -138,12 +138,13 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
     return TRUE;
 }
 
-array_t read_config_file(char *filePath)
+config_t read_config_file(char *filePath)
 {
     // Storing the processed data
     dynamic_array_t results = new_dynamic_array(sizeof(config_var_t));
     dynamic_array_t fields = new_dynamic_array(sizeof(string_t));
     config_var_t newVar;
+    config_t config;
 
     // reading from the file
     FILE *configFile = fopen(filePath, MODE_READ);
@@ -157,12 +158,11 @@ array_t read_config_file(char *filePath)
     int named = FALSE;
     int currField = CONFIG_FIELD_NAME;
     int complexField = FALSE;
-    int currentConfigSaved = FALSE;
+    int currentConfigSaved = TRUE;
     int addedDeclaration = FALSE;
 
     while (fileio_next_line(configFile, &buffer))
     {
-
         unsigned int pos = 0;
         while (extract_field(buffer, &pos, &field, &complexField))
         {
@@ -184,26 +184,20 @@ array_t read_config_file(char *filePath)
                 }
                 else if (field.str[0] == CONFIG_ARRAY_END_CHAR)
                 {
-                    if (!currentConfigSaved)
-                    {
-                        newVar.data = dynamic_array_to_array(&fields);
-                        dynamic_array_append(&results, &newVar);
-                        currentConfigSaved = TRUE;
-                    }
+                    currField = CONFIG_FIELD_NONE;
                     inArray = FALSE;
-                    continue;
                 }
             }
 
             if (currField == CONFIG_FIELD_NAME)
             {
-                if (!named)
+                if (!named && field.len != 0)
                 {
                     currentConfigSaved = FALSE;
                     newVar.varName = string_copy(field);
-                    newVar.data.dat = NULL;
-                    newVar.data.len = 0;
-                    
+                    newVar.data = NULL;
+                    newVar.len = 0;
+
                     // Reset the array for storing the new data
                     fields.len = 0;
                     named = TRUE;
@@ -227,22 +221,36 @@ array_t read_config_file(char *filePath)
             if (!currentConfigSaved)
             {
                 currentConfigSaved = TRUE;
-                newVar.data = dynamic_array_to_array(&fields);
+                
+                array_t convertedFields = dynamic_array_to_array(&fields);
+                newVar.data = convertedFields.dat;
+                newVar.len = convertedFields.len;
+
                 dynamic_array_append(&results, &newVar);
             }
             currField = CONFIG_FIELD_NAME;
             named = FALSE;
         }
+        
     }
     fclose(configFile);
 
     if (!currentConfigSaved)
     {
-        newVar.data = dynamic_array_to_array(&fields);
+        array_t convertedFields = dynamic_array_to_array(&fields);
+        newVar.data = convertedFields.dat;
+        newVar.len = convertedFields.len;
+
         dynamic_array_append(&results, &newVar);
     }
 
-    array_t final = dynamic_array_to_array(&results);
+    array_t restricted = dynamic_array_to_array(&results);
+    array_t final = tree_sort(restricted, sizeof(config_var_t), config_var_compare);
+
+    array_destroy(restricted);
+
+    config.len = final.len;
+    config.vars = final.dat;
 
     // Dealing with memory
     string_destroy(&buffer);
@@ -251,25 +259,96 @@ array_t read_config_file(char *filePath)
     dynamic_array_destroy(results);
     dynamic_array_destroy(fields);
 
+    return config;
+}
 
-    return final;
+config_var_t *config_get_var(config_t* config, char* name)
+{
+    /*
+     * Convert the name into a searchable format
+    */
+    config_var_t key;
+    key.len = 1;
+    key.varName.str = name;
+
+    /*
+     * Search the sorted config list for the requested var
+    */
+    config_var_t* var = bsearch(&key, config->vars, config->len, sizeof(config_var_t), config_var_compare);
+
+    return var;
+}
+
+int config_var_compare(const void* var1, const void* var2)
+{
+    config_var_t* a = (config_var_t*)var1;
+    config_var_t* b = (config_var_t*)var2;
+
+    if (!a || !a->varName.str)
+    {
+        if (!b || !b->varName.str)
+        {
+            return 0;
+        }
+        else
+        {
+            // A is less than b
+            return -1;
+        }
+    }
+    else if (!b || !b->varName.str)
+    {
+        if (!a || !a->varName.str)
+        {
+            return 0;
+        }
+        else
+        {
+            // b is greather than a
+            return 1;
+        }
+    }
+
+    // Both strings exist, comparing
+    return strcmp(a->varName.str, b->varName.str);
 }
 
 /*
  * Free's all dynamically allocated data in a Config
 */
-void config_destroy(array_t config)
+void config_destroy(config_t config)
 {
     for (int i = 0; i < config.len; i++)
-    {   
-        config_var_t var = ((config_var_t*)config.dat)[i];
+    {  
+        config_var_t var = config.vars[i];
 
         string_destroy(&var.varName);
-        for (int i = 0; i < var.data.len; i++)
+        for (int i = 0; i < var.len; i++)
         {
-            string_destroy(&((string_t*)var.data.dat)[i]);
+            string_destroy(&var.data[i]);
         }
-        array_destroy(var.data);
+        destroy(var.data);
     }
-    array_destroy(config);
+    destroy(config.vars);
+}
+
+void config_print_vars(config_t config)
+{
+    for (int i = 0; i < config.len; i ++)
+    {
+        printf("Name: %s\n", config.vars[i].varName.str);
+        if (config.vars[i].len == 0)
+        {
+            printf("\t- (null)\n");
+        }
+        else
+        {     
+            for (int j = 0; j < config.vars[i].len; j++)
+            {
+                printf("\t- %s\n", config.vars[i].data[j].str);
+            }
+        }
+        
+       
+    }
 }

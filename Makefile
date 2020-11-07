@@ -1,13 +1,13 @@
 all: projectMake testing projectScan 
 
-projectMake: projectMake.o configLoader.o binaryTree.o stacklist.o directory.o list.o string.o fileIO.o array.o general.o 
-	gcc -Wall -o projectMake objects/projectMake.o objects/configLoader.o objects/binaryTree.o objects/stacklist.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o  -g
+projectMake: projectMake.o configLoader.o int.o stacklist.o avlBinTree.o directory.o list.o string.o fileIO.o array.o general.o sorting.o 
+	gcc -Wall -o projectMake objects/projectMake.o objects/configLoader.o objects/int.o objects/stacklist.o objects/avlBinTree.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o objects/sorting.o  -g
 
-testing: testing.o configLoader.o binaryTree.o stacklist.o directory.o list.o string.o fileIO.o array.o general.o 
-	gcc -Wall -o testing objects/testing.o objects/configLoader.o objects/binaryTree.o objects/stacklist.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o  -g
+testing: testing.o configLoader.o int.o stacklist.o avlBinTree.o directory.o list.o string.o fileIO.o array.o general.o sorting.o 
+	gcc -Wall -o testing objects/testing.o objects/configLoader.o objects/int.o objects/stacklist.o objects/avlBinTree.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o objects/sorting.o  -g
 
-projectScan: projectScan.o configLoader.o binaryTree.o stacklist.o directory.o list.o string.o fileIO.o array.o general.o 
-	gcc -Wall -o projectScan objects/projectScan.o objects/configLoader.o objects/binaryTree.o objects/stacklist.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o  -g
+projectScan: projectScan.o configLoader.o int.o stacklist.o avlBinTree.o directory.o list.o string.o fileIO.o array.o general.o sorting.o 
+	gcc -Wall -o projectScan objects/projectScan.o objects/configLoader.o objects/int.o objects/stacklist.o objects/avlBinTree.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o objects/sorting.o  -g
 
 projectMake.o: main/projectMake.c
 	gcc -Wall -c -o objects/projectMake.o main/projectMake.c -g
@@ -21,11 +21,14 @@ projectScan.o: main/projectScan.c
 configLoader.o: /usr/include/clib/std/c/configLoader.c
 	gcc -Wall -c -o objects/configLoader.o /usr/include/clib/std/c/configLoader.c -g
 
-binaryTree.o: /usr/include/clib/std/c/binaryTree.c
-	gcc -Wall -c -o objects/binaryTree.o /usr/include/clib/std/c/binaryTree.c -g
+int.o: /usr/include/clib/std/c/int.c
+	gcc -Wall -c -o objects/int.o /usr/include/clib/std/c/int.c -g
 
 stacklist.o: /usr/include/clib/std/c/stacklist.c
 	gcc -Wall -c -o objects/stacklist.o /usr/include/clib/std/c/stacklist.c -g
+
+avlBinTree.o: /usr/include/clib/std/c/avlBinTree.c
+	gcc -Wall -c -o objects/avlBinTree.o /usr/include/clib/std/c/avlBinTree.c -g
 
 directory.o: /usr/include/clib/std/c/directory.c
 	gcc -Wall -c -o objects/directory.o /usr/include/clib/std/c/directory.c -g
@@ -44,4 +47,7 @@ array.o: /usr/include/clib/std/c/array.c
 
 general.o: /usr/include/clib/std/c/general.c
 	gcc -Wall -c -o objects/general.o /usr/include/clib/std/c/general.c -g
+
+sorting.o: /usr/include/clib/std/c/sorting.c
+	gcc -Wall -c -o objects/sorting.o /usr/include/clib/std/c/sorting.c -g
 
