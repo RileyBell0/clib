@@ -2,10 +2,13 @@
 
 /*
  * returns the position in the string the function exited at
+ * 
+ * complexString is set to TRUE iff the returned string was surrounded by quotes 
 */
-int extract_field(string_t str, unsigned int *pos, string_t *dest)
+int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexField)
 {
     dest->len = 0;
+    *complexField = FALSE;
     unsigned int i;
     if (str.len <= *pos)
     {
@@ -64,6 +67,7 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest)
     int inQuotes = FALSE;
     if (str.str[*pos] == CONFIG_STRING_ENCLOSE_CHAR)
     {
+        *complexField = TRUE;
         *pos += 1;
         inQuotes = TRUE;
     }
@@ -137,7 +141,8 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest)
 array_t read_config_file(char *filePath)
 {
     // Storing the processed data
-    dynamic_array_t data = new_dynamic_array(sizeof(config_var_t));
+    dynamic_array_t results = new_dynamic_array(sizeof(config_var_t));
+    dynamic_array_t fields = new_dynamic_array(sizeof(string_t));
     config_var_t newVar;
 
     // reading from the file
@@ -148,16 +153,20 @@ array_t read_config_file(char *filePath)
     /*
      * Read every line in the file
     */
-    int fieldType = CONFIG_FIELD_NAME;
     int inArray = FALSE;
-    
+    int named = FALSE;
+    int currField = CONFIG_FIELD_NAME;
+    int complexField = FALSE;
+    int currentConfigSaved = FALSE;
+    int addedDeclaration = FALSE;
+
     while (fileio_next_line(configFile, &buffer))
     {
-        int currField = CONFIG_FIELD_NAME;
+
         unsigned int pos = 0;
-        while (extract_field(buffer, pos, &field))
+        while (extract_field(buffer, &pos, &field, &complexField))
         {
-            if (field.len == 1)
+            if (!complexField && field.len == 1)
             {
                 if (field.str[0] == CONFIG_COMMENT_CHAR)
                 {
@@ -166,49 +175,101 @@ array_t read_config_file(char *filePath)
                 else if (field.str[0] == CONFIG_FIELD_DECLARATION_CHAR)
                 {
                     currField = CONFIG_FIELD_DECLARATION;
+                    continue;
                 }
                 else if (field.str[0] == CONFIG_ARRAY_START_CHAR)
                 {
                     inArray = TRUE;
+                    continue;
                 }
                 else if (field.str[0] == CONFIG_ARRAY_END_CHAR)
                 {
+                    if (!currentConfigSaved)
+                    {
+                        newVar.data = dynamic_array_to_array(&fields);
+                        dynamic_array_append(&results, &newVar);
+                        currentConfigSaved = TRUE;
+                    }
                     inArray = FALSE;
+                    continue;
                 }
             }
 
             if (currField == CONFIG_FIELD_NAME)
             {
-                newVar.varName = string_copy(field);
-
-                // Reset the array for storing the new data
-                data.len = 0;
+                if (!named)
+                {
+                    currentConfigSaved = FALSE;
+                    newVar.varName = string_copy(field);
+                    newVar.data.dat = NULL;
+                    newVar.data.len = 0;
+                    
+                    // Reset the array for storing the new data
+                    fields.len = 0;
+                    named = TRUE;
+                    addedDeclaration = FALSE;
+                }
             }
             else if (currField == CONFIG_FIELD_DECLARATION)
             {
-                string_t fieldCpy = string_copy(field);
+                if (field.len != 0 && ((!inArray && !addedDeclaration) || inArray))
+                {
+                    string_t fieldCpy = string_copy(field);
 
-                // Add the current field to the dynamic array
-                dynamic_array_append(&data, &fieldCpy);
+                    // Add the current field to the dynamic array
+                    dynamic_array_append(&fields, &fieldCpy);
+                }
             }
         }
+
+        if (!inArray)
+        {
+            if (!currentConfigSaved)
+            {
+                currentConfigSaved = TRUE;
+                newVar.data = dynamic_array_to_array(&fields);
+                dynamic_array_append(&results, &newVar);
+            }
+            currField = CONFIG_FIELD_NAME;
+            named = FALSE;
+        }
     }
-    // if (configFile)
-    // {
-    //     // For every line in the file
-    //     while (fileio_next_line(configFile, &fileBuffer))
-    //     {
-    //         processLine(&fileBuffer);
-    //     }
-    // }
+    fclose(configFile);
+
+    if (!currentConfigSaved)
+    {
+        newVar.data = dynamic_array_to_array(&fields);
+        dynamic_array_append(&results, &newVar);
+    }
+
+    array_t final = dynamic_array_to_array(&results);
 
     // Dealing with memory
     string_destroy(&buffer);
+    string_destroy(&field);
+    
+    dynamic_array_destroy(results);
+    dynamic_array_destroy(fields);
 
-    // convert the list
-    array_t vars = list_to_array(data);
 
-    // TODO delete the list
+    return final;
+}
 
-    return vars;
+/*
+ * Free's all dynamically allocated data in a Config
+*/
+void config_destroy(array_t config)
+{
+    for (int i = 0; i < config.len; i++)
+    {   
+        config_var_t var = ((config_var_t*)config.dat)[i];
+
+        string_destroy(&var.varName);
+        for (int i = 0; i < var.data.len; i++)
+        {
+            string_destroy(&((string_t*)var.data.dat)[i]);
+        }
+        array_destroy(var.data);
+    }
+    array_destroy(config);
 }

@@ -16,23 +16,23 @@ void bar(char* toPrint);
 
 // Write your code here
 int code(int argc, char** argv){
-    
-    char* yes = " debug=\"really true \\\"george\\\" said\" #and #thats cool # yes [a bc]";
-    unsigned int pos = 0;
-    string_t base = string_from_cstring(yes);
-    string_t dest = new_string(10);
-    while (extract_field(base, &pos, &dest))
+    array_t result = read_config_file("/usr/include/clib/configTest.txt");
+
+    for (int i = 0; i < result.len; i++)
     {
-        if (dest.len != 0)
+        config_var_t var = ((config_var_t*)result.dat)[i];
+        printf("\nname: %s\n",var.varName.str);
+
+        for (int i = 0; i < var.data.len; i++)
         {
-            printf("field: \"%s\"\n", dest.str);
+            string_t element = ((string_t*)var.data.dat)[i];
+            printf("\t- %s\n",element.str);
         }
-        else
-        {
-            printf("empty:\n");
-        }
-        
     }
+
+
+    config_destroy(result);
+    
 
     return END_SUCCESS;
 }

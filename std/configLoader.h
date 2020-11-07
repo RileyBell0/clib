@@ -20,24 +20,48 @@
 #define CONFIG_FIELD_NAME 0
 #define CONFIG_FIELD_DECLARATION 1
 
-
+/*
+ * Config Structure
+ * 
+ * Config_t
+ *      - Elements
+ *      - Dat
+ *          - elem 1
+ *              - name
+ *              - dat
+ *                   - len
+ *                   - dat
+ *                          - "Value1"
+ *                          - "Value2"
+ *                          ...
+ *                          - "ValueN"
+ *          ...
+ *          - elem n
+ *      
+*/
 typedef struct config_var_t
 {
     string_t varName;
     array_t data;
 } config_var_t;
 
-typedef struct config_t
-{
-    unsigned int numEntries;
-    config_var_t* entries;
-} config_t;
+/*
+ * Returns a string containing the next valid field in the string 'str'
+ * starting from position 'pos', storing the field in 'dest'.
+ * 
+ * complexField will be set to true if the field read was enclosed by quotes
+*/
+int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexField);
 
 /*
- * Lets read the file in one go
+ * Loads all variables in a suitable config file into
+ * an array
 */
-
-int extract_field(string_t str, unsigned int *pos, string_t* dest);
 array_t read_config_file(char *filePath);
+
+/*
+ * Free's all dynamically allocated data in a Config
+*/
+void config_destroy(array_t config);
 
 #endif

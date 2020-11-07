@@ -1,0 +1,11 @@
+BASIC = basic
+COMPLEX = "\"complex \"string\" here\""
+TYPECHECK = "\"[]\""
+#this is a comment = true
+smallArr = [1 2] #comment
+ARRTEST = [     
+    "basic Complex"  #comment
+    basic  #comment
+    "complex \"with\" quotes and't apostropyes" #comment
+    "really" #comment
+    ]
