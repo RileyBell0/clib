@@ -1,3 +1,4 @@
+/usr/include/clib/std/c/configLoader.c
 /usr/include/clib/std/c/binaryTree.c
 /usr/include/clib/std/c/stacklist.c
 /usr/include/clib/std/c/directory.c

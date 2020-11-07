@@ -31,13 +31,13 @@ typedef struct array_t
  * is easier and doesnt require a cast since the array knows
  * the size of its stored elements
 */
-typedef struct dynamicArray_t
+typedef struct dynamic_array_t
 {
     void *dat;
     unsigned int len;
     unsigned int maxLen;
     unsigned int elementSize;
-} dynamicArray_t;
+} dynamic_array_t;
 
 // ----------- Array -------------
 /*
@@ -71,13 +71,13 @@ int array_resize(array_t *base, unsigned int elementSize, unsigned int newLength
 /*
  * Returns a new empty dynamic array
 */
-dynamicArray_t new_dynamic_array(unsigned int element_size);
+dynamic_array_t new_dynamic_array(unsigned int element_size);
 
 /*
  * Attempts to add the data pointed to by 'element' to the given dynamic
  * array. Returns TRUE on success, FALSE on failure (if base or element were NULL)
  */
-int dynamic_array_append(dynamicArray_t *base, void *element);
+int dynamic_array_append(dynamic_array_t *base, void *element);
 
 /*
  * If neccesary, extends the array to be exactly the given length
@@ -85,17 +85,23 @@ int dynamic_array_append(dynamicArray_t *base, void *element);
  * Does nothing if the maximum length is greater than the required
  * new length
  */
-int dynamic_array_safe_resize(dynamicArray_t *array, unsigned int newLen);
+int dynamic_array_safe_resize(dynamic_array_t *array, unsigned int newLen);
 
 /*
  * Sets the value of the element in the array at the given index
  */
-void dynamic_array_set_element(dynamicArray_t *array, unsigned int element, void *data);
+void dynamic_array_set_element(dynamic_array_t *array, unsigned int element, void *data);
 
 /*
  * Gets a pointer to the element at the given index in the array
  */
-void *dynamic_array_get_element(dynamicArray_t *array, unsigned int element);
+void *dynamic_array_get_element(dynamic_array_t *array, unsigned int element);
+
+/*
+ * Copies the contents of a dynamic array into a new array_t 
+ * with just enough space for all elements
+*/
+array_t dynamic_array_to_array(dynamic_array_t* array);
 
 /*
  * Destroys the data within the given array which was dynamically allocated by
@@ -107,6 +113,6 @@ void array_destroy(array_t toDestroy);
  * Destroys the data within the given dynamic array which was dynamically allocated by
  * other functions in this file
  */
-void dynamic_array_destroy(dynamicArray_t toDestroy);
+void dynamic_array_destroy(dynamic_array_t toDestroy);
 
 #endif

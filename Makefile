@@ -1,13 +1,13 @@
 all: projectMake testing projectScan 
 
-projectMake: projectMake.o binaryTree.o stacklist.o directory.o list.o string.o fileIO.o array.o general.o 
-	gcc -Wall -o projectMake objects/projectMake.o objects/binaryTree.o objects/stacklist.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o  -g
+projectMake: projectMake.o configLoader.o binaryTree.o stacklist.o directory.o list.o string.o fileIO.o array.o general.o 
+	gcc -Wall -o projectMake objects/projectMake.o objects/configLoader.o objects/binaryTree.o objects/stacklist.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o  -g
 
-testing: testing.o binaryTree.o stacklist.o directory.o list.o string.o fileIO.o array.o general.o 
-	gcc -Wall -o testing objects/testing.o objects/binaryTree.o objects/stacklist.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o  -g
+testing: testing.o configLoader.o binaryTree.o stacklist.o directory.o list.o string.o fileIO.o array.o general.o 
+	gcc -Wall -o testing objects/testing.o objects/configLoader.o objects/binaryTree.o objects/stacklist.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o  -g
 
-projectScan: projectScan.o binaryTree.o stacklist.o directory.o list.o string.o fileIO.o array.o general.o 
-	gcc -Wall -o projectScan objects/projectScan.o objects/binaryTree.o objects/stacklist.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o  -g
+projectScan: projectScan.o configLoader.o binaryTree.o stacklist.o directory.o list.o string.o fileIO.o array.o general.o 
+	gcc -Wall -o projectScan objects/projectScan.o objects/configLoader.o objects/binaryTree.o objects/stacklist.o objects/directory.o objects/list.o objects/string.o objects/fileIO.o objects/array.o objects/general.o  -g
 
 projectMake.o: main/projectMake.c
 	gcc -Wall -c -o objects/projectMake.o main/projectMake.c -g
@@ -17,6 +17,9 @@ testing.o: main/testing.c
 
 projectScan.o: main/projectScan.c
 	gcc -Wall -c -o objects/projectScan.o main/projectScan.c -g
+
+configLoader.o: /usr/include/clib/std/c/configLoader.c
+	gcc -Wall -c -o objects/configLoader.o /usr/include/clib/std/c/configLoader.c -g
 
 binaryTree.o: /usr/include/clib/std/c/binaryTree.c
 	gcc -Wall -c -o objects/binaryTree.o /usr/include/clib/std/c/binaryTree.c -g

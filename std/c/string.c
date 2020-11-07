@@ -33,6 +33,44 @@ string_t string_from_cstring(char *source)
     return newString;
 }
 
+int string_equals(string_t str1, string_t str2)
+{
+    if (str1.len != str2.len)
+    {
+        return FALSE;
+    }
+    
+    return cstring_equals(str1.str, str2.str);
+}
+
+int cstring_equals(char* str1, char* str2)
+{
+    int i = 0;
+    while (TRUE)
+    {
+        if (str1[i] != str2[i] || str1[i] == '\0')
+        {
+            return FALSE;
+        }
+
+        ++i;
+    }
+    return TRUE;
+}
+
+int cstring_equals_range(char* str1, char* str2, int compareRange)
+{
+    for (int i = 0; i < compareRange; i++)
+    {
+        if (str1[i] != str2[i] || str1[i] == '\0')
+        {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 unsigned int string_count_occurances(string_t source, char delim)
 {
     unsigned int occurances = 0;
@@ -46,20 +84,51 @@ unsigned int string_count_occurances(string_t source, char delim)
     return occurances;
 }
 
-array_t string_split(string_t source, char delim)
-{
-    unsigned int segments = string_count_occurances(source, delim) + 1;
-    array_t split = new_array(segments, sizeof(string_t));
+// array_t string_split(string_t source, char delim)
+// {
+//     unsigned int segments = string_count_occurances(source, delim) + 1;
+//     array_t split = new_array(segments, sizeof(string_t));
 
-    for (int i = 0; i < source.len; i++)
+//     for (int i = 0; i < source.len; i++)
+//     {
+//     }
+
+//     return split;
+// }
+
+void string_null_terminate(string_t* str)
+{
+    if (!str || !str->str)
     {
+        return;
     }
 
-    return split;
+    str->str[str->len] = '\0';
+}
+
+void string_write_char(string_t *base, char toAdd)
+{
+    if (!base || !base->str)
+    {
+        return;
+    }
+    // Extend the string if too small
+    if (base->max_len <= base->len)
+    {
+        string_extend(base);
+    }
+    
+    // Write the char
+    base->str[base->len] = toAdd;
+    base->len += 1;
 }
 
 void string_write_c(string_t *base, char* source)
 {
+    if (!base || !base->str || !source)
+    {
+        return;
+    }
     string_t extension = string_from_cstring(source);
     string_write(base, extension);
 }

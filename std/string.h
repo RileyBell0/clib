@@ -15,6 +15,22 @@
  * any tangible performance benefit could arise as a result
 */
 
+
+/*
+ * TO IMPLEMENT
+ *      String split
+ *          - Array
+ *          - List
+ *      concat string list
+ *          - Array
+ *          - List
+ *          - Takes a string as an input for what to put inbetween each string
+ *      String compare
+ *      cstring compare
+ *      cstring compare with len
+ *      string compare with len 
+*/
+
 #ifndef CLIB_STD_STRING_H
 #define CLIB_STD_STRING_H
 
@@ -55,11 +71,27 @@ string_t new_string(unsigned int len);
 string_t string_copy(string_t source);
 
 /*
- * Splits a string based on the given delimiting character
- * returns an array of all split segments (there can be segments
- * of length 0)
+ * Returns TRUE if the given strings are equal within the given
+ * range, otherwise returns FALSE
+ * 
+ * If you want to compare the strings just use strcmp
 */
-array_t string_split(string_t source, char delim);
+int cstring_equals_range(char* str1, char* str2, int compareRange);
+int cstring_equals(char* str1, char* str2);
+int string_equals(string_t str1, string_t str2);
+
+// Null terminates the string
+void string_null_terminate(string_t* str);
+
+// Writes the given char to the end of the string
+void string_write_char(string_t *base, char toAdd);
+
+// /*
+//  * Splits a string based on the given delimiting character
+//  * returns an array of all split segments (there can be segments
+//  * of length 0)
+// */
+// array_t string_split(string_t source, char delim);
 
 /*
  * Counts the number of times a given character appears within
@@ -113,5 +145,6 @@ void string_destroy(string_t *toDestroy);
  * Primarily, this just quietens compiler warnings
 */
 void void_string_destroy(void *toDestroy);
+
 
 #endif

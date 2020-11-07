@@ -1,6 +1,6 @@
 #include "../array.h"
 
-static int dynamic_array_extend(dynamicArray_t *base);
+static int dynamic_array_extend(dynamic_array_t *base);
 
 void array_set_element(void *array, void *data, unsigned int element, unsigned int elementSize)
 {
@@ -64,16 +64,16 @@ int array_resize(array_t *base, unsigned int elementSize, unsigned int newLength
     return TRUE;
 }
 
-dynamicArray_t new_dynamic_array(unsigned int element_size)
+dynamic_array_t new_dynamic_array(unsigned int element_size)
 {
-    dynamicArray_t newArray = {0};
+    dynamic_array_t newArray = {0};
 
     newArray.elementSize = element_size;
 
     return newArray;
 }
 
-int dynamic_array_append(dynamicArray_t *base, void *element)
+int dynamic_array_append(dynamic_array_t *base, void *element)
 {
     if (base == NULL)
     {
@@ -95,7 +95,7 @@ int dynamic_array_append(dynamicArray_t *base, void *element)
 }
 
 // Extends an array (if it is full)
-static int dynamic_array_extend(dynamicArray_t *base)
+static int dynamic_array_extend(dynamic_array_t *base)
 {
     if (base == NULL || base->len < base->maxLen)
     {
@@ -127,7 +127,7 @@ static int dynamic_array_extend(dynamicArray_t *base)
     return TRUE;
 }
 
-int dynamic_array_safe_resize(dynamicArray_t *array, unsigned int newLen)
+int dynamic_array_safe_resize(dynamic_array_t *array, unsigned int newLen)
 {
     // If less than the current array length - FAIL
     if (newLen <= array->len)
@@ -153,7 +153,7 @@ int dynamic_array_safe_resize(dynamicArray_t *array, unsigned int newLen)
     return TRUE;
 }
 
-void dynamic_array_set_element(dynamicArray_t *array, unsigned int element, void *data)
+void dynamic_array_set_element(dynamic_array_t *array, unsigned int element, void *data)
 {
     // Gets a pointer to the start of the required element
     if (array->maxLen < element)
@@ -180,7 +180,7 @@ void dynamic_array_set_element(dynamicArray_t *array, unsigned int element, void
     memcpy((((char *)array->dat) + (array->elementSize * element)), data, array->elementSize);
 }
 
-void *dynamic_array_get_element(dynamicArray_t *array, unsigned int element)
+void *dynamic_array_get_element(dynamic_array_t *array, unsigned int element)
 {
     // If the required element is outside the bounds of the array
     if (element > array->len)
@@ -193,6 +193,21 @@ void *dynamic_array_get_element(dynamicArray_t *array, unsigned int element)
     return (void *)((char *)array->dat + (element * array->elementSize));
 }
 
+/*
+ * Copies the contents of a dynamic array into a new array_t 
+ * with just enough space for all elements
+*/
+array_t dynamic_array_to_array(dynamic_array_t* array)
+{
+    array_t converted = new_array(array->len, array->elementSize);
+
+    // Copy the memory across
+    memcpy(converted.dat, array->dat, array->len * array->elementSize);
+
+    // Return the copied array
+    return converted;
+}
+
 // Wrapper function to destroy the contents of an array
 void array_destroy(array_t toDestroy)
 {
@@ -200,7 +215,7 @@ void array_destroy(array_t toDestroy)
 }
 
 // Wrapper function to destroy the contents of an array
-void dynamic_array_destroy(dynamicArray_t toDestroy)
+void dynamic_array_destroy(dynamic_array_t toDestroy)
 {
     destroy(toDestroy.dat);
 }

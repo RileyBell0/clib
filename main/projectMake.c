@@ -17,6 +17,7 @@
 #define SPACE_FOR_PERIOD 1
 #define MIN_LEN_FOR_EXTENSION 2
 #define EXTRA_CHARS 9
+#define DEFAULT_STR_LEN_PROJMAKE 16
 
 #define OBJECT_OUT_DIR "objects/"
 #define COMPILER "gcc"
@@ -396,7 +397,6 @@ int main(int argc, char **argv)
     string_t requiredFilesPath = string_from_cstring(argv[ARG_REQ_FILES]);
     string_t programFilesPath = string_from_cstring(argv[ARG_PROG_FILES]);
 
-
     /*
      * Setting up the make instructions for the makefile
     */
@@ -460,14 +460,12 @@ int main(int argc, char **argv)
     list_destroy(&objectPaths, void_string_destroy);
     string_t allObjects = concat_string_list(objectNames);
     list_destroy(&objectNames, void_string_destroy);
-
     /*
      * Adding the make instructions for each program
     */
     add_program_make_instructions(&instructions, &mainFiles, &execNames, &execInstructions, &allObjects, &allObjectPaths);
     string_destroy(&allObjectPaths);
     string_destroy(&allObjects);
-
     /*
      * Done using the lines from the mainFiles file, destroying...
     */
@@ -476,15 +474,19 @@ int main(int argc, char **argv)
     /*
      * Writing the 'all' instruction for the makefile
     */
-    string_t allCmd = new_string(strlen("all: "));
+    string_t allCmd = new_string(DEFAULT_STR_LEN_PROJMAKE);
     string_t names = concat_string_list(execNames);
     list_destroy(&execNames, void_string_destroy);
-
     string_write(&allCmd, string_from_cstring("all: "));
     string_write(&allCmd, names);
     string_write(&allCmd, string_from_cstring("\n"));
     string_destroy(&names);
 
+    //////////////////////////////////////////////////////////////
+    /*
+     * Writing the makefile
+    */
+    //////////////////////////////////////////////////////////////
     FILE *outFile = fileio_open_safe(outFilePath.str, FALSE);
 
     fprintf(outFile, "%s\n", allCmd.str);

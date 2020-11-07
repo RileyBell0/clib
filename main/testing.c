@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "../std/configLoader.h"
 
 #define END_SUCCESS 0
 #define MULTIPLE 1
@@ -15,6 +16,23 @@ void bar(char* toPrint);
 
 // Write your code here
 int code(int argc, char** argv){
+    
+    char* yes = " debug=\"really true \\\"george\\\" said\" #and #thats cool # yes [a bc]";
+    unsigned int pos = 0;
+    string_t base = string_from_cstring(yes);
+    string_t dest = new_string(10);
+    while (extract_field(base, &pos, &dest))
+    {
+        if (dest.len != 0)
+        {
+            printf("field: \"%s\"\n", dest.str);
+        }
+        else
+        {
+            printf("empty:\n");
+        }
+        
+    }
 
     return END_SUCCESS;
 }
