@@ -48,9 +48,13 @@ int cstring_equals(char* str1, char* str2)
     int i = 0;
     while (TRUE)
     {
-        if (str1[i] != str2[i] || str1[i] == '\0')
+        if (str1[i] != str2[i])
         {
             return FALSE;
+        }
+        else if (str1[i] == str2[i] && str1[i] == '\0')
+        {
+            return TRUE;
         }
 
         ++i;

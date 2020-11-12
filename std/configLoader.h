@@ -18,32 +18,44 @@
 #define CONFIG_ARRAY_START_CHAR '['
 #define CONFIG_ARRAY_END_CHAR ']'
 #define CONFIG_IGNORE_CHAR ' '
-#define CONFIG_NO_ENTRY "NULL"
+#define CONFIG_NO_ENTRY "null"
+
+#define CONFIG_STANDARD_DESCRIPTION "\
+# Use '#' to define single line comments\n\
+# \n\
+# Declare variables as such:\n\
+# \n\
+# VariableName = Value \n\
+# \n\
+# or if you want to include spaces, surround in quotation marks:\n\
+# \n\
+# \"My Variable Name\" = \"My Variable\"\n\
+# \n\
+# To include Quotation marks within a variable or name, put \n\
+# a backslash directly before them: \n\
+# \n\
+# Name = \"James \\\"Jimmy\\\" Jones\"\n\
+# \n\
+# If you wish to end a string with a backslash, go to the next line \n\
+# without adding a final quotation mark \n\
+# \n\
+# If you wish to declare a variable with an array of associated values: \n\
+# \n\
+# myArray = [ \n\
+#     \"First Value\"\n\
+#     \"Second Value\"\n\
+# \n\
+#     ...\n\
+# \n\
+#     \"Final Value\"\n\
+# \n\
+# ]\n\
+# \n\n"
 
 #define CONFIG_FIELD_NONE (-1)
 #define CONFIG_FIELD_NAME 0
 #define CONFIG_FIELD_DECLARATION 1
 
-/*
- * Config Structure
- * 
- * Config_t
- *      - len
- *      - vars
- *          - elem 1
- *              - varName
- *              - len
- *              - data
- *                   - len
- *                   - str
- *                          - "Value1"
- *                          - "Value2"
- *                          ...
- *                          - "ValueN"
- *          ...
- *          - elem n
- *      
-*/
 typedef struct config_var_t
 {
     string_t varName;
@@ -53,8 +65,10 @@ typedef struct config_var_t
 
 typedef struct config_t
 {
+    int modified;
     unsigned int len;
     config_var_t* vars;
+    char* configLocation;
 } config_t;
 
 /*
@@ -82,6 +96,9 @@ config_var_t *config_get_var(config_t* config, char* name);
  * Free's all dynamically allocated data in a Config
 */
 void config_destroy(config_t config);
+
+int config_save(config_t config);
+void config_encode(string_t* dest, string_t* toEncode);
 
 /*
  * Prints all variables (and their contents) stored

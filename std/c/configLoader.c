@@ -16,11 +16,11 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
     }
 
     /*
-     * Ignore leading whitespaces
+     * Ignore leading whitespaces and tabs
     */
     for (i = *pos; i < str.len; i++)
     {
-        if (str.str[i] != CONFIG_IGNORE_CHAR)
+        if (str.str[i] != CONFIG_IGNORE_CHAR && str.str[i] != '\t')
         {
             // Done with leading whitespaces
             break;
@@ -221,7 +221,7 @@ config_t read_config_file(char *filePath)
             if (!currentConfigSaved)
             {
                 currentConfigSaved = TRUE;
-                
+
                 array_t convertedFields = dynamic_array_to_array(&fields);
                 newVar.data = convertedFields.dat;
                 newVar.len = convertedFields.len;
@@ -231,7 +231,6 @@ config_t read_config_file(char *filePath)
             currField = CONFIG_FIELD_NAME;
             named = FALSE;
         }
-        
     }
     fclose(configFile);
 
@@ -251,18 +250,99 @@ config_t read_config_file(char *filePath)
 
     config.len = final.len;
     config.vars = final.dat;
+    config.modified = FALSE;
+    config.configLocation = filePath;
 
     // Dealing with memory
     string_destroy(&buffer);
     string_destroy(&field);
-    
+
     dynamic_array_destroy(results);
     dynamic_array_destroy(fields);
 
     return config;
 }
 
-config_var_t *config_get_var(config_t* config, char* name)
+void config_encode(string_t *dest, string_t *toEncode)
+{
+    dest->len = 0;
+    // Write a quote-formatted version of the string
+    for (int x = 0; x < toEncode->len; x++)
+    {
+        char c = toEncode->str[x];
+        if (c == CONFIG_STRING_ENCLOSE_CHAR)
+        {
+            string_write_char(dest, CONFIG_ESCAPE_CHAR);
+            string_write_char(dest, CONFIG_STRING_ENCLOSE_CHAR);
+        }
+        else
+        {
+            string_write_char(dest, c);
+        }
+    }
+    string_null_terminate(dest);
+}
+
+/*
+ * If any variables in the config have been modified, saves the config file.
+ * If you have modified any variables directly, ensure to set the modified flag
+ * to TRUE (1) or the config file will not save
+ * 
+ * returns TRUE if successful, FALSE if file failed to open
+*/
+int config_save(config_t config)
+{
+    /*
+     * Nothing to save...
+    */
+    if (!config.modified)
+    {
+        return TRUE;
+    }
+
+    string_t processed = new_string(DEFAULT_BUFFER_LEN);
+
+    FILE *cfgOut = fopen(config.configLocation, MODE_WRITE);
+
+    if (!cfgOut)
+    {
+        return FALSE;
+    }
+
+    /*
+     * Write the standard config header comment
+    */
+    fprintf(cfgOut, CONFIG_STANDARD_DESCRIPTION);
+    for (int i = 0; i < config.len; i++)
+    {
+        config_encode(&processed, &config.vars[i].varName);
+        
+        fprintf(cfgOut, "\"%s\" = [\n", processed.str);
+
+        if (config.vars[i].len == 0)
+        {
+            fprintf(cfgOut, "\t%s\n", CONFIG_NO_ENTRY);
+        }
+        else
+        {
+            for (int j = 0; j < config.vars[i].len; j++)
+            {
+                config_encode(&processed, &config.vars[i].data[j]);
+
+                fprintf(cfgOut, "\t\"%s\"\n", processed.str);
+            }
+        }
+
+        fprintf(cfgOut, "\t]\n\n");
+    }
+
+    string_destroy(&processed);
+    fclose(cfgOut);
+
+    return TRUE;
+}
+
+config_var_t *config_get_var(config_t *config, char *name)
 {
     /*
      * Convert the name into a searchable format
@@ -274,15 +354,15 @@ config_var_t *config_get_var(config_t* config, char* name)
     /*
      * Search the sorted config list for the requested var
     */
-    config_var_t* var = bsearch(&key, config->vars, config->len, sizeof(config_var_t), config_var_compare);
+    config_var_t *var = bsearch(&key, config->vars, config->len, sizeof(config_var_t), config_var_compare);
 
     return var;
 }
 
-int config_var_compare(const void* var1, const void* var2)
+int config_var_compare(const void *var1, const void *var2)
 {
-    config_var_t* a = (config_var_t*)var1;
-    config_var_t* b = (config_var_t*)var2;
+    config_var_t *a = (config_var_t *)var1;
+    config_var_t *b = (config_var_t *)var2;
 
     if (!a || !a->varName.str)
     {
@@ -319,7 +399,7 @@ int config_var_compare(const void* var1, const void* var2)
 void config_destroy(config_t config)
 {
     for (int i = 0; i < config.len; i++)
-    {  
+    {
         config_var_t var = config.vars[i];
 
         string_destroy(&var.varName);
@@ -334,21 +414,22 @@ void config_destroy(config_t config)
 
 void config_print_vars(config_t config)
 {
-    for (int i = 0; i < config.len; i ++)
+    printf("CONFIG Contents:\n-----------------\n");
+    for (int i = 0; i < config.len; i++)
     {
-        printf("Name: %s\n", config.vars[i].varName.str);
+        printf("%s\n", config.vars[i].varName.str);
         if (config.vars[i].len == 0)
         {
-            printf("\t- (null)\n");
+            printf("\t\"(null)\"\n");
         }
         else
-        {     
+        {
             for (int j = 0; j < config.vars[i].len; j++)
             {
-                printf("\t- %s\n", config.vars[i].data[j].str);
+                printf("\t\"%s\"\n", config.vars[i].data[j].str);
             }
         }
-        
-       
+        printf("\n");
     }
+    printf("-----------------\n");
 }

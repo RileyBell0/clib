@@ -17,13 +17,20 @@ void bar(char* toPrint);
 // Write your code here
 int code(int argc, char** argv){
     config_t config = read_config_file("/usr/include/clib/configTest.txt");
-
+    printf("Stuff in the config...\n\n");
+    config_print_vars(config);
+    printf("\n\n");
 
     string_t buffer = new_string(DEFAULT_BUFFER_LEN);
+    string_t escapeCode = string_from_cstring("exit");
 
     while (fileio_next_line(stdin, &buffer))
     {
-        
+        if (string_equals(buffer, escapeCode))
+        {
+            printf("Recieved exit code...\n");
+            break;
+        }
         config_var_t* vary = config_get_var(&config, buffer.str);
 
         if (vary)
@@ -42,6 +49,10 @@ int code(int argc, char** argv){
             printf("Couldn't find the requested var\n");
         }
     }
+
+    printf("Saving config...\n\n");
+    config_save(config);
+    printf("Save Complete!\n\n");
 
     config_destroy(config);
     return END_SUCCESS;
