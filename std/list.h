@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "general.h"
 #include "bool.h"
 #include "array.h"
@@ -55,6 +56,12 @@ typedef struct list_t
 array_t list_to_array(list_t list);
 
 /*
+ * Appends all given items to the list
+ * NULL must be last argument
+*/
+list_t *list_append_multi_n(list_t *list, void* toAppend, ...);
+
+/*
  * Returns a new list where the stored elements will be of size (elementSize)
  */
 list_t new_list(unsigned int elementSize);
@@ -63,7 +70,7 @@ list_t new_list(unsigned int elementSize);
  * Adds the data to the end of the list
  * Requires a pointer to the element that is going to be added (element data gets copied in)
  */
-void list_append(list_t *list, void *data);
+list_t *list_append(list_t *list, void *data);
 
 /*
  * Finds and returns the node at the given index
@@ -94,7 +101,7 @@ void *list_remove_node(list_t *list, list_node_t *toRemove);
  * Combines the two given lists, appending the list 'extension'
  * to the end of the list 'base'
 */
-void list_combine(list_t *base, list_t *extension);
+list_t* list_combine(list_t *base, list_t *extension);
 
 /*
  * frees all dynamically allocated data in a list.

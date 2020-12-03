@@ -50,11 +50,29 @@ static list_node_t *list_new_node(void *data, unsigned int dataSize)
     return newNode;
 }
 
-void list_append(list_t *list, void *data)
+list_t *list_append_multi_n(list_t *list, void* toAppend, ...)
+{
+    va_list args;
+    va_start(args, toAppend);
+
+    void* element = toAppend;
+    
+    while(element)
+    {
+        list_append(list, element);
+        element = va_arg(args, void*);
+    }
+
+    va_end(args);
+
+    return list;
+}
+
+list_t *list_append(list_t *list, void *data)
 {
     if (!list)
     {
-        return;
+        return list;
     }
 
     list_node_t *new_node = list_new_node(data, list->elementSize);
@@ -73,6 +91,8 @@ void list_append(list_t *list, void *data)
     }
 
     ++(list->size);
+
+    return list;
 }
 
 void *list_remove_first(list_t* list)
@@ -244,15 +264,15 @@ void list_destroy(list_t *list, void (*delete_data)(void *data))
     list->size = 0;
 }
 
-void list_combine(list_t *base, list_t *extension)
+list_t* list_combine(list_t *base, list_t *extension)
 {
     if (!base || !extension)
     {
-        return;
+        return base;
     }
     if (extension->size == 0)
     {
-        return;
+        return base;
     }
 
     if (base->size == 0)
@@ -279,4 +299,6 @@ void list_combine(list_t *base, list_t *extension)
     extension->first_node = NULL;
     extension->last_node = NULL;
     extension->size = 0;
+
+    return base;
 }

@@ -21,6 +21,15 @@
 #include "list.h"
 #include "fileIO.h"
 
+typedef struct dirent_info_t {
+    string_t d_name;
+    ino_t d_ino;
+    mode_t d_namlen;
+    mode_t d_reclen;
+    ino_t d_seekoff;
+    unsigned char d_type;
+} dirent_info_t;
+
 /*
  * Returns a pointer to the start of the file extension
  * within the given string.
@@ -28,6 +37,12 @@
  * Returns NULL on empty string
 */
 char *getFileExtension(char *fileName);
+
+/*
+ * Copies a dirent struct from the stack to the heap
+ * Also converts d_name to a string_t from a char*
+*/
+dirent_info_t dirent_copy(struct dirent *d);
 
 /*
  * Modifies the given string, removing
@@ -48,15 +63,13 @@ char *removeFileExtension(char *fileName);
 */
 list_t getAllFiles(DIR *d);
 
+
 /*
- * returns a list of struct dirent containing
- * all directory entries in the given
- * directory
+ * Returns a list of type (struct dirent*)
  * 
- * Ensure the list is destroyed with list_destroy(&list, NULL)
- * when you're done with it
+ * destroy with list_destroy(list, null)
 */
-list_t getAllDirectoryEntries(DIR *d);
+list_t dir_all_entries_list(DIR *d);
 
 /*
  * returns a list of struct dirent containing

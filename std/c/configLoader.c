@@ -348,14 +348,17 @@ config_var_t *config_get_var(config_t *config, char *name)
      * Convert the name into a searchable format
     */
     config_var_t key;
+
+    // len is 1 because a config_var_t can store multiple values
     key.len = 1;
+    
     key.varName.str = name;
 
     /*
      * Search the sorted config list for the requested var
     */
     config_var_t *var = bsearch(&key, config->vars, config->len, sizeof(config_var_t), config_var_compare);
-
+    
     return var;
 }
 

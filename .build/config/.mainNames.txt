@@ -1,3 +1,0 @@
-projectMake
-testing
-projectScan

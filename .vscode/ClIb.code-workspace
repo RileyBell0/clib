@@ -18,7 +18,9 @@
 			"string_view": "c",
 			"initializer_list": "c",
 			"utility": "c",
-			"sstream": "c"
+			"sstream": "c",
+			"__node_handle": "c",
+			"vector": "c"
 		}
 	}
 }

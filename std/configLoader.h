@@ -58,7 +58,10 @@
 
 typedef struct config_var_t
 {
+    // Name of the variable
     string_t varName;
+
+    // Array of values in the variable
     string_t* data;
     unsigned int len;
 } config_var_t;
@@ -89,6 +92,7 @@ int config_var_compare(const void* var1, const void* var2);
 
 /*
  * Gets the requested varaible from the loaded config
+ * prints an error message on fail
 */
 config_var_t *config_get_var(config_t* config, char* name);
 

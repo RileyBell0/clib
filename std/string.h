@@ -34,8 +34,9 @@
 #ifndef CLIB_STD_STRING_H
 #define CLIB_STD_STRING_H
 
-#include "general.h"
 #include <string.h>
+#include <stdarg.h>
+#include "general.h"
 #include "array.h"
 
 #define SPACE_FOR_NULL 1
@@ -100,17 +101,24 @@ void string_write_char(string_t *base, char toAdd);
 unsigned int string_count_occurances(string_t source, char delim);
 
 /*
- * Wrapper for string_write which allows
- * directly appending cstrings to a string_t
- * without first calling string_from_cstring
+ * Appends the given cstrings to the string 'base'
+ * Last argument must be null
 */
-void string_write_c(string_t *base, char* source);
+string_t* string_write_c(string_t *base, char* source, ...);
+/*
+ * Appends the cstring to the string 'base'
+*/
+string_t* string_write_c_single(string_t *base, char* source);
 
+/*
+ * Appends to 'base'. Last parameter must be NULL
+*/
+string_t* string_write(string_t *base, string_t* source, ...);
 /*
  * Appends the given string 'source' to the end of 'base'
  * Extends the string where necessary
 */
-void string_write(string_t *base, string_t source);
+string_t *string_write_single(string_t *base, string_t source);
 
 /*
  * Takes a cstring as a source and converts it
@@ -126,10 +134,25 @@ string_t string_from_cstring(char *source);
 char *cstring_copy(const char *source);
 
 /*
+ * concats the given args into a new string.
+ * args must be set to the number of input args
+ * Allocates memory
+*/
+string_t string_new_concat_multi(string_t base, string_t *extension, ...);
+
+/*
  * returns the concatenation of 'base' and 'extension' without
  * altering either strings
 */
 string_t string_new_concat(string_t base, string_t extension);
+
+/*
+ * Concatenates the given strings
+ * args must be set to the number of input args
+*/
+string_t string_concat_multi(string_t base, string_t *extension, ...);
+
+string_t string_concat(string_t base, string_t extension);
 
 // Realloc's the given string, updating its length
 void string_extend(string_t *toExtend);

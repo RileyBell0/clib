@@ -1,5 +1,33 @@
 #include "../fileIO.h"
 
+char *path_file_extension(char *fileName)
+{
+    if (!fileName)
+    {
+        return NULL;
+    }
+    char *extension = NULL;
+
+    int i = 0;
+    while (fileName[i] != '\0')
+    {
+        if (fileName[i] == EXTENSION_SEPERATING_CHAR)
+        {
+            // We havent reached the end of the string
+            if (fileName[i + 1] != '\0')
+            {
+                // We have the start of what could be a valid extension
+                // The last valid potential extension start-point is returned
+                extension = &fileName[i + 1];
+            }
+        }
+
+        ++i;
+    }
+
+    return extension;
+}
+
 FILE *fileio_open_safe_advanced(char *filePath, char *mode)
 {
     FILE *newFile = NULL;
@@ -86,7 +114,7 @@ int fileio_next_line(FILE *file, string_t *buffer)
     buffer->str[buffer->len] = '\0';
 
     // Failed to read anything
-    if (c == EOF)
+    if (c == EOF && charsWritten == 0)
     {
         return FALSE;
     }
@@ -145,6 +173,42 @@ char *removeFileExtension(char *fileName)
     return fileName;
 }
 
+void remove_file_extensions(list_t files)
+{
+    // Removing the extension from the program names
+    list_node_t *node = files.first_node;
+
+    while (node)
+    {
+        removeFileExtension(((string_t *)node->data)->str);
+
+        // Update the length of the string
+        ((string_t *)node->data)->len = strlen(((string_t *)node->data)->str);
+        node = node->next;
+    }
+}
+
+list_t get_file_names(list_t files)
+{
+    list_t prog_names = new_list(sizeof(string_t));
+
+    list_node_t *node = files.first_node;
+    while (node)
+    {
+        // Get the path to the current file from the node
+        string_t *file_path = (string_t *)node->data;
+
+        // Extract the file's name from the path and remove its extension
+        string_t file_name = getFileName(*file_path);
+
+        // Save the file's name
+        list_append(&prog_names, &file_name);
+
+        node = node->next;
+    }
+
+    return prog_names;
+}
 
 list_t fileio_read_all_lines_list(char *fileName)
 {
@@ -179,7 +243,6 @@ list_t fileio_read_all_lines_list(char *fileName)
 
         string_destroy(&buffer);
     }
-
 
     return lines;
 }

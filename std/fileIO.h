@@ -26,6 +26,13 @@ FILE *fileio_open_safe_advanced(char *filePath, char *mode);
 FILE *fileio_open_safe(char *filePath, int isReading);
 
 /*
+ * Returns a pointer to the start of the file extension
+ * within this string.
+ * Does not modify the input string and does not allocate memory
+*/
+char *path_file_extension(char *fileName);
+
+/*
  * Attempts to open a file in the given mode
  * 
  * Returns NULL on failure
@@ -62,6 +69,24 @@ string_t getFileName(string_t path);
 */
 char *removeFileExtension(char *fileName);
 
+/*
+ * Given a list of files, the paths to the files are removed
+ * and their filename is returned
+ * /User/Desktop/myFile.txt -> myFile.txt
+*/
+list_t get_file_names(list_t files);
+
+/*
+ * Given a list of files, removes the file extensions from
+ * each file
+ * /Folder/myFile.txt -> /Folder/myFile
+*/
+void remove_file_extensions(list_t files);
+
+/*
+ * Reads all lines in the given file into a list
+ * List is of type string_t
+*/
 list_t fileio_read_all_lines_list(char *fileName);
 
 #endif

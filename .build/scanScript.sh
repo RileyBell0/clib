@@ -4,8 +4,14 @@ echo "---------------------------------"
 echo ""
 
 MAIN_DIR="main"
-SRC_DIR="/usr/include/clib/std"
+SRC_DIR="std"
 
-./.build/prog/projectScan $MAIN_DIR c .build/config/.mainFiles.txt 0
-./.build/prog/projectScan $MAIN_DIR c .build/config/.mainNames.txt 1
-./.build/prog/projectScan $SRC_DIR c .build/config/.requiredFiles.txt 0
+PROGNAME="projectScan"
+
+# Command line argument gives which version of the program to run
+EXTENSION=$1
+
+EXECUTABLE="$PROGNAME$EXTENSION"
+
+./.build/prog/$EXECUTABLE $MAIN_DIR c .build/config/programs.txt 0
+./.build/prog/$EXECUTABLE $SRC_DIR c .build/config/components.txt 0

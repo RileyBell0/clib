@@ -22,7 +22,7 @@ string_t string_from_cstring(char *source)
     newString.str = source;
     if (source)
     {
-        newString.len = strlen(newString.str);
+        newString.len = strlen(newString.str); 
     }
     else
     {
@@ -127,17 +127,53 @@ void string_write_char(string_t *base, char toAdd)
     base->len += 1;
 }
 
-void string_write_c(string_t *base, char* source)
+string_t* string_write_c(string_t *base, char* source, ...)
+{
+    va_list vargs;
+    va_start(vargs, source);
+
+    char *str = source;
+
+    while (str)
+    {
+        string_write_c_single(base, str);
+        str = va_arg(vargs, char*);
+    }
+
+    va_end(vargs);
+
+    return base;
+}
+string_t* string_write_c_single(string_t *base, char* source)
 {
     if (!base || !base->str || !source)
     {
-        return;
+        return base;
     }
     string_t extension = string_from_cstring(source);
-    string_write(base, extension);
+    string_write_single(base, extension);
+
+    return base;
 }
 
-void string_write(string_t *base, string_t source)
+string_t* string_write(string_t *base, string_t* source, ...)
+{
+    va_list vargs;
+    va_start(vargs, source);
+
+    string_t *str = source;
+    while (str)
+    {
+        string_write_single(base, *str);
+        str = va_arg(vargs, string_t*);
+    }
+
+    va_end(vargs);
+
+    return base;
+}
+
+string_t* string_write_single(string_t *base, string_t source)
 {
     // If there isnt enough room to fit the extension
     if (base->max_len < base->len + source.len)
@@ -164,6 +200,8 @@ void string_write(string_t *base, string_t source)
         base->len += 1;
     }
     base->str[base->len] = '\0';
+
+    return base;
 }
 
 void string_extend(string_t *toExtend)
@@ -203,7 +241,26 @@ static void string_lengthen(string_t *toExtend, unsigned int len)
     toExtend->max_len = newLen;
 }
 
-// returns a new string that is the concatenation of the two inputs
+string_t string_new_concat_multi(string_t base, string_t *extension, ...)
+{
+    va_list vargs;
+    va_start(vargs, extension);
+
+    string_t copy = string_copy(base);
+
+    string_t* str = extension;
+
+    while (str)
+    {
+        string_concat(copy, *str);
+        str = va_arg(vargs, string_t*);
+    }
+
+    va_end(vargs);
+
+    return copy;
+}
+
 string_t string_new_concat(string_t base, string_t extension)
 {
     string_t combined = new_string(base.len + extension.len);
@@ -224,6 +281,41 @@ string_t string_new_concat(string_t base, string_t extension)
     combined.len = combined.max_len;
 
     return combined;
+}
+
+string_t string_concat_multi(string_t base, string_t *extension, ...)
+{
+    va_list vargs;
+    va_start(vargs, extension);
+
+    string_t *str = extension;
+
+    while (str)
+    {
+        string_concat(base, *str);
+        str = va_arg(vargs, string_t*);
+    }
+
+    va_end(vargs);
+
+    return base;
+}
+
+string_t string_concat(string_t base, string_t extension)
+{
+    // Writing
+    for (int i = 0; i < extension.len; i++)
+    {
+        base.str[base.len++] = extension.str[i];
+    }
+
+    // Null terminating the new string
+    base.str[base.len] = '\0';
+
+    // updating string length field
+    base.len = base.len + extension.len;
+
+    return base;
 }
 
 string_t string_copy(string_t source)
@@ -249,11 +341,14 @@ string_t string_copy(string_t source)
     return newString;
 }
 
+#include <stdio.h>
 char *cstring_copy(const char *source)
 {
+    printf("\t\tChecking strlen\n");
     int sLen = strlen(source);
+    printf("\t\tallocating %d bytes for %s\n", sLen, source);
     char *newString = safe_malloc(sLen * sizeof(char) + SPACE_FOR_NULL);
-
+    printf("\t\tAllocated\n");
     // copying 'source' onto the new string
     for (int i = 0; i < sLen; i++)
     {
