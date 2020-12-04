@@ -233,7 +233,7 @@ void *list_remove_at(list_t *list, unsigned int index)
 */
 void list_destroy(list_t *list, void (*delete_data)(void *data))
 {
-    if (list->size <= 0)
+    if (list->size == 0)
     {
         return;
     }

@@ -2,12 +2,7 @@
  * Gets all 'c' files that are to be compiled
 */
 
-#include <stdio.h>
-#include "../std/path.h"
-#include "../std/list.h"
-#include "../std/string.h"
 #include "../std/directory.h"
-#include "../std/fileIO.h"
 #include "../std/configLoader.h"
 
 #define REQUIRED_ARGS 1
@@ -51,7 +46,6 @@ void add_src_files_from_dir(FILE* outFile, string_t basePath, string_t pathSeper
     list_t files = getFilesWithExtensionRecursive(main, basePath, pathSeperator, extension);
     printf("Got all the files\n");
 
-    char* yes = malloc(sizeof(char)*52);
 
     // Print all files in the subdirectory
     list_node_t *node = files.first_node;
@@ -71,11 +65,6 @@ void add_src_files_from_dir(FILE* outFile, string_t basePath, string_t pathSeper
 
 int main(int argc, char **argv)
 {
-    printf("Size: %d\n", sizeof(struct dirent));
-    printf("Size: %d\n", sizeof(struct dirent));
-    printf("Size: %d\n", sizeof(struct dirent));
-    printf("Size: %d\n", sizeof(struct dirent));
-    printf("Size: %d\n", sizeof(struct dirent));
     // Check Arguments
     if (argc < REQUIRED_ARGS + 1)
     {
@@ -83,32 +72,42 @@ int main(int argc, char **argv)
         exit(EXIT_ERROR);
     }
 
-    config_t cfg = read_config_file(argv[ARG_CONFIG]);
+    // config_t cfg = read_config_file(argv[ARG_CONFIG]);
 
-    // ------------ SETTING UP VARAIBLES
-    config_var_t* var_src_dirs = safe_cfg_get_var(&cfg, VAR_SRC_DIRS);
-    config_var_t* var_main_dirs = safe_cfg_get_var(&cfg, VAR_MAIN_DIRS);
-    config_var_t* var_extension = safe_cfg_get_var(&cfg, VAR_EXTENSION);
-    config_var_t* var_component_out = safe_cfg_get_var(&cfg, VAR_COMPONENT_OUT);
-    config_var_t* var_main_out = safe_cfg_get_var(&cfg, VAR_MAIN_OUT);
-    config_var_t* var_config_dir = safe_cfg_get_var(&cfg, VAR_CONFIG_DIR);
+    // // ------------ SETTING UP VARAIBLES
+    // config_var_t* var_src_dirs = safe_cfg_get_var(&cfg, VAR_SRC_DIRS);
+    // config_var_t* var_main_dirs = safe_cfg_get_var(&cfg, VAR_MAIN_DIRS);
+    // config_var_t* var_extension = safe_cfg_get_var(&cfg, VAR_EXTENSION);
+    // config_var_t* var_component_out = safe_cfg_get_var(&cfg, VAR_COMPONENT_OUT);
+    // config_var_t* var_main_out = safe_cfg_get_var(&cfg, VAR_MAIN_OUT);
+    // config_var_t* var_config_dir = safe_cfg_get_var(&cfg, VAR_CONFIG_DIR);
 
 
-    // Making input args more usable
-    string_t extension = *var_extension->data;
-    string_t pathSeperator = string_from_cstring(PATH_SEPERATOR);
-    string_t component_out = string_new_concat_multi(*var_config_dir->data, &pathSeperator, var_component_out->data, NULL);
-    string_t main_out = string_new_concat_multi(*var_config_dir->data, &pathSeperator, var_main_out->data, NULL);
+    // // Making input args more usable
+    // string_t extension = *var_extension->data;
+    // string_t pathSeperator = string_from_cstring(PATH_SEPERATOR);
+    // string_t component_out = string_new_concat_multi(*var_config_dir->data, &pathSeperator, var_component_out->data, NULL);
+    // string_t main_out = string_new_concat_multi(*var_config_dir->data, &pathSeperator, var_main_out->data, NULL);
     
+    list_t entries = dir_all_entries_list( string_from_cstring("std") );
+
+    list_node_t* node = entries.first_node;
+    printf("entries: %d\n",entries.size);
+    while (node)
+    {
+        printf("\t%s\n",((struct dirent*)node->data)->d_name);
+        node = node->next;
+    }
+
     // Finding and recording all program files
     // FILE *mainOut = fileio_open_safe(main_out.str, FALSE);
-    for (unsigned int i = 0; i < var_main_dirs->len; i++)
-    {
-        printf("%d OI THE LOOP HAS BEEN ENTERED\n",i);
-        printf("dir = %s\n\n", var_main_dirs->data[i]);
-        string_t mainDirPath = var_main_dirs->data[i];
-        add_src_files_from_dir(NULL, mainDirPath, pathSeperator, extension);
-    }
+    // for (unsigned int i = 0; i < var_main_dirs->len; i++)
+    // {
+    //     printf("%d OI THE LOOP HAS BEEN ENTERED\n",i);
+    //     printf("dir = %s\n\n", var_main_dirs->data[i]);
+    //     string_t mainDirPath = var_main_dirs->data[i];
+    //     add_src_files_from_dir(NULL, mainDirPath, pathSeperator, extension);
+    // }
     // fclose(mainOut);
 
     // // Finding and recording all component files

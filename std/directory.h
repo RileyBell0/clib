@@ -15,84 +15,50 @@
 #define CLIB_STD_DIRECTORY_H
 
 #include <dirent.h>
-
+#include <sys/stat.h>
 #include "path.h"
 #include "string.h"
 #include "list.h"
 #include "fileIO.h"
 
-typedef struct dirent_info_t {
-    string_t d_name;
-    ino_t d_ino;
-    mode_t d_namlen;
-    mode_t d_reclen;
-    ino_t d_seekoff;
-    unsigned char d_type;
-} dirent_info_t;
+typedef struct ordered_dirent_t 
+{
+    list_t block;
+    list_t character;
+    list_t directory;
+    list_t fifo_pipe;
+    list_t link;
+    list_t regular;
+    list_t socket;
+    list_t unknown;
+} ordered_dirent_t ;
 
+
+struct dirent* ldirentnode(list_node_t *node)
+{
+    return (struct dirent*)node->data;
+}
+
+string_t *lstrnode(list_node_t *node)
+{
+    return (string_t *)node->data;
+}
 /*
- * Returns a pointer to the start of the file extension
- * within the given string.
- * 
- * Returns NULL on empty string
-*/
-char *getFileExtension(char *fileName);
-
-/*
- * Copies a dirent struct from the stack to the heap
- * Also converts d_name to a string_t from a char*
-*/
-dirent_info_t dirent_copy(struct dirent *d);
-
-/*
- * Modifies the given string, removing
- * the extension at the end of the string
- * if there is an extension
- * 
- * DOES NOT ALLOCATE MEMORY
-*/
-char *removeFileExtension(char *fileName);
-
-/*
- * returns a list of struct dirent containing
- * all directory entries of type file in the given
- * directory
- * 
- * Ensure the list is destroyed with list_destroy(&list, NULL)
- * when you're done with it
-*/
-list_t getAllFiles(DIR *d);
-
-
-/*
- * Returns a list of type (struct dirent*)
+ * returns a list of type (struct dirent*)
+ * of all entries in the directory at the given path
  * 
  * destroy with list_destroy(list, null)
 */
-list_t dir_all_entries_list(DIR *d);
+list_t dir_all_entries_list(string_t path);
 
 /*
- * returns a list of struct dirent containing
- * all directory entries of type file in the given
- * directory where the file has the extension 'extension'
+ * Returns a list of type (struct dirent*) of all
+ * entries of the given type in the directory of the
+ * given path
  * 
- * If extension is a string of length 0, all files without
- * extensions are returned
- * 
- * Ensure the list is destroyed with list_destroy(&list, NULL)
- * when you're done with it
+ * destroy with list_destroy(list, null)
 */
-list_t getFilesWithExtension(DIR *d, string_t extension);
-
-/*
- * returns a list of struct dirent containing
- * all directory entries of type directory in the given
- * directory
- * 
- * Ensure the list is destroyed with list_destroy(&list, NULL)
- * when you're done with it
-*/
-list_t getFoldersInDir(DIR *d);
+list_t dir_all_entries_of_type(string_t path, unsigned char type);
 
 /*
  * Returns a *new* string which is the concatenation

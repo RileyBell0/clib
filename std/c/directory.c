@@ -1,121 +1,203 @@
 #include "../directory.h"
 
-dirent_info_t dirent_copy(struct dirent *d)
+unsigned char get_file_type(char *path)
 {
-    dirent_info_t copy;
-    copy.d_name = string_copy(string_from_cstring(d->d_name));
-    copy.d_ino = d->d_ino;
-    copy.d_namlen = d->d_namlen;
-    copy.d_reclen = d->d_reclen;
-    copy.d_seekoff = d->d_seekoff;
-    copy.d_type = d->d_type;
-
-    return copy;
+    struct stat sb;
+    if (stat(path, &sb) == -1)
+    {
+        printf("stat error\n");
+        exit(-1);
+    }
+    switch (sb.st_mode & S_IFMT)
+    {
+    case S_IFBLK:
+        return DT_BLK;
+    case S_IFCHR:
+        return DT_CHR;
+    case S_IFDIR:
+        return DT_DIR;
+    case S_IFIFO:
+        return DT_FIFO;
+    case S_IFLNK:
+        return DT_LNK;
+    case S_IFREG:
+        return DT_REG;
+    case S_IFSOCK:
+        return DT_SOCK;
+    default:
+        return DT_UNKNOWN;
+    }
 }
 
-list_t dir_all_entries_list(DIR *d)
+list_t dir_all_entries_list(string_t path)
 {
-    list_t entries = new_list(sizeof(dirent_info_t));
-
-    struct dirent *entry;
-
-    while (entry = readdir(d))
+    DIR *d = opendir(path.str);
+    list_t entries = new_list(sizeof(struct dirent));
+    if (!d)
     {
-        dirent_info_t copy = dirent_copy(entry);
-
-        // Copy the contents of 'entry'
-        list_append(&entries, &copy);
+        return entries;
     }
 
-    return entries;
-}
-
-// Allocates memory, returns a list of (char*)
-list_t getAllDirectoryEntryNames(DIR *d)
-{
-    list_t entries = new_list(sizeof(char *));
-
     struct dirent *entry;
 
-    while ((entry = readdir(d)) != NULL)
+    while ((entry = readdir(d)))
     {
-        printf("\tGot a new dirent\n");
-        // Copy the contents of 'entry'
-        int *yes = malloc(sizeof(int));
-        char *name = cstring_copy(entry->d_name);
-        printf("\tcopied a cstring\n");
-        list_append(&entries, &name);
-    }
-    printf("FINISHED WITH DIR\n");
-    return entries;
-}
-
-list_t getAllFiles(DIR *d)
-{
-    list_t files = new_list(sizeof(struct dirent));
-
-    struct dirent *entry;
-
-    while (entry = readdir(d))
-    {
-        if (entry->d_type == DT_REG)
-        { /* If the entry is a regular file */
-            list_append(&files, &entry);
-        }
-    }
-
-    return files;
-}
-
-list_t getFoldersInDir(DIR *d)
-{
-    struct dirent *entry;
-    list_t folders = new_list(sizeof(struct dirent));
-
-    // list_t allEntries = getAllDirectoryEntries(d);
-    list_t allEntries;
-    list_node_t *node = allEntries.first_node;
-    while (node)
-    {
-        entry = (struct dirent *)node->data;
-        if (entry->d_type == DT_DIR)
+        if (entry->d_type == DT_UNKNOWN)
         {
-            list_append(&folders, entry);
+            // Try harder to get the file's type
+            string_t filePath = string_new_concat(path, string_from_cstring(entry->d_name));
+            entry->d_type = get_file_type(filePath.str);
+            string_destroy(&filePath);
         }
-        node = node->next;
+        // Copy the contents of 'entry'
+        list_append(&entries, entry);
     }
 
-    list_destroy(&allEntries, NULL);
-
-    return folders;
+    return entries;
 }
 
-list_t getFilesWithExtension(DIR *d, string_t extension)
+list_t dir_all_entries_of_type(string_t path, unsigned char type)
 {
-    struct dirent *file;
+    /*
+     * This is essentially the code above (dir_all_entries_list) but
+     * with a check for a given type 
+    */
+    DIR *d = opendir(path.str);
+    list_t entries = new_list(sizeof(struct dirent));
+    if (!d)
+    {
+        return entries;
+    }
+
+    struct dirent *entry;
+
+    while ((entry = readdir(d)))
+    {
+        if (entry->d_type == DT_UNKNOWN)
+        {
+            // Try harder to get the file's type
+            string_t filePath = string_new_concat(path, string_from_cstring(entry->d_name));
+            entry->d_type = get_file_type(filePath.str);
+            string_destroy(&filePath);
+        }
+        if (entry->d_type == type)
+        {
+            // Copy the contents of 'entry'
+            list_append(&entries, entry);
+        }
+    }
+
+    return entries;
+}
+
+ordered_dirent_t new_ordered_dirent_t()
+{
+
+    ordered_dirent_t ordered;
+    ordered.block = new_list(sizeof(struct dirent));
+    ordered.character = new_list(sizeof(struct dirent));
+    ordered.directory = new_list(sizeof(struct dirent));
+    ordered.fifo_pipe = new_list(sizeof(struct dirent));
+    ordered.link = new_list(sizeof(struct dirent));
+    ordered.regular = new_list(sizeof(struct dirent));
+    ordered.socket = new_list(sizeof(struct dirent));
+    ordered.unknown = new_list(sizeof(struct dirent));
+    return ordered;
+}
+
+void ordered_dirent_insert(ordered_dirent_t *ordered, struct dirent *entry)
+{
+    switch (entry->d_type)
+    {
+    case DT_BLK:
+        list_append(&ordered->block, entry);
+        break;
+    case DT_CHR:
+        list_append(&ordered->character, entry);
+        break;
+    case DT_DIR:
+        list_append(&ordered->directory, entry);
+        break;
+    case DT_FIFO:
+        list_append(&ordered->fifo_pipe, entry);
+        break;
+    case DT_LNK:
+        list_append(&ordered->link, entry);
+        break;
+    case DT_REG:
+        list_append(&ordered->regular, entry);
+        break;
+    case DT_SOCK:
+        list_append(&ordered->socket, entry);
+        break;
+    default:
+        list_append(&ordered->unknown, entry);
+        break;
+    }
+}
+
+void ordered_dirent_destroy(ordered_dirent_t* ordered)
+{
+    list_destroy(&ordered->block, NULL);
+    list_destroy(&ordered->character, NULL);
+    list_destroy(&ordered->directory, NULL);
+    list_destroy(&ordered->fifo_pipe, NULL);
+    list_destroy(&ordered->link, NULL);
+    list_destroy(&ordered->regular, NULL);
+    list_destroy(&ordered->socket, NULL);
+    list_destroy(&ordered->unknown, NULL);
+}
+
+ordered_dirent_t dir_all_entries_categorised(string_t path)
+{
+    ordered_dirent_t ordered = new_ordered_dirent_t();
+
+    DIR *d = opendir(path.str);
+    if (!d)
+    {
+        return ordered;
+    }
+
+    struct dirent *entry;
+
+    while ((entry = readdir(d)))
+    {
+        if (entry->d_type == DT_UNKNOWN)
+        {
+            // Try harder to get the file's type
+            string_t filePath = string_new_concat(path, string_from_cstring(entry->d_name));
+            entry->d_type = get_file_type(filePath.str);
+            string_destroy(&filePath);
+        }
+        ordered_dirent_insert(&ordered, entry);
+    }
+
+    return ordered;
+}
+
+list_t dir_files_with_extension_recur(string_t path, string_t extension)
+{
+    // struct dirent *file;
     list_t matchingFiles = new_list(sizeof(struct dirent));
 
-    // Get all files in the directory
-    list_t allFiles = getAllFiles(d);
+    // ordered_dirent_t entries = dir_all_entries_categorised(path);
 
-    list_node_t *node = allFiles.first_node;
-    while (node)
-    {
-        // Get the next file
-        file = (struct dirent *)node->data;
-
-        // string_t fileExtension = string_from_cstring(getFileExtension(file->d_name));
-        string_t fileExtension;
-        // Extension matches the requested extension
-        if (((extension.str == NULL || extension.len == 0) && fileExtension.len == 0) ||
-            (fileExtension.len != 0 && strcmp(fileExtension.str, extension.str) == 0))
-        {
-            list_append(&matchingFiles, file);
-        }
-        node = node->next;
-    }
-
-    list_destroy(&allFiles, NULL);
+    // list_node_t *node = entries.regular.first_node;
+    // while (node)
+    // {
+    //     if (strcmp(extension.str, getFileExtension(string_from_cstring(ldirentnode(node)->d_name))) == 0)
+    //     {
+    //         list_append(&matchingFiles, node->data);
+    //     }
+    //     node = node->next;
+    // }
+    // node = entries.directory.first_node;
+    // while (node)
+    // {
+    //     // list_t subDirFiles = dir_files_with_extension_recur(, extension);
+    //     // list_combine(&matchingFiles, &subDirFiles);
+    //     node = node->next;
+    // }
 
     return matchingFiles;
 }

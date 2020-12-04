@@ -169,5 +169,4 @@ void string_destroy(string_t *toDestroy);
 */
 void void_string_destroy(void *toDestroy);
 
-
 #endif

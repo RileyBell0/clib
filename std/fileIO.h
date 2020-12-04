@@ -60,6 +60,27 @@ int fileio_next_line(FILE *file, string_t *buffer);
 string_t getFileName(string_t path);
 
 /*
+ * returns a pointer to the start of the file extension
+ * in the given string
+ * 
+ * returns NULL on failure
+*/
+const char* getFileExtension(string_t fileName)
+{
+    // Start at the end of the string and work backwards
+    // until the extension seperating char is recieved
+    for (unsigned int i = fileName.len - 1; i >= 0; i--)
+    {
+        if (fileName.str[i] == EXTENSION_SEPERATING_CHAR)
+        {
+            // Return a pointer to the char after the extension
+            return &fileName.str[i+1];
+        }
+    }
+    return NULL;
+}
+
+/*
  * Modifies the given cstring, removing the file
  * extension if it is present.
  * 
