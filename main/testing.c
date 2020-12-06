@@ -5,8 +5,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include "../std/configLoader.h"
 
 #define END_SUCCESS 0
 #define MULTIPLE 1
@@ -16,51 +14,7 @@ void bar(char* toPrint);
 
 // Write your code here
 int code(int argc, char** argv){
-    config_t config = read_config_file("cfg.txt");
-
-    // Dislay what we've read
-    printf("Stuff in the config...\n\n");
-    config_print_vars(config);
-    printf("\n\n");
-
-    string_t buffer = new_string(DEFAULT_BUFFER_LEN);
-    string_t escapeCode = string_from_cstring("exit");
-
-    // Find in the array
-    while (fileio_next_line(stdin, &buffer))
-    {
-        // Exiting the loops
-        if (string_equals(buffer, escapeCode))
-        {
-            printf("Recieved exit code...\n");
-            break;
-        }
-
-        // Get a variable from a config.
-        config_var_t* vary = config_get_var(&config, buffer.str);
-
-        if (vary)
-        {
-            printf("Found the requested var\n");
-            printf("\nname: %s\n",vary->varName.str);
-
-            for (int i = 0; i < vary->len; i++)
-            {
-                string_t element = vary->data[i];
-                printf("\t- %s\n",element.str);
-            }
-        }
-        else
-        {
-            printf("Couldn't find the requested var\n");
-        }
-    }
-
-    printf("Saving config...\n\n");
-    config_save(config);
-    printf("Save Complete!\n\n");
-
-    config_destroy(config);
+    
     return END_SUCCESS;
 }
 

@@ -9,6 +9,8 @@
  * Verified to (probably) work with Linux file systems
  * I mean, i havent really done extensive testing on this
  * code but it's worked with what ive needed it for
+ * 
+ * im reworking all of this
 */
 
 #ifndef CLIB_STD_DIRECTORY_H
@@ -33,16 +35,8 @@ typedef struct ordered_dirent_t
     list_t unknown;
 } ordered_dirent_t ;
 
+unsigned char get_file_type(char *path);
 
-struct dirent* ldirentnode(list_node_t *node)
-{
-    return (struct dirent*)node->data;
-}
-
-string_t *lstrnode(list_node_t *node)
-{
-    return (string_t *)node->data;
-}
 /*
  * returns a list of type (struct dirent*)
  * of all entries in the directory at the given path
@@ -60,34 +54,24 @@ list_t dir_all_entries_list(string_t path);
 */
 list_t dir_all_entries_of_type(string_t path, unsigned char type);
 
-/*
- * Returns a *new* string which is the concatenation
- * of basePath + pathSeperator + dirName
- * 
- * More efficient than doing each concatenation seperately as 
- * all required space is allocated at once
-*/
-string_t getSubDirectory(string_t basePath, string_t pathSeperator, string_t dirName);
+ordered_dirent_t new_ordered_dirent_t();
 
-/*
- * returns a list of c strings (char*) containing
- * the names of all directory entries in the given
- * directory
- * 
- * Ensure the list is destroyed with list_destroy(&list, ptr_destroy)
- * when you're done with it
-*/
-list_t getAllDirectoryEntryNames(DIR *d);
+void ordered_dirent_insert(ordered_dirent_t *ordered, struct dirent *entry);
 
-/*
- * returns a list of string_t structs containing
- * the paths with the name of all files in the 
- * given directory and all of its sub-directories with the
- * specified extension.
- * 
- * Ensure the list is destroyed with list_destroy(&list, void_string_destroy)
- * when you're done with it
-*/
-list_t getFilesWithExtensionRecursive(DIR *d, string_t path, string_t pathSeperator, string_t extension);
+void ordered_dirent_destroy(ordered_dirent_t* ordered);
+
+ordered_dirent_t dir_all_entries_categorised(string_t path);
+
+list_t dir_files_with_extension_recur(string_t path, string_t extension);
+
+struct dirent* ldirentnode(list_node_t *node)
+{
+    return (struct dirent*)node->data;
+}
+
+string_t *lstrnode(list_node_t *node)
+{
+    return (string_t *)node->data;
+}
 
 #endif
