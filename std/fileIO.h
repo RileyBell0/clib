@@ -9,10 +9,6 @@
 #define EXTENSION_SEPERATING_CHAR '.'
 
 #include <stdio.h>
-#include <assert.h>
-#include "general.h"
-#include "bool.h"
-#include "string.h"
 #include "path.h"
 #include "list.h"
 
@@ -65,20 +61,7 @@ string_t getFileName(string_t path);
  * 
  * returns NULL on failure
 */
-const char* getFileExtension(string_t fileName)
-{
-    // Start at the end of the string and work backwards
-    // until the extension seperating char is recieved
-    for (unsigned int i = fileName.len - 1; i >= 0; i--)
-    {
-        if (fileName.str[i] == EXTENSION_SEPERATING_CHAR)
-        {
-            // Return a pointer to the char after the extension
-            return &fileName.str[i+1];
-        }
-    }
-    return NULL;
-}
+char* getFileExtension(string_t fileName);
 
 /*
  * Modifies the given cstring, removing the file

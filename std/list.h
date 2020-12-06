@@ -20,11 +20,7 @@
 #ifndef CLIB_STD_LIST_H
 #define CLIB_STD_LIST_H
 
-#include <stdlib.h>
-#include <string.h>
 #include <stdarg.h>
-#include "general.h"
-#include "bool.h"
 #include "array.h"
 
 #define ERROR -1

@@ -18,9 +18,6 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
-#include "path.h"
-#include "string.h"
-#include "list.h"
 #include "fileIO.h"
 
 typedef struct ordered_dirent_t 
@@ -64,14 +61,8 @@ ordered_dirent_t dir_all_entries_categorised(string_t path);
 
 list_t dir_files_with_extension_recur(string_t path, string_t extension);
 
-struct dirent* ldirentnode(list_node_t *node)
-{
-    return (struct dirent*)node->data;
-}
+struct dirent* ldirentnode(list_node_t *node);
 
-string_t *lstrnode(list_node_t *node)
-{
-    return (string_t *)node->data;
-}
+string_t *lstrnode(list_node_t *node);
 
 #endif

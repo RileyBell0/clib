@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "string.h"
 
 #define END_SUCCESS 0
 #define MULTIPLE 1

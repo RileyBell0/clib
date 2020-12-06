@@ -180,24 +180,16 @@ list_t dir_files_with_extension_recur(string_t path, string_t extension)
     // struct dirent *file;
     list_t matchingFiles = new_list(sizeof(struct dirent));
 
-    // ordered_dirent_t entries = dir_all_entries_categorised(path);
-
-    // list_node_t *node = entries.regular.first_node;
-    // while (node)
-    // {
-    //     if (strcmp(extension.str, getFileExtension(string_from_cstring(ldirentnode(node)->d_name))) == 0)
-    //     {
-    //         list_append(&matchingFiles, node->data);
-    //     }
-    //     node = node->next;
-    // }
-    // node = entries.directory.first_node;
-    // while (node)
-    // {
-    //     // list_t subDirFiles = dir_files_with_extension_recur(, extension);
-    //     // list_combine(&matchingFiles, &subDirFiles);
-    //     node = node->next;
-    // }
-
     return matchingFiles;
+}
+
+
+struct dirent* ldirentnode(list_node_t *node)
+{
+    return (struct dirent*)node->data;
+}
+
+string_t *lstrnode(list_node_t *node)
+{
+    return (string_t *)node->data;
 }

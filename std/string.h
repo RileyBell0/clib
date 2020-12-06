@@ -36,7 +36,6 @@
 
 #include <string.h>
 #include <stdarg.h>
-#include "general.h"
 #include "array.h"
 
 #define SPACE_FOR_NULL 1

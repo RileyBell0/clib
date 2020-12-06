@@ -6,9 +6,6 @@
  * Save everything with its variable name
 */
 #include "fileIO.h"
-#include "string.h"
-#include "array.h"
-#include "avlBinTree.h"
 #include "sorting.h"
 
 #define CONFIG_COMMENT_CHAR '#'

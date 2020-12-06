@@ -188,6 +188,21 @@ void remove_file_extensions(list_t files)
     }
 }
 
+char* getFileExtension(string_t fileName)
+{
+    // Start at the end of the string and work backwards
+    // until the extension seperating char is recieved
+    for (unsigned int i = fileName.len - 1; i >= 0; i--)
+    {
+        if (fileName.str[i] == EXTENSION_SEPERATING_CHAR)
+        {
+            // Return a pointer to the char after the extension
+            return &fileName.str[i+1];
+        }
+    }
+    return NULL;
+}
+
 list_t get_file_names(list_t files)
 {
     list_t prog_names = new_list(sizeof(string_t));
