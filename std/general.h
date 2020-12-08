@@ -14,7 +14,7 @@
  * Wrapper for malloc which calls assert on the malloc'd data
  * and crashes the program if the malloc fails
 */
-void *safe_malloc(unsigned int size);
+void *safe_malloc(size_t size);
 
 /*
  * Wrapper for calloc which calls assert on the calloc'd data
@@ -22,7 +22,12 @@ void *safe_malloc(unsigned int size);
  * 
  * All data is initialised to zero
 */
-void *safe_calloc(unsigned int size);
+void *safe_calloc(size_t size);
+
+/*
+ * Makes sure a realloc succeeds
+*/
+void* safe_realloc(void* ptr, size_t size);
 
 /*
  * Wrapper for the 'free' function

@@ -1,4 +1,4 @@
-#include "../path.h"
+#include "../filePath.h"
 
 string_t path_enter_directory(string_t basePath, string_t dirName)
 {

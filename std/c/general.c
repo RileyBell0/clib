@@ -1,17 +1,27 @@
 #include "../general.h"
+#include <stdio.h>
 
-void *safe_malloc(unsigned int size)
+void *safe_malloc(size_t size)
 {
     void *newData = malloc(size);
     assert(newData);
+    printf("\t- Malloc'd %zu bytes\n", size);
     return newData;
 }
 
-void *safe_calloc(unsigned int size)
+void *safe_calloc(size_t size)
 {
     void *newData = calloc(1, size);
     assert(newData);
+    printf("\t- Calloc'd %zu bytes\n", size);
     return newData;
+}
+
+void* safe_realloc(void* ptr, size_t size)
+{
+    void* result = realloc(ptr, size);
+    assert(result);
+    return result;
 }
 
 void destroy(void *toDestroy)

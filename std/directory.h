@@ -61,6 +61,8 @@ ordered_dirent_t dir_all_entries_categorised(string_t path);
 
 list_t dir_files_with_extension_recur(string_t path, string_t extension);
 
+int is_normal_dir(string_t dirName);
+
 struct dirent* ldirentnode(list_node_t *node);
 
 string_t *lstrnode(list_node_t *node);

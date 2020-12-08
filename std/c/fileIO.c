@@ -136,7 +136,7 @@ string_t getFileName(string_t path)
             // The file name starts at the next character
             fileName = string_from_cstring(&path.str[i + 1]);
             // Copy the string starting from the character after 'i' to a new string
-            fileName = string_copy(fileName);
+            fileName = string_copy(&fileName);
 
             found = TRUE;
 
@@ -146,7 +146,7 @@ string_t getFileName(string_t path)
 
     if (!found)
     {
-        fileName = string_copy(path);
+        fileName = string_copy(&path);
     }
 
     return fileName;
@@ -248,7 +248,7 @@ list_t fileio_read_all_lines_list(char *fileName)
         {
             if (buffer.len > 0)
             {
-                string_t valid_string = string_copy(buffer);
+                string_t valid_string = string_copy(&buffer);
                 list_append(&lines, &valid_string);
             }
         }

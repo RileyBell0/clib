@@ -1,4 +1,10 @@
-all: testing
+all: projectScan testing
+
+projectScan: projectScan.o avlBinTree.o directory.o sorting.o list.o fileIO.o array.o stacklist.o string.o configLoader.o general.o int.o
+	clang -Wall -o build/projectScan objects/projectScan.o objects/avlBinTree objects/directory objects/sorting objects/list objects/fileIO objects/array objects/stacklist objects/string objects/configLoader objects/general objects/int -g
+
+projectScan.o: main/projectScan.c
+	clang -Wall -c -o objects/projectScan.o main/projectScan.c -g
 
 testing: testing.o avlBinTree.o directory.o sorting.o list.o fileIO.o array.o stacklist.o string.o configLoader.o general.o int.o
 	clang -Wall -o build/testing objects/testing.o objects/avlBinTree objects/directory objects/sorting objects/list objects/fileIO objects/array objects/stacklist objects/string objects/configLoader objects/general objects/int -g

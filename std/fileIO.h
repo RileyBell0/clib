@@ -9,12 +9,14 @@
 #define EXTENSION_SEPERATING_CHAR '.'
 
 #include <stdio.h>
-#include "path.h"
+#include "filePath.h"
 #include "list.h"
 
 #define MODE_READ "r"
 #define MODE_WRITE "w"
 #define DEFAULT_BUFFER_LEN 511
+#define MEDIUM_BUFFER_LEN 255
+#define SMALL_BUFFER_LEN 63
 
 /* Attempts to open a file in the given mode
  * Quits the program on failure */

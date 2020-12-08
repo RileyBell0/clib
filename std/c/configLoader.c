@@ -194,7 +194,7 @@ config_t read_config_file(char *filePath)
                 if (!named && field.len != 0)
                 {
                     currentConfigSaved = FALSE;
-                    newVar.varName = string_copy(field);
+                    newVar.varName = string_copy(&field);
                     newVar.data = NULL;
                     newVar.len = 0;
 
@@ -208,7 +208,7 @@ config_t read_config_file(char *filePath)
             {
                 if (field.len != 0 && ((!inArray && !addedDeclaration) || inArray))
                 {
-                    string_t fieldCpy = string_copy(field);
+                    string_t fieldCpy = string_copy(&field);
 
                     // Add the current field to the dynamic array
                     dynamic_array_append(&fields, &fieldCpy);

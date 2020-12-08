@@ -1,8 +1,5 @@
 #include "../list.h"
 
-// Returns a pointer to a new list Node with the relevant data attached
-static list_node_t *list_new_node(void *data, unsigned int dataSize);
-
 array_t list_to_array(list_t list)
 {
     array_t converted = new_array(list.size, list.elementSize);
@@ -18,7 +15,7 @@ array_t list_to_array(list_t list)
     return converted;
 }
 
-list_t new_list(unsigned int elementSize)
+list_t new_list(size_t elementSize)
 {
     list_t new_list = {0};
 
@@ -27,9 +24,9 @@ list_t new_list(unsigned int elementSize)
     return new_list;
 }
 
-static list_node_t *list_new_node(void *data, unsigned int dataSize)
+list_node_t *list_new_node(void *data, size_t dataSize)
 {
-    list_node_t *newNode = (list_node_t *)safe_calloc(sizeof(list_node_t));
+    list_node_t *newNode = safe_calloc(sizeof(list_node_t));
 
     // Create space for the data
     newNode->data = safe_malloc(dataSize);
@@ -70,11 +67,6 @@ list_t *list_append_multi_n(list_t *list, void* toAppend, ...)
 
 list_t *list_append(list_t *list, void *data)
 {
-    if (!list)
-    {
-        return list;
-    }
-
     list_node_t *new_node = list_new_node(data, list->elementSize);
 
     // patching references to add to end of list

@@ -1,15 +1,30 @@
 #include "../string.h"
 
-static void string_lengthen(string_t *toExtend, unsigned int len);
+
+void string_shrink(string_t* source, unsigned int new_len)
+{
+    source->str[new_len] = '\0';
+    source->len = new_len;
+}
 
 string_t new_string(unsigned int len)
 {
     string_t str;
 
     str.len = 0;
-    str.max_len = len;
 
-    str.str = safe_malloc(len * sizeof(char) + SPACE_FOR_NULL);
+    // Small string optimisation
+    if (len <= SHORT_STR_LEN)
+    {
+        str.max_len = SHORT_STR_LEN;
+        str.str = str.small;
+    }
+    else
+    {
+        str.max_len = len;
+        str.str = safe_malloc(len * sizeof(char) + SPACE_FOR_NULL);
+    }
+
     str.str[0] = '\0';
 
     return str;
@@ -33,14 +48,14 @@ string_t string_from_cstring(char *source)
     return newString;
 }
 
-int string_equals(string_t str1, string_t str2)
+int string_equals(string_t *str1, string_t *str2)
 {
-    if (str1.len != str2.len)
+    if (str1->len != str2->len)
     {
         return FALSE;
     }
     
-    return cstring_equals(str1.str, str2.str);
+    return cstring_equals(str1->str, str2->str);
 }
 
 int cstring_equals(char* str1, char* str2)
@@ -75,12 +90,12 @@ int cstring_equals_range(char* str1, char* str2, int compareRange)
     return TRUE;
 }
 
-unsigned int string_count_occurances(string_t source, char delim)
+unsigned int string_count_occurances(string_t* source, char delim)
 {
     unsigned int occurances = 0;
-    for (int i = 0; i < source.len; i++)
+    for (int i = 0; i < source->len; i++)
     {
-        if (source.str[i] == delim)
+        if (source->str[i] == delim)
         {
             ++occurances;
         }
@@ -144,14 +159,23 @@ string_t* string_write_c(string_t *base, char* source, ...)
 
     return base;
 }
+
 string_t* string_write_c_single(string_t *base, char* source)
 {
     if (!base || !base->str || !source)
     {
         return base;
     }
+    /*
+     * Goes over all chars in 'source'
+     * then goes over all chars in 'source' adding it to the str
+     * 
+     * or 
+     * goes over all chars in 'source', extending the str where necessary
+     * TODO implement this method, will make the strings faster
+    */
     string_t extension = string_from_cstring(source);
-    string_write_single(base, extension);
+    string_write_single(base, &extension);
 
     return base;
 }
@@ -164,7 +188,7 @@ string_t* string_write(string_t *base, string_t* source, ...)
     string_t *str = source;
     while (str)
     {
-        string_write_single(base, *str);
+        string_write_single(base, str);
         str = va_arg(vargs, string_t*);
     }
 
@@ -173,17 +197,17 @@ string_t* string_write(string_t *base, string_t* source, ...)
     return base;
 }
 
-string_t* string_write_single(string_t *base, string_t source)
+string_t* string_write_single(string_t *base, string_t *source)
 {
     // If there isnt enough room to fit the extension
-    if (base->max_len < base->len + source.len)
+    if (base->max_len < base->len + source->len)
     {
         int newLen = base->max_len * REALLOC_MULTIPLIER;
 
         // If the new string is going to need more space than a normal extension
-        if (newLen < base->len + source.len)
+        if (newLen < base->len + source->len)
         {
-            string_lengthen(base, base->len + source.len - base->max_len);
+            string_lengthen(base, base->len + source->len - base->max_len);
         }
         else
         {
@@ -193,10 +217,10 @@ string_t* string_write_single(string_t *base, string_t source)
 
     int sourcePos = 0;
     unsigned int startLen = base->len;
-    unsigned int finalLen = startLen + source.len;
+    unsigned int finalLen = startLen + source->len;
     for (unsigned int i = startLen; i < finalLen; i++)
     {
-        base->str[i] = source.str[sourcePos++];
+        base->str[i] = source->str[sourcePos++];
         base->len += 1;
     }
     base->str[base->len] = '\0';
@@ -225,23 +249,28 @@ void string_extend(string_t *toExtend)
     toExtend->max_len = newLen;
 }
 
-static void string_lengthen(string_t *toExtend, unsigned int len)
+void string_lengthen(string_t *toExtend, unsigned int len)
 {
     // multiplying by 1.5 then adding 1 to account for cases where strlen is 0 or 1
     int newLen = toExtend->max_len + len;
 
-    // Increasing the length of the string and allocating space
-    // Still need space for null termination
-    toExtend->str = realloc(toExtend->str, (newLen + SPACE_FOR_NULL) * sizeof(char));
-
-    // Ensure the string upgraded
-    assert(toExtend->str);
+    // If the current string is a short string
+    if (toExtend->max_len == SHORT_STR_LEN)
+    {
+        toExtend->str = safe_malloc(len);
+    }
+    else
+    {
+        // Increasing the length of the string and allocating space
+        // Still need space for null termination
+        toExtend->str = safe_realloc(toExtend->str, (newLen + SPACE_FOR_NULL) * sizeof(char));
+    }
 
     // Updating the length of the string
     toExtend->max_len = newLen;
 }
 
-string_t string_new_concat_multi(string_t base, string_t *extension, ...)
+string_t string_new_concat_multi(string_t* base, string_t *extension, ...)
 {
     va_list vargs;
     va_start(vargs, extension);
@@ -252,7 +281,7 @@ string_t string_new_concat_multi(string_t base, string_t *extension, ...)
 
     while (str)
     {
-        string_concat(copy, *str);
+        string_concat(&copy, str);
         str = va_arg(vargs, string_t*);
     }
 
@@ -261,18 +290,18 @@ string_t string_new_concat_multi(string_t base, string_t *extension, ...)
     return copy;
 }
 
-string_t string_new_concat(string_t base, string_t extension)
+string_t string_new_concat(string_t* base, string_t* extension)
 {
-    string_t combined = new_string(base.len + extension.len);
+    string_t combined = new_string(base->len + extension->len);
 
     // Writing
-    for (int i = 0; i < base.len; i++)
+    for (int i = 0; i < base->len; i++)
     {
-        combined.str[combined.len++] = base.str[i];
+        combined.str[combined.len++] = base->str[i];
     }
-    for (int i = 0; i < extension.len; i++)
+    for (int i = 0; i < extension->len; i++)
     {
-        combined.str[combined.len++] = extension.str[i];
+        combined.str[combined.len++] = extension->str[i];
     }
     // Null terminating the new string
     combined.str[combined.len] = '\0';
@@ -283,7 +312,7 @@ string_t string_new_concat(string_t base, string_t extension)
     return combined;
 }
 
-string_t string_concat_multi(string_t base, string_t *extension, ...)
+string_t* string_concat_multi(string_t* base, string_t *extension, ...)
 {
     va_list vargs;
     va_start(vargs, extension);
@@ -292,7 +321,7 @@ string_t string_concat_multi(string_t base, string_t *extension, ...)
 
     while (str)
     {
-        string_concat(base, *str);
+        string_concat(base, str);
         str = va_arg(vargs, string_t*);
     }
 
@@ -301,38 +330,38 @@ string_t string_concat_multi(string_t base, string_t *extension, ...)
     return base;
 }
 
-string_t string_concat(string_t base, string_t extension)
+string_t* string_concat(string_t* base, string_t* extension)
 {
     // Writing
-    for (int i = 0; i < extension.len; i++)
+    for (int i = 0; i < extension->len; i++)
     {
-        base.str[base.len++] = extension.str[i];
+        base->str[base->len++] = extension->str[i];
     }
 
     // Null terminating the new string
-    base.str[base.len] = '\0';
+    base->str[base->len] = '\0';
 
     // updating string length field
-    base.len = base.len + extension.len;
+    base->len = base->len + extension->len;
 
     return base;
 }
 
-string_t string_copy(string_t source)
+string_t string_copy(string_t* source)
 {
     string_t newString;
 
     // Updating string length field
-    newString.len = source.len;
-    newString.max_len = source.len;
+    newString.len = source->len;
+    newString.max_len = source->len;
 
     // Allocating space for the string
-    newString.str = (char *)safe_malloc(sizeof(char) * source.len + SPACE_FOR_NULL);
+    newString.str = (char *)safe_malloc(sizeof(char) * source->len + SPACE_FOR_NULL);
 
     // copying 'source' onto the new string
-    for (int i = 0; i < source.len; i++)
+    for (int i = 0; i < source->len; i++)
     {
-        newString.str[i] = source.str[i];
+        newString.str[i] = source->str[i];
     }
 
     // null terminating

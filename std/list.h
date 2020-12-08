@@ -45,8 +45,11 @@ typedef struct list_t
     list_node_t *first_node;
     list_node_t *last_node;
     unsigned int size;
-    unsigned int elementSize;
+    size_t elementSize;
 } list_t;
+
+// Returns a pointer to a new list Node with the relevant data attached
+list_node_t *list_new_node(void *data, size_t dataSize);
 
 /*
  * Converts the given list into an array
@@ -62,7 +65,7 @@ list_t *list_append_multi_n(list_t *list, void* toAppend, ...);
 /*
  * Returns a new list where the stored elements will be of size (elementSize)
  */
-list_t new_list(unsigned int elementSize);
+list_t new_list(size_t elementSize);
 
 /*
  * Adds the data to the end of the list

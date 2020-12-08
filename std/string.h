@@ -41,7 +41,8 @@
 #define SPACE_FOR_NULL 1
 #define REALLOC_MULTIPLIER 1.5
 #define EXTENSION_ASSURANCE 1
-
+#define SHORT_STR_BUF (__WORDSIZE-8)-sizeof(void*)
+#define SHORT_STR_LEN SHORT_STR_BUF-1
 /*
  * Dealing with strings, do the same thing youd normally do, pass a pointer
  * if you want to keep track of len and max_len
@@ -58,6 +59,7 @@ typedef struct string_t
     char *str;
     unsigned int len;
     unsigned int max_len;
+    char small[SHORT_STR_BUF];
 } string_t;
 
 /*
@@ -68,7 +70,14 @@ string_t new_string(unsigned int len);
 /*
  * Copies 'source' and returns it
 */
-string_t string_copy(string_t source);
+string_t string_copy(string_t *source);
+
+/*
+ * Shrinks the given string to the new length.
+*/
+void string_shrink(string_t* source, unsigned int new_len);
+
+void string_lengthen(string_t *toExtend, unsigned int len);
 
 /*
  * Returns TRUE if the given strings are equal within the given
@@ -78,7 +87,7 @@ string_t string_copy(string_t source);
 */
 int cstring_equals_range(char* str1, char* str2, int compareRange);
 int cstring_equals(char* str1, char* str2);
-int string_equals(string_t str1, string_t str2);
+int string_equals(string_t *str1, string_t *str2);
 
 // Null terminates the string
 void string_null_terminate(string_t* str);
@@ -97,7 +106,7 @@ void string_write_char(string_t *base, char toAdd);
  * Counts the number of times a given character appears within
  * a string
 */
-unsigned int string_count_occurances(string_t source, char delim);
+unsigned int string_count_occurances(string_t* source, char delim);
 
 /*
  * Appends the given cstrings to the string 'base'
@@ -117,7 +126,7 @@ string_t* string_write(string_t *base, string_t* source, ...);
  * Appends the given string 'source' to the end of 'base'
  * Extends the string where necessary
 */
-string_t *string_write_single(string_t *base, string_t source);
+string_t *string_write_single(string_t *base, string_t* source);
 
 /*
  * Takes a cstring as a source and converts it
@@ -137,21 +146,21 @@ char *cstring_copy(const char *source);
  * args must be set to the number of input args
  * Allocates memory
 */
-string_t string_new_concat_multi(string_t base, string_t *extension, ...);
+string_t string_new_concat_multi(string_t* base, string_t *extension, ...);
 
 /*
  * returns the concatenation of 'base' and 'extension' without
  * altering either strings
 */
-string_t string_new_concat(string_t base, string_t extension);
+string_t string_new_concat(string_t *base, string_t *extension);
 
 /*
  * Concatenates the given strings
  * args must be set to the number of input args
 */
-string_t string_concat_multi(string_t base, string_t *extension, ...);
+string_t* string_concat_multi(string_t *base, string_t *extension, ...);
 
-string_t string_concat(string_t base, string_t extension);
+string_t* string_concat(string_t *base, string_t *extension);
 
 // Realloc's the given string, updating its length
 void string_extend(string_t *toExtend);
