@@ -24,6 +24,8 @@
 #include "array.h"
 
 #define ERROR -1
+#define ALIST_REALLOC_MULTIPLIER 1.5
+#define ALIST_NULL UINT32_MAX
 
 /*
  * Struct for storing a single noede
@@ -44,12 +46,42 @@ typedef struct list_t
 {
     list_node_t *first_node;
     list_node_t *last_node;
-    unsigned int size;
+    uint32_t size;
     size_t elementSize;
 } list_t;
 
+/*
+ * Null value is INT_MAX
+*/
+typedef struct alist_node_t
+{
+    uint32_t next;
+    uint32_t prev;
+} alist_node_t;
+
+typedef struct alist_t
+{
+    void* list_start;
+    uint32_t first;
+    uint32_t last;
+    uint32_t size;
+    uint32_t capacity;
+    size_t element_size;
+} alist_t;
+
+alist_t new_alist(size_t element_size);
+void alist_append(alist_t *list, void* data);
+void* alist_get_element(alist_t* list, uint32_t element);
+
 // Returns a pointer to a new list Node with the relevant data attached
 list_node_t *list_new_node(void *data, size_t dataSize);
+
+/*
+ * list vs alist
+ * list insertion: O(1)
+ * alist insertion: O(n)
+*/
+
 
 /*
  * Converts the given list into an array

@@ -49,7 +49,7 @@ void add_src_files_from_dir(FILE* outFile, string_t basePath, string_t pathSeper
     while (node)
     {
         string_t* current = ((string_t*)node->data);
-        printf("\tCurrent String: %s\n", current->str);
+        printf("\tCurrent String: %s\n", cstr(current));
         // fprintf(outFile, "%s\n", current->str);
 
         node = node->next;
@@ -80,12 +80,12 @@ int main(int argc, char **argv)
 
     // Making input args more usable
     string_t extension = *var_extension->data;
-    string_t pathSeperator = string_from_cstring(PATH_SEPERATOR);
+    string_t pathSeperator = string_make(PATH_SEPERATOR);
     string_t component_out = string_new_concat_multi(var_config_dir->data, &pathSeperator, var_component_out->data, NULL);
     string_t main_out = string_new_concat_multi(var_config_dir->data, &pathSeperator, var_main_out->data, NULL);
     
     printf("\t- Trying first directory.h function, dir_all_entries_list\n");
-    list_t entries = dir_all_entries_list( string_from_cstring("std") );
+    list_t entries = dir_all_entries_list( string_make("std") );
     printf("\t- Completed function\n\t-\n");
 
     list_node_t* node = entries.first_node;
@@ -97,11 +97,11 @@ int main(int argc, char **argv)
     }
 
     // Finding and recording all program files
-    FILE *mainOut = fileio_open_safe(main_out.str, FALSE);
+    FILE *mainOut = fileio_open_safe(cstr(&main_out), FALSE);
     for (unsigned int i = 0; i < var_main_dirs->len; i++)
     {
         printf("%d OI THE LOOP HAS BEEN ENTERED\n",i);
-        printf("dir = %s\n\n", var_main_dirs->data[i].str);
+        printf("dir = %s\n\n", cstr(&var_main_dirs->data[i]));
         string_t mainDirPath = var_main_dirs->data[i];
         add_src_files_from_dir(NULL, mainDirPath, pathSeperator, extension);
     }
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 
     // Finding and recording all component files
     printf("COMPONENT START\n");
-    FILE *componentOut = fileio_open_safe(component_out.str, FALSE);
+    FILE *componentOut = fileio_open_safe(cstr(&component_out), FALSE);
     for (unsigned int i = 0; i < var_src_dirs->len; i++)
     {
         string_t componentDirPath = var_src_dirs->data[i];

@@ -20,7 +20,8 @@
 			"utility": "c",
 			"sstream": "c",
 			"__node_handle": "c",
-			"vector": "c"
+			"vector": "c",
+			"chrono": "c"
 		}
 	}
 }

@@ -1,5 +1,63 @@
 #include "../list.h"
 
+alist_t new_alist(size_t element_size)
+{
+    alist_t list;
+    list.capacity = 0;
+    list.first = ALIST_NULL;
+    list.last = ALIST_NULL;
+    list.size = 0;
+    list.element_size = element_size;
+    list.list_start = NULL;
+    return list;
+}
+
+
+void alist_append(alist_t *list, void* data)
+{
+    if (list->capacity <= list->size)
+    {
+        unsigned int new_len = list->capacity + list->capacity / 2;
+        if (new_len <= 1)
+        {
+            ++new_len;
+        }
+        list->list_start = safe_realloc(list->list_start, (sizeof(alist_node_t)+list->element_size)*new_len);
+        list->capacity = new_len;
+    }
+
+    alist_node_t node;
+    alist_node_t* end = (alist_node_t*)array_get_element(list->list_start, list->size, sizeof(alist_node_t) + list->element_size);
+    void* elementStart = &end[1];
+    if (list->size)
+    {
+        alist_node_t* last = (alist_node_t*)array_get_element(list->list_start, list->last, sizeof(alist_node_t) + list->element_size);
+        last->next = list->size;
+        node.prev = list->last;
+        node.next = ALIST_NULL;
+        list->last = list->size;
+    }
+    else
+    {
+        list->last = list->size;
+        list->first = list->size;
+        node.next = ALIST_NULL;
+        node.prev = ALIST_NULL;
+    }
+    
+
+    // Ensure the copy succeeds
+    assert(memcpy(elementStart, data, list->element_size));
+
+    list->size+=1;
+}
+
+void* alist_get_element(alist_t* list, uint32_t element)
+{
+    alist_node_t *node = (alist_node_t*)array_get_element(list->list_start, element, list->element_size + sizeof(alist_node_t));
+    return (void*)&node[1];
+}
+
 array_t list_to_array(list_t list)
 {
     array_t converted = new_array(list.size, list.elementSize);

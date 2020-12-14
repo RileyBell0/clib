@@ -21,6 +21,7 @@ void* safe_realloc(void* ptr, size_t size)
 {
     void* result = realloc(ptr, size);
     assert(result);
+    printf("\t- Realloc'd %zu bytes\n", size);
     return result;
 }
 

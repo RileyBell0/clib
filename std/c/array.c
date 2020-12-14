@@ -83,6 +83,7 @@ int dynamic_array_append(dynamic_array_t *base, void *element)
     // Extending the array if needed
     if (base->maxLen == base->len)
     {
+        printf("Extending dyanmic array\n");
         dynamic_array_extend(base);
     }
 
@@ -101,7 +102,7 @@ static int dynamic_array_extend(dynamic_array_t *base)
     {
         return FALSE;
     }
-
+    printf("REALLOCATING DYNAMIC ARRAY\n");
     unsigned int newLen;
 
     // Add one to the length if its less than 3 (after which point dividing makes sense)
@@ -116,11 +117,7 @@ static int dynamic_array_extend(dynamic_array_t *base)
     }
 
     // Extend the array
-    base->dat = realloc(base->dat, newLen * base->elementSize);
-    if (base->dat == NULL)
-    {
-        return FALSE;
-    }
+    base->dat = safe_realloc(base->dat, newLen * base->elementSize);
 
     base->maxLen = newLen;
 

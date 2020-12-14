@@ -55,7 +55,7 @@ int fileio_next_line(FILE *file, string_t *buffer);
  * MEMORY IS ALLOCATED, ensure you destroy the returned string when
  * done with it
 */
-string_t getFileName(string_t path);
+string_t getFileName(string_t* path);
 
 /*
  * returns a pointer to the start of the file extension
@@ -63,7 +63,7 @@ string_t getFileName(string_t path);
  * 
  * returns NULL on failure
 */
-char* getFileExtension(string_t fileName);
+char* getFileExtension(string_t *fileName);
 
 /*
  * Modifies the given cstring, removing the file

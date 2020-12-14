@@ -9,6 +9,9 @@
 #include "general.h"
 #include <string.h>
 
+// TODO Remove stdio debugging
+#include <stdio.h>
+
 /*
  * Ammount to extend a dynamic array whenever an element
  * is appended to a full array

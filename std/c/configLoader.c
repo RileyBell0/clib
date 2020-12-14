@@ -18,9 +18,10 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
     /*
      * Ignore leading whitespaces and tabs
     */
+    char* str_start = cstr(&str);
     for (i = *pos; i < str.len; i++)
     {
-        if (str.str[i] != CONFIG_IGNORE_CHAR && str.str[i] != '\t')
+        if (str_start[i] != CONFIG_IGNORE_CHAR && str_start[i] != '\t')
         {
             // Done with leading whitespaces
             break;
@@ -31,9 +32,9 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
     /*
      * If we've reached an = as its own field
     */
-    if (str.str[*pos] == CONFIG_FIELD_DECLARATION_CHAR)
+    if (str_start[*pos] == CONFIG_FIELD_DECLARATION_CHAR)
     {
-        string_write_char(dest, str.str[*pos]);
+        string_write_char(dest, str_start[*pos]);
         string_null_terminate(dest);
         *pos += 1;
         return TRUE;
@@ -42,9 +43,9 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
     /*
      * If we've reached a # as its own field
     */
-    if (str.str[*pos] == CONFIG_COMMENT_CHAR)
+    if (str_start[*pos] == CONFIG_COMMENT_CHAR)
     {
-        string_write_char(dest, str.str[*pos]);
+        string_write_char(dest, str_start[*pos]);
         string_null_terminate(dest);
         *pos += 1;
         return TRUE;
@@ -53,9 +54,9 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
     /*
      * If we've reached an array declaration square brace
     */
-    if (str.str[*pos] == CONFIG_ARRAY_START_CHAR || str.str[*pos] == CONFIG_ARRAY_END_CHAR)
+    if (str_start[*pos] == CONFIG_ARRAY_START_CHAR || str_start[*pos] == CONFIG_ARRAY_END_CHAR)
     {
-        string_write_char(dest, str.str[*pos]);
+        string_write_char(dest, str_start[*pos]);
         string_null_terminate(dest);
         *pos += 1;
         return TRUE;
@@ -65,7 +66,7 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
      * If the current field is within quotes
     */
     int inQuotes = FALSE;
-    if (str.str[*pos] == CONFIG_STRING_ENCLOSE_CHAR)
+    if (str_start[*pos] == CONFIG_STRING_ENCLOSE_CHAR)
     {
         *complexField = TRUE;
         *pos += 1;
@@ -79,7 +80,7 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
         */
         for (i = *pos; i < str.len; i++)
         {
-            char c = str.str[i];
+            char c = str_start[i];
 
             if (c == CONFIG_STRING_ENCLOSE_CHAR)
             {
@@ -87,10 +88,10 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
                 i++;
                 break;
             }
-            if (c == CONFIG_ESCAPE_CHAR && str.str[i + 1] == CONFIG_STRING_ENCLOSE_CHAR)
+            if (c == CONFIG_ESCAPE_CHAR && str_start[i + 1] == CONFIG_STRING_ENCLOSE_CHAR)
             {
                 // reached a quote intended to be within a string
-                string_write_char(dest, str.str[i + 1]);
+                string_write_char(dest, str_start[i + 1]);
                 i++;
             }
             else
@@ -107,7 +108,7 @@ int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexF
         */
         for (i = *pos; i < str.len; i++)
         {
-            char c = str.str[i];
+            char c = str_start[i];
 
             if (c == CONFIG_IGNORE_CHAR)
             {
@@ -160,29 +161,31 @@ config_t read_config_file(char *filePath)
     int complexField = FALSE;
     int currentConfigSaved = TRUE;
     int addedDeclaration = FALSE;
-
     while (fileio_next_line(configFile, &buffer))
     {
+        printf("BUFFER: %s\n", cstr(&buffer));
         unsigned int pos = 0;
         while (extract_field(buffer, &pos, &field, &complexField))
         {
+            printf("\t- %s\n", cstr(&field));
             if (!complexField && field.len == 1)
             {
-                if (field.str[0] == CONFIG_COMMENT_CHAR)
+                char* fieldstr = cstr(&field);
+                if (fieldstr[0] == CONFIG_COMMENT_CHAR)
                 {
                     break;
                 }
-                else if (field.str[0] == CONFIG_FIELD_DECLARATION_CHAR)
+                else if (fieldstr[0] == CONFIG_FIELD_DECLARATION_CHAR)
                 {
                     currField = CONFIG_FIELD_DECLARATION;
                     continue;
                 }
-                else if (field.str[0] == CONFIG_ARRAY_START_CHAR)
+                else if (fieldstr[0] == CONFIG_ARRAY_START_CHAR)
                 {
                     inArray = TRUE;
                     continue;
                 }
-                else if (field.str[0] == CONFIG_ARRAY_END_CHAR)
+                else if (fieldstr[0] == CONFIG_ARRAY_END_CHAR)
                 {
                     currField = CONFIG_FIELD_NONE;
                     inArray = FALSE;
@@ -269,7 +272,7 @@ void config_encode(string_t *dest, string_t *toEncode)
     // Write a quote-formatted version of the string
     for (int x = 0; x < toEncode->len; x++)
     {
-        char c = toEncode->str[x];
+        char c = cstr(toEncode)[x];
         if (c == CONFIG_STRING_ENCLOSE_CHAR)
         {
             string_write_char(dest, CONFIG_ESCAPE_CHAR);
@@ -317,7 +320,7 @@ int config_save(config_t config)
     {
         config_encode(&processed, &config.vars[i].varName);
         
-        fprintf(cfgOut, "\"%s\" = [\n", processed.str);
+        fprintf(cfgOut, "\"%s\" = [\n", cstr(&processed));
 
         if (config.vars[i].len == 0)
         {
@@ -329,7 +332,7 @@ int config_save(config_t config)
             {
                 config_encode(&processed, &config.vars[i].data[j]);
 
-                fprintf(cfgOut, "\t\"%s\"\n", processed.str);
+                fprintf(cfgOut, "\t\"%s\"\n", cstr(&processed));
             }
         }
 
@@ -351,8 +354,8 @@ config_var_t *config_get_var(config_t *config, char *name)
 
     // len is 1 because a config_var_t can store multiple values
     key.len = 1;
-    
-    key.varName.str = name;
+
+    string_set(&key.varName, name);
 
     /*
      * Search the sorted config list for the requested var
@@ -366,10 +369,12 @@ int config_var_compare(const void *var1, const void *var2)
 {
     config_var_t *a = (config_var_t *)var1;
     config_var_t *b = (config_var_t *)var2;
+    char* astr = cstr(&a->varName);
+    char* bstr = cstr(&b->varName);
 
-    if (!a || !a->varName.str)
+    if (!a || !astr)
     {
-        if (!b || !b->varName.str)
+        if (!b || !bstr)
         {
             return 0;
         }
@@ -379,9 +384,9 @@ int config_var_compare(const void *var1, const void *var2)
             return -1;
         }
     }
-    else if (!b || !b->varName.str)
+    else if (!b || !bstr)
     {
-        if (!a || !a->varName.str)
+        if (!a || !astr)
         {
             return 0;
         }
@@ -393,7 +398,7 @@ int config_var_compare(const void *var1, const void *var2)
     }
 
     // Both strings exist, comparing
-    return strcmp(a->varName.str, b->varName.str);
+    return strcmp(astr, bstr);
 }
 
 /*
@@ -420,7 +425,7 @@ void config_print_vars(config_t config)
     printf("CONFIG Contents:\n-----------------\n");
     for (int i = 0; i < config.len; i++)
     {
-        printf("%s\n", config.vars[i].varName.str);
+        printf("%s\n", cstr(&config.vars[i].varName));
         if (config.vars[i].len == 0)
         {
             printf("\t\"(null)\"\n");
@@ -429,7 +434,7 @@ void config_print_vars(config_t config)
         {
             for (int j = 0; j < config.vars[i].len; j++)
             {
-                printf("\t\"%s\"\n", config.vars[i].data[j].str);
+                printf("\t\"%s\"\n", cstr(&config.vars[i].data[j]));
             }
         }
         printf("\n");

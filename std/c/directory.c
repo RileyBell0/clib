@@ -30,7 +30,7 @@ unsigned char get_file_type(char *path)
 
 list_t dir_all_entries_list(string_t path)
 {
-    DIR *d = opendir(path.str);
+    DIR *d = opendir(cstr(&path));
     list_t entries = new_list(sizeof(struct dirent));
     if (!d)
     {
@@ -44,9 +44,9 @@ list_t dir_all_entries_list(string_t path)
         if (entry->d_type == DT_UNKNOWN)
         {
             // Try harder to get the file's type
-            string_t entryName = string_from_cstring(entry->d_name);
+            string_t entryName = string_make(entry->d_name);
             string_t filePath = string_new_concat(&path, &entryName);
-            entry->d_type = get_file_type(filePath.str);
+            entry->d_type = get_file_type(cstr(&filePath));
             string_destroy(&filePath);
         }
         // Copy the contents of 'entry'
@@ -62,7 +62,7 @@ list_t dir_all_entries_of_type(string_t path, unsigned char type)
      * This is essentially the code above (dir_all_entries_list) but
      * with a check for a given type 
     */
-    DIR *d = opendir(path.str);
+    DIR *d = opendir(cstr(&path));
     list_t entries = new_list(sizeof(struct dirent));
     if (!d)
     {
@@ -76,9 +76,9 @@ list_t dir_all_entries_of_type(string_t path, unsigned char type)
         if (entry->d_type == DT_UNKNOWN)
         {
             // Try harder to get the file's type
-            string_t entryName = string_from_cstring(entry->d_name);
+            string_t entryName = string_make(entry->d_name);
             string_t filePath = string_new_concat(&path, &entryName);
-            entry->d_type = get_file_type(filePath.str);
+            entry->d_type = get_file_type(cstr(&filePath));
             string_destroy(&filePath);
         }
         if (entry->d_type == type)
@@ -126,6 +126,7 @@ void ordered_dirent_insert(ordered_dirent_t *ordered, struct dirent *entry)
         list_append(&ordered->link, entry);
         break;
     case DT_REG:
+        printf("regular\n");
         list_append(&ordered->regular, entry);
         break;
     case DT_SOCK:
@@ -153,27 +154,32 @@ ordered_dirent_t dir_all_entries_categorised(string_t path)
 {
     ordered_dirent_t ordered = new_ordered_dirent_t();
 
-    DIR *d = opendir(path.str);
+    DIR *d = opendir(cstr(&path));
     if (!d)
     {
         return ordered;
     }
 
     struct dirent *entry;
+    printf("path\n");
     string_t filePath = new_string(path.len + SMALL_BUFFER_LEN);
-    string_write_single(&filePath, &path);
+    string_write(&filePath, &path);
+    printf("path end\n");
     while ((entry = readdir(d)))
     {
         if (entry->d_type == DT_UNKNOWN)
         {
             // Try harder to get the file's type
             filePath.len = path.len;
-            filePath.str[filePath.len] = '\0';
+            cstr(&filePath)[filePath.len] = '\0';
 
-            string_t entryName = string_from_cstring(entry->d_name);
-            string_write_single(&filePath, &entryName);
-            entry->d_type = get_file_type(filePath.str);
+            printf("copy d_name\n");
+            string_t entryName = string_make(entry->d_name);
+            printf("write path\n");
+            string_write(&filePath, &entryName);
+            entry->d_type = get_file_type(cstr(&filePath));
         }
+            printf("dirent insert\n");
         ordered_dirent_insert(&ordered, entry);
     }
     string_destroy(&filePath);
@@ -225,7 +231,7 @@ list_t dir_files_with_extension_recur(string_t path, string_t extension)
     list_t matchingFiles = new_list(sizeof(string_t));
 
     // Converting the system-specific path seperator into a string
-    string_t path_seperator = string_from_cstring(PATH_SEPERATOR);
+    string_t path_seperator = string_make(PATH_SEPERATOR);
 
     // Getting all the directory entries in the current directory
     ordered_dirent_t entries = dir_all_entries_categorised(path);
@@ -234,28 +240,27 @@ list_t dir_files_with_extension_recur(string_t path, string_t extension)
     list_node_t *node = entries.regular.first_node;
 
     // THE PART DEALING WITH THE CURRENT DIRECTORY
-
     // Storing the current directory's path into an editable buffer string
     string_t filePath = new_string(DEFAULT_BUFFER_LEN);
-    string_write_single(&filePath, &path);
+    string_write(&filePath, &path);
     while (node)
     {
         // Resetting the current file's path back to the path
         // to the current directory
         // (after last loop /usr/dir/myfile.txt becomes /usr/dir)
-        filePath.str[path.len] = '\0';
+        cstr(&filePath)[path.len] = '\0';
         filePath.len = path.len;
 
         // Converting the file's name into a string for easier use
-        string_t fileName = string_from_cstring(ldirentnode(node)->d_name);
+        string_t fileName = string_make(ldirentnode(node)->d_name);
 
         // If the extension matches the requested one
-        if (cstring_equals(extension.str, getFileExtension(fileName)))
+        if (cstring_equals(cstr(&extension), getFileExtension(&fileName)))
         {
             // Add the file's name to the end of the string
             // eg. /usr/dir -> /usr/dir/myfile.extension
-            string_write_single(&filePath, &path_seperator);
-            string_write_single(&filePath, &fileName);
+            string_write(&filePath, &path_seperator);
+            string_write(&filePath, &fileName);
 
             // Make a copy of this and save it to the list
             string_t matching = string_copy(&filePath);
@@ -265,6 +270,7 @@ list_t dir_files_with_extension_recur(string_t path, string_t extension)
     }
     string_destroy(&filePath);
 
+
     // THE RECURSION PART
 
     // Go through the directories
@@ -273,15 +279,15 @@ list_t dir_files_with_extension_recur(string_t path, string_t extension)
     while (node)
     {
         // restrict the path back to the current directory (the path recieved by this function)
-        subDirPath.str[path.len] = '\0';
+        cstr(&subDirPath)[path.len] = '\0';
 
-        string_t subDirName = string_from_cstring(ldirentnode(node)->d_name);
+        string_t subDirName = string_make(ldirentnode(node)->d_name);
 
         if (is_normal_dir(subDirName))
         {
             // Make the new path's string
-            string_write_single(&subDirPath, &path_seperator);
-            string_write_single(&subDirPath, &subDirName);
+            string_write(&subDirPath, &path_seperator);
+            string_write(&subDirPath, &subDirName);
             // Look through the directory
             list_t subDirFiles = dir_files_with_extension_recur(subDirPath, extension);
             list_combine(&matchingFiles, &subDirFiles);
@@ -297,7 +303,7 @@ int is_normal_dir(string_t dirName)
 {
     if (dirName.len <= 2)
     {
-        if (cstring_equals(dirName.str, ".") || cstring_equals(dirName.str, ".."))
+        if (cstring_equals(cstr(&dirName), ".") || cstring_equals(cstr(&dirName), ".."))
         {
             return FALSE;
         }

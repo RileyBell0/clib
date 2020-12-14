@@ -98,20 +98,21 @@ int fileio_next_line(FILE *file, string_t *buffer)
     }
 
     char c;
+    char* bufferstr = cstr(buffer);
     unsigned int charsWritten = 0;
     while ((c = getc(file)) != EOF && c != '\n' && c != '\r')
     {
         // Need more room to store the next line
-        if (charsWritten == buffer->len)
+        if (charsWritten == buffer->max_len)
         {
             string_extend(buffer);
         }
 
-        buffer->str[charsWritten++] = c;
+        bufferstr[charsWritten++] = c;
     }
     buffer->len = charsWritten;
 
-    buffer->str[buffer->len] = '\0';
+    bufferstr[buffer->len] = '\0';
 
     // Failed to read anything
     if (c == EOF && charsWritten == 0)
@@ -123,18 +124,19 @@ int fileio_next_line(FILE *file, string_t *buffer)
     return TRUE;
 }
 
-string_t getFileName(string_t path)
+string_t getFileName(string_t *path)
 {
-    string_t fileName = {0};
+    string_t fileName = new_string(0);
     int found = FALSE;
     char pathSeperator = PATH_SEPERATOR_CHAR;
-    for (int i = path.len; i >= 0; i--)
+    char* pathstr = cstr(path);
+    for (int i = path->len; i >= 0; i--)
     {
         // Found the first directory character
-        if (path.str[i] == pathSeperator)
+        if (pathstr[i] == pathSeperator)
         {
             // The file name starts at the next character
-            fileName = string_from_cstring(&path.str[i + 1]);
+            fileName = string_make(&pathstr[i + 1]);
             // Copy the string starting from the character after 'i' to a new string
             fileName = string_copy(&fileName);
 
@@ -146,7 +148,7 @@ string_t getFileName(string_t path)
 
     if (!found)
     {
-        fileName = string_copy(&path);
+        fileName = string_copy(path);
     }
 
     return fileName;
@@ -180,24 +182,25 @@ void remove_file_extensions(list_t files)
 
     while (node)
     {
-        removeFileExtension(((string_t *)node->data)->str);
+        removeFileExtension(cstr(((string_t *)node->data)));
 
         // Update the length of the string
-        ((string_t *)node->data)->len = strlen(((string_t *)node->data)->str);
+        ((string_t *)node->data)->len = strlen(cstr(((string_t *)node->data)));
         node = node->next;
     }
 }
 
-char* getFileExtension(string_t fileName)
+char* getFileExtension(string_t *fileName)
 {
     // Start at the end of the string and work backwards
     // until the extension seperating char is recieved
-    for (unsigned int i = fileName.len - 1; i >= 0; i--)
+    char* filestr = cstr(fileName);
+    for (unsigned int i = fileName->len - 1; i >= 0; i--)
     {
-        if (fileName.str[i] == EXTENSION_SEPERATING_CHAR)
+        if (filestr[i] == EXTENSION_SEPERATING_CHAR)
         {
             // Return a pointer to the char after the extension
-            return &fileName.str[i+1];
+            return &filestr[i+1];
         }
     }
     return NULL;
@@ -214,7 +217,7 @@ list_t get_file_names(list_t files)
         string_t *file_path = (string_t *)node->data;
 
         // Extract the file's name from the path and remove its extension
-        string_t file_name = getFileName(*file_path);
+        string_t file_name = getFileName(file_path);
 
         // Save the file's name
         list_append(&prog_names, &file_name);

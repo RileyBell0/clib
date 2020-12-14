@@ -38,11 +38,15 @@
 #include <stdarg.h>
 #include "array.h"
 
+//TODO remove stdio
+#include <stdio.h>
+
 #define SPACE_FOR_NULL 1
 #define REALLOC_MULTIPLIER 1.5
 #define EXTENSION_ASSURANCE 1
-#define SHORT_STR_BUF (__WORDSIZE-8)-sizeof(void*)
-#define SHORT_STR_LEN SHORT_STR_BUF-1
+#define SPACE_FOR_LOCAL_BOOL 1
+#define SHORT_STR_BUF (__WORDSIZE-8)-sizeof(void*) - SPACE_FOR_LOCAL_BOOL
+#define SHORT_STR_LEN SHORT_STR_BUF-SPACE_FOR_NULL
 /*
  * Dealing with strings, do the same thing youd normally do, pass a pointer
  * if you want to keep track of len and max_len
@@ -56,16 +60,45 @@
 */
 typedef struct string_t
 {
-    char *str;
+    char *_str;
     unsigned int len;
     unsigned int max_len;
+    // boolean value
+    char local;
     char small[SHORT_STR_BUF];
 } string_t;
+
+/*
+ * Okay so the idea for short string optimisation
+ * 
+ * we can make sure the string pointer is always pointing at the right place by calling cstr
+ * but the problem arises once we look at string_from_cstring
+ * 
+ * the problem is: if we make a string which is a reference to a c string then some weird schenanigans can happen
+ * usually when we make a cstring itno a string we kinda just store the start of the string
+ * but i say what if we just treat it like a normal string? 
+ * yeah that means thers going to be memory duplicatoin but whatever am i rite?
+ * so like what canwe do we just send it in to the string?
+ * we make a new string? what if we redefine how strings work, we dont ahve a string form cstring which would mean that any constant values we want to store as strings have to be loaded in
+ * thats not that big of a deal in terms of performmae and istnte really an issue
+*/
+
+void string_allocate(string_t* str, unsigned int newLen);
+
+string_t string_make(char* src);
+
+string_t* string_set(string_t *str, char* src);
 
 /*
  * returns a new empty string with the max length of 'len'
 */
 string_t new_string(unsigned int len);
+
+/*
+ * Returns a pointer to the start of the cstring component
+ * MUST BE USED IN ALL INSTANCES WHERE A CSTR IS REQUIRED
+*/
+char* cstr(string_t* str);
 
 /*
  * Copies 'source' and returns it
@@ -77,6 +110,9 @@ string_t string_copy(string_t *source);
 */
 void string_shrink(string_t* source, unsigned int new_len);
 
+/*
+ * Adds 'len' capacity to the string
+*/
 void string_lengthen(string_t *toExtend, unsigned int len);
 
 /*
@@ -112,29 +148,21 @@ unsigned int string_count_occurances(string_t* source, char delim);
  * Appends the given cstrings to the string 'base'
  * Last argument must be null
 */
-string_t* string_write_c(string_t *base, char* source, ...);
+string_t* string_write_c_multi(string_t *base, char* source, ...);
 /*
  * Appends the cstring to the string 'base'
 */
-string_t* string_write_c_single(string_t *base, char* source);
+string_t* string_write_c(string_t *base, char* source);
 
 /*
  * Appends to 'base'. Last parameter must be NULL
 */
-string_t* string_write(string_t *base, string_t* source, ...);
+string_t* string_write_multi(string_t *base, string_t* source, ...);
 /*
  * Appends the given string 'source' to the end of 'base'
  * Extends the string where necessary
 */
-string_t *string_write_single(string_t *base, string_t* source);
-
-/*
- * Takes a cstring as a source and converts it
- * into a string struct
- * 
- * Does not allocate memory
-*/
-string_t string_from_cstring(char *source);
+string_t *string_write(string_t *base, string_t* source);
 
 /*
  * Copies the recieved cstring and returns it

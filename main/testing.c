@@ -14,28 +14,51 @@
 int code(int argc, char** argv);
 void bar(char* toPrint);
 
+void strinfo(string_t info)
+{
+    printf("len: %d, max: %d, str: %s\n", info.len, info.max_len, cstr(&info));
+}
+
+void list_test()
+{
+    alist_t list = new_alist(sizeof(string_t));
+    string_t str = string_make("hellow");
+
+    printf("Time to append\n");
+    alist_append(&list, &str);
+    str = string_make("elemtn 2");
+    alist_append(&list, &str);
+    str = string_make("elemtn 3");
+    alist_append(&list, &str);
+    str = string_make("elemtn 4");
+    alist_append(&list, &str);
+    str = string_make("elemtn 5");
+    alist_append(&list, &str);
+    str = string_make("elemtn 6");
+    alist_append(&list, &str);
+
+    printf("Time to retrieve some elements\n");
+    string_t* retrieved = alist_get_element(&list, 1);
+    printf("Second Element: %s\n", cstr(retrieved));
+    retrieved = alist_get_element(&list, 0);
+    printf("First Element: %s\n", cstr(retrieved));
+    retrieved = alist_get_element(&list, 2);
+    printf("third Element: %s\n", cstr(retrieved));
+    retrieved = alist_get_element(&list, 3);
+    printf("forth Element: %s\n", cstr(retrieved));
+}
+
+#define STR_TEST 48
 // Write your code here
 int code(int argc, char** argv){
-    printf("making string 1\n");
-    string_t small = new_string(47);
-    printf("writing 1 char\n");
-    string_t ext = string_from_cstring("s");
-    string_write(&small, &ext);
-
-    printf("%lu\n", SHORT_STR_LEN);
-    printf("%lu\n", SHORT_STR_LEN);
-    printf("%lu\n", SHORT_STR_LEN);
-
-
+    list_test();
     return 0;
-
-
     printf("Reading config file..\n");
     config_t cfg = read_config_file(".build/config/project.cfg");
     printf("Completed\n\n");
 
     printf("reading all entries in dir\n");
-    ordered_dirent_t entries = dir_all_entries_categorised(string_from_cstring("std"));
+    ordered_dirent_t entries = dir_all_entries_categorised(string_make("std"));
     printf("Tried to get the entries...\n");
     list_node_t *node;
 
@@ -57,12 +80,12 @@ int code(int argc, char** argv){
     }
 
 
-    list_t result = dir_files_with_extension_recur(string_from_cstring("std"), string_from_cstring("c"));
+    list_t result = dir_files_with_extension_recur(string_make("std"), string_make("c"));
     node = result.first_node;
     printf("going through results:\n");
     while (node)
     {
-        printf("\t- %s\n", lstrnode(node)->str);
+        printf("\t- %s\n", cstr(lstrnode(node)));
         node = node->next;
     }
     printf("Cleaning Up...\n");
