@@ -123,6 +123,16 @@ string_t* string_set(string_t* str, char* src)
     return str;
 }
 
+int string_void_compare(const void* str1, const void* str2)
+{
+    return string_compare((string_t*)str1, (string_t*)str2);
+}
+
+int string_compare(string_t *str1, string_t *str2)
+{
+    return strcmp(cstr(str1), cstr(str2));
+}
+
 int string_equals(string_t *str1, string_t *str2)
 {
     if (str1->len != str2->len)

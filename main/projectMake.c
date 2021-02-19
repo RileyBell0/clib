@@ -3,7 +3,7 @@
 */
 
 #include <stdio.h>
-#include "../std/path.h"
+#include "../std/filePath.h"
 #include "../std/bool.h"
 #include "../std/string.h"
 #include "../std/fileIO.h"
@@ -88,7 +88,7 @@ void write_make_all_call(FILE* outFile, list_t prog_names)
     list_node_t* node = prog_names.first_node;
     while (node)
     {
-        fprintf(outFile, " %s", strnode(node)->str);
+        fprintf(outFile, " %s", strnode(node)->_str);
         node = node->next;
     }
     fprintf(outFile, "\n");
@@ -97,18 +97,18 @@ void write_make_all_call(FILE* outFile, list_t prog_names)
 // Add the start of the call to make the current prog -> prog: prog.o 
 void write_make_call(FILE* outFile, string_t name)
 {
-    fprintf(outFile, "%s:",name.str);
+    fprintf(outFile, "%s:",name._str);
 }
 
 void write_make_name_with_extension(FILE* outFile, string_t name, string_t extension)
 {
-    fprintf(outFile, " %s%s", name.str, extension.str);
+    fprintf(outFile, " %s%s", name._str, extension._str);
 }
 
 void write_make_compiler(FILE* outFile, config_var_t* var_compiler)
 {
     // Compiler
-    fprintf(outFile, "\t%s", var_compiler->data->str);
+    fprintf(outFile, "\t%s", var_compiler->data->_str);
 }
 
 void write_make_flags(FILE* outFile, config_var_t* var_flags)
@@ -116,7 +116,7 @@ void write_make_flags(FILE* outFile, config_var_t* var_flags)
     // Flags
     for (unsigned int i = 0; i < var_flags->len; i++)
     {
-        fprintf(outFile, " -%s", var_flags->data[i].str);
+        fprintf(outFile, " -%s", var_flags->data[i]._str);
     }
 }
 
@@ -127,7 +127,7 @@ void write_make_all_components(FILE* outFile, list_t component_names)
     list_node_t *comp_node = component_names.first_node;
     while (comp_node)
     {
-        fprintf(outFile, " %s", strnode(comp_node)->str);
+        fprintf(outFile, " %s", strnode(comp_node)->_str);
         comp_node = comp_node->next;
     }
 }
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
     /*
      * Setting up varaibles
     */
-    string_t path_seperator = string_from_cstring(PATH_SEPERATOR);
+    string_t path_seperator = string_make(PATH_SEPERATOR);
     config_var_t* var_makeName = safe_cfg_get_var(&cfg, VAR_MAKE_NAME);
     config_var_t* var_cfg_dir = safe_cfg_get_var(&cfg, VAR_CFG_DIR);
     config_var_t* var_prog_files = safe_cfg_get_var(&cfg, VAR_PROG_FILES);
@@ -174,17 +174,18 @@ int main(int argc, char **argv)
     config_var_t* var_compiler = safe_cfg_get_var(&cfg, VAR_COMPILER);
     config_var_t* var_flags = safe_cfg_get_var(&cfg, VAR_FLAGS);
     config_var_t* var_debug = safe_cfg_get_var(&cfg, VAR_DEBUG);
+    string_t seperator = string_make(".");
     config_var_t* var_prog_flags = safe_cfg_get_var(&cfg, VAR_PROG_FLAGS);
-    string_t extension = string_new_concat(string_from_cstring("."), var_obj_ext->data[0]);
+    string_t extension = string_new_concat(&seperator, var_obj_ext->data);
     string_t component_files_loc = new_string(var_cfg_dir->data[0].len + strlen(PATH_SEPERATOR) + var_obj_files->data[0].len);
-    string_write(&component_files_loc, var_cfg_dir->data, &path_seperator, var_obj_files->data, NULL);
+    string_write_multi(&component_files_loc, var_cfg_dir->data, &path_seperator, var_obj_files->data, NULL);
     string_t prog_files_loc = new_string(var_cfg_dir->data[0].len + strlen(PATH_SEPERATOR) + var_prog_files->data[0].len);
-    string_write(&prog_files_loc, var_cfg_dir->data, &path_seperator, var_prog_files->data, NULL);
+    string_write_multi(&prog_files_loc, var_cfg_dir->data, &path_seperator, var_prog_files->data, NULL);
     /*
      * Reading in from files
     */
-    list_t prog_files = fileio_read_all_lines_list(prog_files_loc.str);
-    list_t obj_files = fileio_read_all_lines_list(component_files_loc.str);
+    list_t prog_files = fileio_read_all_lines_list(prog_files_loc._str);
+    list_t obj_files = fileio_read_all_lines_list(component_files_loc._str);
 
     /*
      * Parsing read data
@@ -199,7 +200,7 @@ int main(int argc, char **argv)
     while (node)
     {
         string_t out_name = new_string(var_prog_out->data[0].len + strlen(PATH_SEPERATOR) + strnode(node)->len);
-        string_write(&out_name, var_prog_out->data, &path_seperator, strnode(node), NULL);
+        string_write_multi(&out_name, var_prog_out->data, &path_seperator, strnode(node), NULL);
         list_append(&prog_out_names, &out_name);
         node = node->next;
     }
@@ -208,7 +209,7 @@ int main(int argc, char **argv)
     while (node)
     {
         string_t out_name = new_string(var_obj_out->data[0].len + strlen(PATH_SEPERATOR) + strnode(node)->len + extension.len);
-        string_write(&out_name, var_obj_out->data, &path_seperator, strnode(node), &extension, NULL);
+        string_write_multi(&out_name, var_obj_out->data, &path_seperator, strnode(node), &extension, NULL);
         list_append(&prog_obj_out, &out_name);
         node = node->next;
     }
@@ -217,7 +218,7 @@ int main(int argc, char **argv)
     while (node)
     {
         string_t out_name = new_string(var_obj_out->data[0].len + strlen(PATH_SEPERATOR) + strnode(node)->len);
-        string_write(&out_name, var_obj_out->data, &path_seperator, strnode(node), NULL);
+        string_write_multi(&out_name, var_obj_out->data, &path_seperator, strnode(node), NULL);
         list_append(&obj_out_names, &out_name);
         node = node->next;
     }
@@ -232,7 +233,7 @@ int main(int argc, char **argv)
         node = node->next;
     }
 
-    FILE* outFile = fileio_open_safe(var_makeName->data[0].str, FALSE);
+    FILE* outFile = fileio_open_safe(var_makeName->data[0]._str, FALSE);
 
     write_make_all_call(outFile, prog_names);
     fprintf(outFile, "\n");
@@ -251,20 +252,20 @@ int main(int argc, char **argv)
         write_make_flags(outFile, var_flags);
         write_make_flags(outFile, var_prog_flags);
         fprintf(outFile, " -o");
-        fprintf(outFile, " %s", strnode(node_out)->str);
-        fprintf(outFile, " %s", strnode(node_obj_loc)->str);
+        fprintf(outFile, " %s", strnode(node_out)->_str);
+        fprintf(outFile, " %s", strnode(node_obj_loc)->_str);
         write_make_all_components(outFile, obj_out_names);
         write_make_flags(outFile, var_debug);
         fprintf(outFile, "\n\n");
 
         // Add the make instructions for the obj file of the program
-        fprintf(outFile, "%s%s: %s\n", strnode(node)->str, extension.str, strnode(node_file)->str);
+        fprintf(outFile, "%s%s: %s\n", strnode(node)->_str, extension._str, strnode(node_file)->_str);
         write_make_compiler(outFile, var_compiler);
         write_make_flags(outFile, var_flags);
         write_make_flags(outFile, var_obj_flags);
         fprintf(outFile, " -o");
-        fprintf(outFile, " %s", strnode(node_obj_loc)->str);
-        fprintf(outFile, " %s", strnode(node_file)->str);
+        fprintf(outFile, " %s", strnode(node_obj_loc)->_str);
+        fprintf(outFile, " %s", strnode(node_file)->_str);
         write_make_flags(outFile, var_debug);
         fprintf(outFile, "\n\n");
 
@@ -281,15 +282,15 @@ int main(int argc, char **argv)
     while (node)
     {
         write_make_call(outFile, *strnode(node));
-        fprintf(outFile, " %s", strnode(node_file)->str);
+        fprintf(outFile, " %s", strnode(node_file)->_str);
         fprintf(outFile, "\n");
 
         write_make_compiler(outFile, var_compiler);
         write_make_flags(outFile, var_flags);
         write_make_flags(outFile, var_obj_flags);
         fprintf(outFile, " -o");
-        fprintf(outFile, " %s", strnode(node_out)->str);
-        fprintf(outFile, " %s", strnode(node_file)->str);
+        fprintf(outFile, " %s", strnode(node_out)->_str);
+        fprintf(outFile, " %s", strnode(node_file)->_str);
         write_make_flags(outFile, var_debug);
         fprintf(outFile, "\n\n");
         node = node->next;
@@ -297,8 +298,8 @@ int main(int argc, char **argv)
         node_out = node_out->next;
     }
 
-    fprintf(outFile, "clean:\n\trm %s%s*%s", var_obj_out->data->str, PATH_SEPERATOR, extension.str);
-    fprintf(outFile, " %s%s*\n", var_prog_out->data->str, PATH_SEPERATOR);
+    fprintf(outFile, "clean:\n\trm %s%s*%s", var_obj_out->data->_str, PATH_SEPERATOR, extension._str);
+    fprintf(outFile, " %s%s*\n", var_prog_out->data->_str, PATH_SEPERATOR);
 
     fclose(outFile);
 

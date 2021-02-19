@@ -1,5 +1,49 @@
 #include "../list.h"
 
+// TODO
+// array_set_element should return a pointer to the start of the modified memory, the start of the 'set' element
+/*
+ * The alist is a good all-rounder list
+ * 
+ * Insertion: Really fast (except when the list needs to be realloc'd somehwere)
+ *      -> O(1)
+ *         good average time complexity O(1), but significantly the space where the new
+ *         element is going to be inserted is already allocated alot of the time
+ * Deletion: Really fast
+ *      -> O(1) 
+ *         there is no need to free the memory due to the structure the data being in an array
+ *         there is generally (especially in smaller lists) huge advantages in memory locality
+ *         due to all elements being in similar places in memory due to being stored in the same chunk
+ *         however deleting an element has an added cost in comparison to a linked-list
+ *         as the deleted element needs to have the last element in the array copied into its
+ *         place and the referenes for that element fixed aswell to point at its new position
+ *         
+ *         so deleition is still fast, and benefits from memory locality but it has more to do in a deletion
+ * Search: Quite fast
+ *      -> This is where the memory locality helps out, all list elements are stored together so we get the added
+ *         boost of hvaing less cache misses because especially in smaller lists, the entire list will be able
+ *         to be stored in the cache, or at least theres a high likely hood that at least some of the next elements
+ *         will be in the cache
+ *          
+ *         i dont actually know how cache works
+ * 
+ * Drawbacks:
+ *      ->  No element's position in memory is guaranteed using this data structure
+ *          the list is faster with smaller element sizes due to stuff being frequently
+ *          moved around within the list
+ * 
+ *          so no element's position in memory is guaranteed, and its position relative to the
+ *          list's origin in memory is also not guaranteed.
+ *          
+ *          it's faster at inserting stuff than a list, assuming faster at searching stuff than a list
+ *          and when an atree_t structure exists it'll be faster for doing anything sorted-related than using
+ *          a list or a tree
+ * 
+ * from testing, insertion is magnitudes of times faster than in a linked list when all optimisations are turned
+ * on in the compiler. but worth noting theres a larger range of performance than when comparing to an array
+*/
+
+
 alist_t new_alist(size_t element_size)
 {
     alist_t list;
@@ -12,44 +56,174 @@ alist_t new_alist(size_t element_size)
     return list;
 }
 
+void alist_extend(alist_t *list)
+{
+    unsigned int new_len = list->capacity + list->capacity / 2;
+    if (new_len <= 1)
+    {
+        ++new_len;
+    }
+    list->list_start = safe_realloc(list->list_start, (sizeof(alist_node_t)+list->element_size)*new_len);
+    list->capacity = new_len;
+}
+
+// TODO replace all instances of this with straight up maths because we dont need a function call for the list.element_size + sizeof(alist_node_t)
+size_t alist_node_size(alist_t* list)
+{
+    return list->element_size + sizeof(alist_node_t);
+}
 
 void alist_append(alist_t *list, void* data)
 {
     if (list->capacity <= list->size)
     {
-        unsigned int new_len = list->capacity + list->capacity / 2;
-        if (new_len <= 1)
-        {
-            ++new_len;
-        }
-        list->list_start = safe_realloc(list->list_start, (sizeof(alist_node_t)+list->element_size)*new_len);
-        list->capacity = new_len;
+        alist_extend(list);
     }
 
-    alist_node_t node;
-    alist_node_t* end = (alist_node_t*)array_get_element(list->list_start, list->size, sizeof(alist_node_t) + list->element_size);
-    void* elementStart = &end[1];
-    if (list->size)
+    size_t elemsize = alist_node_size(list);
+
+    alist_node_t* newNode = (alist_node_t*)array_get_element(list->list_start, list->size, elemsize);
+
+    // Patching reference so the new node is appended
+    if (list->size) // there is an element in the list which needs to point at this new node
     {
-        alist_node_t* last = (alist_node_t*)array_get_element(list->list_start, list->last, sizeof(alist_node_t) + list->element_size);
-        last->next = list->size;
-        node.prev = list->last;
-        node.next = ALIST_NULL;
-        list->last = list->size;
+        // Setting the node after the last node to the new node being placed into the list
+        ((alist_node_t*)array_get_element(list->list_start, list->last, elemsize))->next = list->size;
     }
     else
     {
-        list->last = list->size;
-        list->first = list->size;
-        node.next = ALIST_NULL;
-        node.prev = ALIST_NULL;
+        list->first = 0;
     }
-    
 
-    // Ensure the copy succeeds
-    assert(memcpy(elementStart, data, list->element_size));
+    newNode->prev = list->last;
+    list->last = list->size;
+    newNode->next = ALIST_NULL;
+    
+    // Copy the data in and Ensure the copy succeeds
+    // Treating each element asthough its only an alist_node_t struct means that going to the 'second' element actually takes us to the 
+    // memory directly after the end of the alist_node_t which is the start of our actual element in the list. this refers to &newNode[1]
+    assert(memcpy(&newNode[1], data, list->element_size));
 
     list->size+=1;
+}
+
+/*
+ * TODO
+ * if removing a node so that the list becomes empty, need to make sure that the last and first pointers in the
+ * main list struct are set to ALIST_NULL otherwise the appending method will break, as it assumes these values are ALIST_NULL
+ * when the list is empty
+*/
+//  Patch references around the node to be removed, making it disappear from the list
+//  
+//  if there was a node before the removed node we need to make it point to the node after
+//  the removed node. You dont need to do any null checking because if there is no node after
+//  then it will be equal to ALIST_NULL already  
+// Only once we have fixed the references around the removed node can we move a node from the end
+// of the array to fill its spot.  
+
+// Get references to the surrounding nodes for the current node (the node being removed)
+// and the references to the surrounding nodes for the last node in the array (the node that
+// will replace the current node's position)
+#include "../string.h"
+
+void alist_remove_node(alist_t *list, alist_node_t* node, uint32_t curr)
+{
+    uint32_t next = node->next;
+    uint32_t prev = node->prev;
+    uint32_t elemsize = alist_node_size(list);
+    // Patching references around the removed node      
+    if (prev != ALIST_NULL)
+    {
+        // Get the previous node's address
+        ((alist_node_t*)array_get_element(list->list_start, prev, elemsize))->next = next;
+    }
+
+    if (next != ALIST_NULL)
+    {
+        ((alist_node_t*)array_get_element(list->list_start, next, elemsize))->prev = prev;
+        // Get the next node's address
+        // point the node after the removed node at the node before the removed node
+    }
+
+    // fix overall list references
+    if (list->first == curr)
+    {
+        // If the first node was removed
+        list->first = next;
+    }
+    if (list->last == curr)
+    {
+        // If the last node was removed
+        list->last = curr;
+    }
+    
+    // If the removed node is not the last node in the list we need to move a node to fill its empty spot
+    if (curr != list->size - 1)
+    {
+        // Get the last element in the array
+        alist_node_t *moved_node =  array_get_element(list->list_start, list->size - 1, elemsize);
+
+        // Moves the last element in the array into the removed element's position
+        array_set_element(list->list_start, moved_node, curr, elemsize);
+
+        // If there was a node before the moved node
+        if (moved_node->prev != ALIST_NULL)
+        {
+            // Get a reference to the node before the node we're moving
+            ((alist_node_t*)array_get_element(list->list_start, moved_node->prev, elemsize))->next = curr;
+        }
+        if (moved_node->next != ALIST_NULL)
+        {
+            // Get a reference to the node after the node we're moving
+            ((alist_node_t*)array_get_element(list->list_start, moved_node->next, elemsize))->prev = curr;
+        }
+    }
+
+    if (list->size - 1 == list->last)
+    {
+        list->last = curr;
+    }
+    if (list->size - 1 == list->first)
+    {
+        list->first = curr;
+    }
+}
+
+#include "../string.h" //TODO REMOVE
+int alist_remove(alist_t* list, void* element)
+{
+    void* start = list->list_start;
+
+    int (*compare)(const void* elem1, const void* elem2) = list->compare;
+    uint32_t elemsize = alist_node_size(list);
+    uint32_t curr = list->first;
+
+    while (curr != ALIST_NULL)
+    {
+        // Get the address of the current list element
+        alist_node_t* node = array_get_element(start, curr, elemsize);
+
+        // Have we found the matching element?
+        if (compare(element, &node[1]) == 0)
+        {
+            printf("%s == %s\n", cstr(element), cstr((string_t*)&node[1]));
+            alist_remove_node(list, node, curr);
+
+            list->size -= 1;
+
+            return TRUE;
+        }
+
+        curr = node->next;
+    }
+
+    return FALSE;
+    
+}
+
+alist_node_t* alist_next_node(alist_t* list, alist_node_t* node)
+{
+    return array_get_element(list->list_start, node->next, alist_node_size(list));
 }
 
 void* alist_get_element(alist_t* list, uint32_t element)

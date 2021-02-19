@@ -4,7 +4,7 @@ echo "---------------------------------"
 echo ""
 
 MAIN_DIR="main"
-SRC_DIR="std"
+SRC_DIR="src"
 
 PROGNAME="projectScan"
 

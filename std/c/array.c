@@ -75,15 +75,9 @@ dynamic_array_t new_dynamic_array(unsigned int element_size)
 
 int dynamic_array_append(dynamic_array_t *base, void *element)
 {
-    if (base == NULL)
-    {
-        return FALSE;
-    }
-
     // Extending the array if needed
     if (base->maxLen == base->len)
     {
-        printf("Extending dyanmic array\n");
         dynamic_array_extend(base);
     }
 
@@ -102,7 +96,6 @@ static int dynamic_array_extend(dynamic_array_t *base)
     {
         return FALSE;
     }
-    printf("REALLOCATING DYNAMIC ARRAY\n");
     unsigned int newLen;
 
     // Add one to the length if its less than 3 (after which point dividing makes sense)

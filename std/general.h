@@ -45,4 +45,9 @@ void destroy(void *toDestroy);
 */
 void ptr_destroy(void *data);
 
+/*
+ * Offsets the given memory address by the given value
+*/
+void* offset(void* ptr, unsigned int num);
+
 #endif

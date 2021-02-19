@@ -94,6 +94,11 @@ string_t* string_set(string_t *str, char* src);
 */
 string_t new_string(unsigned int len);
 
+
+int string_compare(string_t *str1, string_t *str2);
+
+int string_void_compare(const void* str1, const void* str2);
+
 /*
  * Returns a pointer to the start of the cstring component
  * MUST BE USED IN ALL INSTANCES WHERE A CSTR IS REQUIRED
