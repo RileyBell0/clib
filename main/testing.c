@@ -173,6 +173,7 @@ int code(int argc, char** argv){
                     }
                     break;
                 case DISPLAY:
+                    printf(" first: %u\n Last: %u\n capacity: %u\n size: %u\n\n", list.first, list.last, list.capacity, list.size);
                     print_string_alist(&list);
                     break;
                 case TRAVERSE:

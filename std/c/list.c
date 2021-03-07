@@ -154,7 +154,7 @@ void alist_remove_node(alist_t *list, alist_node_t* node, uint32_t curr)
     if (list->last == curr)
     {
         // If the last node was removed
-        list->last = curr;
+        list->last = prev;
     }
     
     // If the removed node is not the last node in the list we need to move a node to fill its empty spot
