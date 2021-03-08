@@ -229,7 +229,7 @@ int main(int argc, char **argv)
     node = obj_names.first_node;
     while (node)
     {
-        string_write_single(strnode(node), extension);
+        string_write(strnode(node), &extension);
         node = node->next;
     }
 

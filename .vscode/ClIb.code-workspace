@@ -21,7 +21,8 @@
 			"sstream": "c",
 			"__node_handle": "c",
 			"vector": "c",
-			"chrono": "c"
+			"chrono": "c",
+			"alist.h": "c"
 		}
 	}
 }

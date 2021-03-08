@@ -3,8 +3,8 @@ echo "Setting up Project Information..."
 echo "---------------------------------"
 echo ""
 
-MAIN_DIR="main"
-SRC_DIR="src"
+#MAIN_DIR="main"
+#SRC_DIR="src"
 
 PROGNAME="projectScan"
 
@@ -13,5 +13,4 @@ EXTENSION=$1
 
 EXECUTABLE="$PROGNAME$EXTENSION"
 
-./.build/prog/$EXECUTABLE $MAIN_DIR c .build/config/programs.txt 0
-./.build/prog/$EXECUTABLE $SRC_DIR c .build/config/components.txt 0
+./.build/prog/$EXECUTABLE .build/config/scan.cfg

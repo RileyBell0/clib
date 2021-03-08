@@ -22,15 +22,9 @@
 
 #include <stdarg.h>
 #include "array.h"
+#include <stdint.h>
 
 #define ERROR -1
-#define ALIST_REALLOC_MULTIPLIER 1.5
-#define ALIST_NULL UINT32_MAX
-
-/*
- * All of these lists use UINT32_MAX as a NULL value
- * but we might consider changing this later
-*/
 
 /*
  * Struct for storing a single noede
@@ -54,68 +48,8 @@ typedef struct list_t
     int (*compare)(const void *first, const void *second);
 } list_t;
 
-/*
- * Good for building a sorted list
- * or for making, well anything sorted
- * 
- * has fast insert (log(n)) and allows fast lookup (log(n))
- * and range searching (log(n) gets you to the start of the range search)
-*/
-typedef struct tlist_node_t
-{
-    void* data;
-    struct tlist_node_t* left;
-    struct tlist_node_t* right;
-    struct tlist_node_t* prev;
-    struct tlist_node_t* next;
-} tlist_node_t;
-
-typedef struct tlist_t
-{
-    tlist_node_t *root;
-    tlist_node_t *first;
-    tlist_node_t *last;
-    uint32_t size;
-    size_t elementSize;
-    int (*compare)(const void *first, const void *second);
-} tlist_t;
-
-/*
- * Null value is INT_MAX
-*/
-typedef struct alist_node_t
-{
-    uint32_t next;
-    uint32_t prev;
-} alist_node_t;
-
-typedef struct alist_t
-{
-    void* list_start;
-    uint32_t first;
-    uint32_t last;
-    uint32_t size;
-    uint32_t capacity;
-    size_t element_size;
-    int (*compare)(const void *first, const void *second);
-} alist_t;
-
-alist_t new_alist(size_t element_size);
-void alist_append(alist_t *list, void* data);
-void* alist_get_element(alist_t* list, uint32_t element);
-size_t alist_node_size(alist_t* list);
-void alist_remove_node(alist_t *list, alist_node_t* node, uint32_t curr);
-int alist_remove(alist_t* list, void* element);
-
 // Returns a pointer to a new list Node with the relevant data attached
 list_node_t *list_new_node(void *data, size_t dataSize);
-
-/*
- * list vs alist
- * list insertion: O(1)
- * alist insertion: O(n)
-*/
-
 
 /*
  * Converts the given list into an array

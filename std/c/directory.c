@@ -28,10 +28,10 @@ unsigned char get_file_type(char *path)
     }
 }
 
-list_t dir_all_entries_list(string_t path)
+alist_t dir_all_entries_list(string_t path)
 {
     DIR *d = opendir(cstr(&path));
-    list_t entries = new_list(sizeof(struct dirent));
+    alist_t entries = new_alist(sizeof(struct dirent));
     if (!d)
     {
         return entries;
@@ -50,20 +50,20 @@ list_t dir_all_entries_list(string_t path)
             string_destroy(&filePath);
         }
         // Copy the contents of 'entry'
-        list_append(&entries, entry);
+        alist_append(&entries, entry);
     }
 
     return entries;
 }
 
-list_t dir_all_entries_of_type(string_t path, unsigned char type)
+alist_t dir_all_entries_of_type(string_t path, unsigned char type)
 {
     /*
      * This is essentially the code above (dir_all_entries_list) but
      * with a check for a given type 
     */
     DIR *d = opendir(cstr(&path));
-    list_t entries = new_list(sizeof(struct dirent));
+    alist_t entries = new_alist(sizeof(struct dirent));
     if (!d)
     {
         return entries;
@@ -84,7 +84,7 @@ list_t dir_all_entries_of_type(string_t path, unsigned char type)
         if (entry->d_type == type)
         {
             // Copy the contents of 'entry'
-            list_append(&entries, entry);
+            alist_append(&entries, entry);
         }
     }
 
@@ -95,14 +95,14 @@ ordered_dirent_t new_ordered_dirent_t()
 {
 
     ordered_dirent_t ordered;
-    ordered.block = new_list(sizeof(struct dirent));
-    ordered.character = new_list(sizeof(struct dirent));
-    ordered.directory = new_list(sizeof(struct dirent));
-    ordered.fifo_pipe = new_list(sizeof(struct dirent));
-    ordered.link = new_list(sizeof(struct dirent));
-    ordered.regular = new_list(sizeof(struct dirent));
-    ordered.socket = new_list(sizeof(struct dirent));
-    ordered.unknown = new_list(sizeof(struct dirent));
+    ordered.block = new_alist(sizeof(struct dirent));
+    ordered.character = new_alist(sizeof(struct dirent));
+    ordered.directory = new_alist(sizeof(struct dirent));
+    ordered.fifo_pipe = new_alist(sizeof(struct dirent));
+    ordered.link = new_alist(sizeof(struct dirent));
+    ordered.regular = new_alist(sizeof(struct dirent));
+    ordered.socket = new_alist(sizeof(struct dirent));
+    ordered.unknown = new_alist(sizeof(struct dirent));
     return ordered;
 }
 
@@ -111,29 +111,29 @@ void ordered_dirent_insert(ordered_dirent_t *ordered, struct dirent *entry)
     switch (entry->d_type)
     {
     case DT_BLK:
-        list_append(&ordered->block, entry);
+        alist_append(&ordered->block, entry);
         break;
     case DT_CHR:
-        list_append(&ordered->character, entry);
+        alist_append(&ordered->character, entry);
         break;
     case DT_DIR:
-        list_append(&ordered->directory, entry);
+        alist_append(&ordered->directory, entry);
         break;
     case DT_FIFO:
-        list_append(&ordered->fifo_pipe, entry);
+        alist_append(&ordered->fifo_pipe, entry);
         break;
     case DT_LNK:
-        list_append(&ordered->link, entry);
+        alist_append(&ordered->link, entry);
         break;
     case DT_REG:
         printf("regular\n");
-        list_append(&ordered->regular, entry);
+        alist_append(&ordered->regular, entry);
         break;
     case DT_SOCK:
-        list_append(&ordered->socket, entry);
+        alist_append(&ordered->socket, entry);
         break;
     default:
-        list_append(&ordered->unknown, entry);
+        alist_append(&ordered->unknown, entry);
         break;
     }
 }
@@ -161,10 +161,10 @@ ordered_dirent_t dir_all_entries_categorised(string_t path)
     }
 
     struct dirent *entry;
-    printf("path\n");
+    printf("path \"%s\"\n", cstr(&path));
     string_t filePath = new_string(path.len + SMALL_BUFFER_LEN);
     string_write(&filePath, &path);
-    printf("path end\n");
+    printf("path end \"%s\"\n", cstr(&filePath));
     while ((entry = readdir(d)))
     {
         if (entry->d_type == DT_UNKNOWN)
@@ -209,8 +209,8 @@ ordered_dirent_t dir_all_entries_categorised(string_t path)
  * directorytreenode
  * {
  *      string_t dirName
- *      list_t files (list of strings)
- *      list_t subDirs
+ *      alist_t files (list of strings)
+ *      alist_t subDirs
  * }
  * 
  * idk, i want a function which remembers its state (through using a iterator struct) which can be used to progressively
@@ -225,10 +225,10 @@ ordered_dirent_t dir_all_entries_categorised(string_t path)
  * 
  * This function takes a path to a 
 */
-list_t dir_files_with_extension_recur(string_t path, string_t extension)
+alist_t dir_files_with_extension_recur(string_t path, string_t extension)
 {
     // The return type is a list containing the paths to all matching files
-    list_t matchingFiles = new_list(sizeof(string_t));
+    alist_t matchingFiles = new_alist(sizeof(string_t));
 
     // Converting the system-specific path seperator into a string
     string_t path_seperator = string_make(PATH_SEPERATOR);
@@ -264,7 +264,7 @@ list_t dir_files_with_extension_recur(string_t path, string_t extension)
 
             // Make a copy of this and save it to the list
             string_t matching = string_copy(&filePath);
-            list_append(&matchingFiles, &matching);
+            alist_append(&matchingFiles, &matching);
         }
         node = node->next;
     }
@@ -289,7 +289,7 @@ list_t dir_files_with_extension_recur(string_t path, string_t extension)
             string_write(&subDirPath, &path_seperator);
             string_write(&subDirPath, &subDirName);
             // Look through the directory
-            list_t subDirFiles = dir_files_with_extension_recur(subDirPath, extension);
+            alist_t subDirFiles = dir_files_with_extension_recur(subDirPath, extension);
             list_combine(&matchingFiles, &subDirFiles);
         }
         node = node->next;

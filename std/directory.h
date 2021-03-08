@@ -22,14 +22,14 @@
 
 typedef struct ordered_dirent_t 
 {
-    list_t block;
-    list_t character;
-    list_t directory;
-    list_t fifo_pipe;
-    list_t link;
-    list_t regular;
-    list_t socket;
-    list_t unknown;
+    alist_t block;
+    alist_t character;
+    alist_t directory;
+    alist_t fifo_pipe;
+    alist_t link;
+    alist_t regular;
+    alist_t socket;
+    alist_t unknown;
 } ordered_dirent_t ;
 
 unsigned char get_file_type(char *path);
@@ -40,7 +40,7 @@ unsigned char get_file_type(char *path);
  * 
  * destroy with list_destroy(list, null)
 */
-list_t dir_all_entries_list(string_t path);
+alist_t dir_all_entries_list(string_t path);
 
 /*
  * Returns a list of type (struct dirent*) of all
@@ -49,7 +49,7 @@ list_t dir_all_entries_list(string_t path);
  * 
  * destroy with list_destroy(list, null)
 */
-list_t dir_all_entries_of_type(string_t path, unsigned char type);
+alist_t dir_all_entries_of_type(string_t path, unsigned char type);
 
 ordered_dirent_t new_ordered_dirent_t();
 
@@ -59,7 +59,7 @@ void ordered_dirent_destroy(ordered_dirent_t* ordered);
 
 ordered_dirent_t dir_all_entries_categorised(string_t path);
 
-list_t dir_files_with_extension_recur(string_t path, string_t extension);
+alist_t dir_files_with_extension_recur(string_t path, string_t extension);
 
 int is_normal_dir(string_t dirName);
 

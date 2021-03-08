@@ -1,4 +1,10 @@
-all: projectScan testing
+all: projectMake projectScan testing
+
+projectMake: projectMake.o avlBinTree.o directory.o sorting.o list.o fileIO.o array.o stacklist.o string.o configLoader.o general.o int.o
+	clang -Wall -O3 -o build/projectMake objects/projectMake.o objects/avlBinTree objects/directory objects/sorting objects/list objects/fileIO objects/array objects/stacklist objects/string objects/configLoader objects/general objects/int -g
+
+projectMake.o: main/projectMake.c
+	clang -Wall -O3 -c -o objects/projectMake.o main/projectMake.c -g
 
 projectScan: projectScan.o avlBinTree.o directory.o sorting.o list.o fileIO.o array.o stacklist.o string.o configLoader.o general.o int.o
 	clang -Wall -O3 -o build/projectScan objects/projectScan.o objects/avlBinTree objects/directory objects/sorting objects/list objects/fileIO objects/array objects/stacklist objects/string objects/configLoader objects/general objects/int -g
