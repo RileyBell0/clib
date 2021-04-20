@@ -13,6 +13,10 @@
         "unordered_map": "c",
         "vector": "c",
         "__node_handle": "c",
-        "algorithm": "c"
-    }
+        "algorithm": "c",
+        "array.h": "c",
+        "stdarg.h": "c",
+        "stdint.h": "c"
+    },
+    "C_Cpp.clang_format_fallbackStyle": "{ ColumnLimit: 80 }",
 }

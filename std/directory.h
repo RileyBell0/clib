@@ -18,6 +18,7 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
+#include "alist.h"
 #include "fileIO.h"
 
 typedef struct ordered_dirent_t 
@@ -40,7 +41,7 @@ unsigned char get_file_type(char *path);
  * 
  * destroy with list_destroy(list, null)
 */
-alist_t dir_all_entries_list(string_t path);
+alist_t dir_all_entries_list(string_t* path);
 
 /*
  * Returns a list of type (struct dirent*) of all
@@ -49,7 +50,7 @@ alist_t dir_all_entries_list(string_t path);
  * 
  * destroy with list_destroy(list, null)
 */
-alist_t dir_all_entries_of_type(string_t path, unsigned char type);
+alist_t dir_all_entries_of_type(string_t* path, unsigned char type);
 
 ordered_dirent_t new_ordered_dirent_t();
 
@@ -57,11 +58,11 @@ void ordered_dirent_insert(ordered_dirent_t *ordered, struct dirent *entry);
 
 void ordered_dirent_destroy(ordered_dirent_t* ordered);
 
-ordered_dirent_t dir_all_entries_categorised(string_t path);
+ordered_dirent_t dir_all_entries_categorised(string_t* path);
 
-alist_t dir_files_with_extension_recur(string_t path, string_t extension);
+alist_t dir_files_with_extension_recur(string_t* path, string_t* extension);
 
-int is_normal_dir(string_t dirName);
+int is_normal_dir(string_t* dirName);
 
 struct dirent* ldirentnode(list_node_t *node);
 

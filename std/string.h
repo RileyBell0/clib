@@ -83,10 +83,26 @@ typedef struct string_t
  * thats not that big of a deal in terms of performmae and istnte really an issue
 */
 
+
+/*
+ * Removes all data from the string, making its length zero
+*/
+void string_clear(string_t* to_clear);
+
+/*
+ * If the capacity of the string is not newLen or greater, extends it to be of said length
+*/
 void string_allocate(string_t* str, unsigned int newLen);
 
+/*
+ * Takes a C string as an input and converts it into a string_t
+*/
 string_t string_make(char* src);
 
+/*
+ * Makes the string point at a preexisting C string, make sure the string it points to is mutable and not
+ * referenced elsewhere as it will now be managed by string_t
+*/
 string_t* string_set(string_t *str, char* src);
 
 /*
@@ -94,9 +110,18 @@ string_t* string_set(string_t *str, char* src);
 */
 string_t new_string(unsigned int len);
 
-
+/*
+ * strcmp() called on both cstring components of the strings given
+ * if return value < 0 -> str1 < str2
+ * if return value > 0 -> str1 > str2
+ * if return value == 0 -> str1 == str2
+*/
 int string_compare(string_t *str1, string_t *str2);
 
+/*
+ * same as string_compare but makes comparing string_t that are
+ * seen as void work without causing errors
+*/
 int string_void_compare(const void* str1, const void* str2);
 
 /*

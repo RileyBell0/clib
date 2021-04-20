@@ -415,6 +415,15 @@ char* cstr(string_t* str)
     return str->_str;
 }
 
+void string_clear(string_t* to_clear)
+{
+    // Null terminate to the start of the string
+    cstr(to_clear)[0] = '\0';
+
+    // Convince the string it has no length
+    to_clear->len = 0;
+}
+
 string_t string_copy(string_t* source)
 {
     string_t newString = new_string(source->len);

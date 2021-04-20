@@ -28,10 +28,12 @@ unsigned char get_file_type(char *path)
     }
 }
 
-alist_t dir_all_entries_list(string_t path)
+// TODO Clunky but will get the job done
+alist_t dir_all_entries_list(string_t* path)
 {
-    DIR *d = opendir(cstr(&path));
+    DIR *d = opendir(cstr(path));
     alist_t entries = new_alist(sizeof(struct dirent));
+
     if (!d)
     {
         return entries;
@@ -39,19 +41,38 @@ alist_t dir_all_entries_list(string_t path)
 
     struct dirent *entry;
 
+    // there's a good chance the filepath may be longer than the small string size, so pre-allocating it
+    string_t filePath = new_string(DEFAULT_BUFFER_LEN);
+    string_write(&filePath, path);
+
+    // The file name probably wont be too long so no need to allocate memory for it
+    string_t entryName = new_string(0);
+
     while ((entry = readdir(d)))
     {
         if (entry->d_type == DT_UNKNOWN)
         {
+            string_clear(&filePath);
+            string_clear(&entryName);
+
+            // Extract the file's name from the dirent struct
+            string_write_c(&entryName, entry->d_name);
+
+            // Make a new string containing the path to (and including) the file
+            string_write_c(&filePath, PATH_SEPERATOR);
+            string_write(&filePath, &entryName);
+
             // Try harder to get the file's type
-            string_t entryName = string_make(entry->d_name);
-            string_t filePath = string_new_concat(&path, &entryName);
             entry->d_type = get_file_type(cstr(&filePath));
-            string_destroy(&filePath);
         }
+
         // Copy the contents of 'entry'
-        alist_append(&entries, entry);
+        list_append(&entries, entry);
     }
+
+    // CLEANUP
+    string_destroy(&filePath);
+    string_destroy(&entryName);
 
     return entries;
 }

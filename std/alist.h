@@ -5,28 +5,37 @@
 #include <stdarg.h>
 #include "array.h"
 
-#define ALIST_REALLOC_MULTIPLIER 2
-#define ALIST_NULL UINT32_MAX
+#define ALIST_REALLOC_MULTIPLIER 2 // TODO currently unused
+#define ALIST_NULL INT32_MIN
 #define ALIST_SAFE_DESTROY
+#define ALIST_ELEMENT 1
 
 /*
- * All of these lists use UINT32_MAX as a NULL value
+ * All of these lists use -1 as a NULL value
  * but might consider changing this later
 */
 
+// Using int32 for all values to demonstrate the capacity of this
+// list being UINT32_T
+
 typedef struct alist_node_t
 {
-    uint32_t next;
-    uint32_t prev;
+    int32_t next;
+    int32_t prev;
 } alist_node_t;
 
+/*
+ * Array based implementation of a list
+ * Uses more space than an array or list, but is faster than both for
+ * adding and removing elements. Max capacity of INT32_MAX
+*/
 typedef struct alist_t
 {
     void* list_start;
-    uint32_t first;
-    uint32_t last;
-    uint32_t size;
-    uint32_t capacity;
+    int32_t first;
+    int32_t last;
+    int32_t size;
+    int32_t capacity;
     size_t element_size;
     size_t block_size;
     int (*compare)(const void *first, const void *second);
