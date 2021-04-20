@@ -9,7 +9,7 @@
 #define ALIST_NULL INT32_MIN
 #define ALIST_SAFE_DESTROY
 #define ALIST_ELEMENT 1
-#define CLIB_STD_ALIST_COMPLEMENT TRUE
+// #define CLIB_STD_ALIST_COMPLEMENT TRUE
 
 /*
  * All of these lists use -1 as a NULL value
@@ -45,6 +45,25 @@ typedef struct alist_t {
   int (*compare)(const void *first, const void *second);
   void (*destroy)(void *data);
 } alist_t;
+
+#ifdef CLIB_STD_ALIST_COMPLEMENTARY
+/*
+ * Generates a complementary ledger for a given list
+*/
+int32_t* alist_generate_complementary_ledger(alist_t* list);
+#endif
+
+
+/*
+ * Given a list, generates a ledger array for the alist
+*/
+int32_t* alist_generate_ledger(alist_t* list);
+
+/*
+ * Given two alists, combines them into list1 by appending list2
+ * onto list1. returns list 1
+*/
+alist_t* alist_combine(alist_t* list1, alist_t *list2);
 
 /*
  * Returns an empty alist - no memory allocated
