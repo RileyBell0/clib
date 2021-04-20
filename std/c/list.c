@@ -150,9 +150,11 @@ void *list_remove_last(list_t* list)
 
 // TODO
 // should this also chcek if toRemove is non-null?
+// Does this function even make sense since any element's place
+// in memory is not guaranteed?
 void *list_remove_element(list_t *list, void *toRemove)
 {
-    if (!list || list->size == 0)
+    if (!list || !toRemove || list->size == 0)
     {
         return NULL;
     }

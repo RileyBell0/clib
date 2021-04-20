@@ -4,14 +4,19 @@
 
 alist_t new_alist(size_t element_size) {
   alist_t list;
-  list.capacity = 0;
+
+  list.list_start = NULL;
+  list.ledger = NULL;
+  list.fast_index = TRUE;
   list.first = ALIST_NULL;
   list.last = ALIST_NULL;
   list.size = 0;
+  list.capacity = 0;
   list.element_size = element_size;
   list.block_size = element_size + sizeof(alist_node_t);
-  list.list_start = NULL;
+  list.compare = NULL;
   list.destroy = NULL;
+
   return list;
 }
 
@@ -22,6 +27,11 @@ void alist_extend(alist_t *list) {
   // Increment to avoid new_len getting stuck at 0 or 1
   if (new_len <= 1) {
     ++new_len;
+  }
+
+  if (list->fast_index){
+    // Increase the ledger size to match
+    safe_realloc(list->ledger, new_len * sizeof(int32_t));
   }
 
   // Convert new_len from num elements into num bytes
@@ -37,6 +47,43 @@ void alist_extend(alist_t *list) {
 size_t alist_node_size(alist_t *list) {
   return list->element_size + sizeof(alist_node_t);
 }
+
+
+#ifdef CLIB_STD_ALIST_COMPLEMENT
+void alist_fix_ledger(alist_t *list, int32_t removed_node) {
+  int32_t orig = list->ledger_complement[removed_node];
+
+  // TODO should only be +1 if the removal has already occured
+  list->ledger_complement[removed_node] = list->ledger_complement[list->size + 1];
+
+  for (int32_t i = 0; i < list->size; i++)
+  {
+    if (list->ledger_complement[i] > orig)
+    {
+      list->ledger_complement[i] -= 1;
+    }
+  }
+
+  // Create the ledger from the complementary list
+  for (int32_t i = 0; i < list->size; i++)
+  {
+    list->ledger[list->ledger_complement[i]] = i;
+  }
+}
+#else
+void alist_fix_ledger(alist_t *list, int32_t removed_node) {
+  uint32_t elemsize = alist_node_size(list);
+  int32_t curr = list->first;
+  int32_t curr_node = 0;
+
+  while (curr >= 0) {
+    alist_node_t *node = array_get_element(list->list_start, curr, elemsize);
+    list->ledger[curr_node] = curr;
+    curr += node->next;
+    ++curr_node;
+  }
+}
+#endif
 
 void alist_append(alist_t *list, void *data) {
   // Make space for the new element
@@ -68,28 +115,31 @@ void alist_append(alist_t *list, void *data) {
   // Copy the data in and Ensure the copy succeeds
   assert(memcpy(&newNode[ALIST_ELEMENT], data, list->element_size));
 
+  if (list->fast_index) {
+    // Record the location of the new node in the ledger
+    ((int32_t*)list->ledger)[list->size] = list->size;
+  }
+
+  // Add new entry to the ledger for the new node if fast indexing enabled
+  if (list->fast_index) {
+#ifdef CLIB_STD_ALIST_COMPLEMENT
+    list->ledger_complement[list->size] = list->size;
+#endif
+    list->ledger[list->size] = list->size;
+  }
+
   list->size += 1;
 }
 
 /*
- * TODO
- * if removing a node so that the list becomes empty, need to make sure that the
- * last and first pointers in the main list struct are set to ALIST_NULL
- * otherwise the appending method will break, as it assumes these values are
- * ALIST_NULL when the list is empty
- */
-//  Patch references around the node to be removed, making it disappear from the
-//  list
-//
-//  if there was a node before the removed node we need to make it point to the
-//  node after the removed node. You dont need to do any null checking because
-//  if there is no node after then it will be equal to ALIST_NULL already
-// Only once we have fixed the references around the removed node can we move a
-// node from the end of the array to fill its spot.
-
-// Get references to the surrounding nodes for the current node (the node being
-// removed) and the references to the surrounding nodes for the last node in the
-// array (the node that will replace the current node's position)
+ * so we want an array which is instantly accessable
+ * and yet also changes 
+ * is there a way we can do this?
+ * im not sure if its even possible
+ * im starting to think that it may not be
+ * if we delete an element in a list,
+ * fixing the ledger is easy
+*/
 
 void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
   // Calculate the positions of the surrounding nodes
@@ -146,11 +196,19 @@ void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
   if (list->size - 1 == list->first) {
     list->first = curr;
   }
+
+  if (list->fast_index) {
+    /*
+     * Fix the ledger information
+    */
+
+
+  }
 }
 
 int alist_remove(alist_t *list, void *element) {
   uint32_t elemsize = alist_node_size(list);
-  uint32_t curr = list->first;
+  int32_t curr = list->first;
 
   // Find the first occurance of the given element in the list and remove it
   while (curr >= 0) {
@@ -161,6 +219,12 @@ int alist_remove(alist_t *list, void *element) {
     // Check if it matches the given element, if so, remove it
     if (list->compare(element, &node[ALIST_ELEMENT]) == 0) {
       alist_remove_node(list, node, curr);
+      
+      // Fix the ledger
+      if (list->fast_index) {
+        alist_fix_ledger(list, curr);
+      }
+
       list->size -= 1;
 
       return TRUE;
