@@ -96,4 +96,15 @@ int alist_remove(alist_t *list, void *element);
 */
 void alist_fix_ledger(alist_t *list, int32_t removed_node);
 
+/*
+ * Ensures the given list has at least the capacity 'new_len', if not
+ * resizes the list to fit
+*/
+void alist_set_length(alist_t *list, int32_t new_len);
+
+/*
+ * Given an alist, destroys its contents
+*/
+void alist_destroy(alist_t* list);
+
 #endif

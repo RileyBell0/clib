@@ -67,7 +67,7 @@ alist_t dir_all_entries_list(string_t* path)
         }
 
         // Copy the contents of 'entry'
-        list_append(&entries, entry);
+        alist_append(&entries, entry);
     }
 
     // CLEANUP
@@ -77,13 +77,13 @@ alist_t dir_all_entries_list(string_t* path)
     return entries;
 }
 
-alist_t dir_all_entries_of_type(string_t path, unsigned char type)
+alist_t dir_all_entries_of_type(string_t* path, unsigned char type)
 {
     /*
      * This is essentially the code above (dir_all_entries_list) but
      * with a check for a given type 
     */
-    DIR *d = opendir(cstr(&path));
+    DIR *d = opendir(cstr(path));
     alist_t entries = new_alist(sizeof(struct dirent));
     if (!d)
     {
@@ -98,7 +98,7 @@ alist_t dir_all_entries_of_type(string_t path, unsigned char type)
         {
             // Try harder to get the file's type
             string_t entryName = string_make(entry->d_name);
-            string_t filePath = string_new_concat(&path, &entryName);
+            string_t filePath = string_new_concat(path, &entryName);
             entry->d_type = get_file_type(cstr(&filePath));
             string_destroy(&filePath);
         }
@@ -161,37 +161,37 @@ void ordered_dirent_insert(ordered_dirent_t *ordered, struct dirent *entry)
 
 void ordered_dirent_destroy(ordered_dirent_t* ordered)
 {
-    list_destroy(&ordered->block, NULL);
-    list_destroy(&ordered->character, NULL);
-    list_destroy(&ordered->directory, NULL);
-    list_destroy(&ordered->fifo_pipe, NULL);
-    list_destroy(&ordered->link, NULL);
-    list_destroy(&ordered->regular, NULL);
-    list_destroy(&ordered->socket, NULL);
-    list_destroy(&ordered->unknown, NULL);
+    alist_destroy(&ordered->block);
+    alist_destroy(&ordered->character);
+    alist_destroy(&ordered->directory);
+    alist_destroy(&ordered->fifo_pipe);
+    alist_destroy(&ordered->link);
+    alist_destroy(&ordered->regular);
+    alist_destroy(&ordered->socket);
+    alist_destroy(&ordered->unknown);
 }
 
-ordered_dirent_t dir_all_entries_categorised(string_t path)
+ordered_dirent_t dir_all_entries_categorised(string_t* path)
 {
     ordered_dirent_t ordered = new_ordered_dirent_t();
 
-    DIR *d = opendir(cstr(&path));
+    DIR *d = opendir(cstr(path));
     if (!d)
     {
         return ordered;
     }
 
     struct dirent *entry;
-    printf("path \"%s\"\n", cstr(&path));
-    string_t filePath = new_string(path.len + SMALL_BUFFER_LEN);
-    string_write(&filePath, &path);
+    printf("path \"%s\"\n", cstr(path));
+    string_t filePath = new_string(path->len + SMALL_BUFFER_LEN);
+    string_write(&filePath, path);
     printf("path end \"%s\"\n", cstr(&filePath));
     while ((entry = readdir(d)))
     {
         if (entry->d_type == DT_UNKNOWN)
         {
             // Try harder to get the file's type
-            filePath.len = path.len;
+            filePath.len = path->len;
             cstr(&filePath)[filePath.len] = '\0';
 
             printf("copy d_name\n");
@@ -246,85 +246,86 @@ ordered_dirent_t dir_all_entries_categorised(string_t path)
  * 
  * This function takes a path to a 
 */
-alist_t dir_files_with_extension_recur(string_t path, string_t extension)
+alist_t dir_files_with_extension_recur(string_t *path, string_t *extension)
 {
+  // TODO write this function
     // The return type is a list containing the paths to all matching files
     alist_t matchingFiles = new_alist(sizeof(string_t));
 
-    // Converting the system-specific path seperator into a string
-    string_t path_seperator = string_make(PATH_SEPERATOR);
+    // // Converting the system-specific path seperator into a string
+    // string_t path_seperator = string_make(PATH_SEPERATOR);
 
-    // Getting all the directory entries in the current directory
-    ordered_dirent_t entries = dir_all_entries_categorised(path);
+    // // Getting all the directory entries in the current directory
+    // ordered_dirent_t entries = dir_all_entries_categorised(path);
 
-    // Add all files with the matching extension
-    list_node_t *node = entries.regular.first_node;
+    // // Add all files with the matching extension
+    // list_node_t *node = entries.regular.first_node;
 
-    // THE PART DEALING WITH THE CURRENT DIRECTORY
-    // Storing the current directory's path into an editable buffer string
-    string_t filePath = new_string(DEFAULT_BUFFER_LEN);
-    string_write(&filePath, &path);
-    while (node)
-    {
-        // Resetting the current file's path back to the path
-        // to the current directory
-        // (after last loop /usr/dir/myfile.txt becomes /usr/dir)
-        cstr(&filePath)[path.len] = '\0';
-        filePath.len = path.len;
+    // // THE PART DEALING WITH THE CURRENT DIRECTORY
+    // // Storing the current directory's path into an editable buffer string
+    // string_t filePath = new_string(DEFAULT_BUFFER_LEN);
+    // string_write(&filePath, &path);
+    // while (node)
+    // {
+    //     // Resetting the current file's path back to the path
+    //     // to the current directory
+    //     // (after last loop /usr/dir/myfile.txt becomes /usr/dir)
+    //     cstr(&filePath)[path.len] = '\0';
+    //     filePath.len = path.len;
 
-        // Converting the file's name into a string for easier use
-        string_t fileName = string_make(ldirentnode(node)->d_name);
+    //     // Converting the file's name into a string for easier use
+    //     string_t fileName = string_make(ldirentnode(node)->d_name);
 
-        // If the extension matches the requested one
-        if (cstring_equals(cstr(&extension), getFileExtension(&fileName)))
-        {
-            // Add the file's name to the end of the string
-            // eg. /usr/dir -> /usr/dir/myfile.extension
-            string_write(&filePath, &path_seperator);
-            string_write(&filePath, &fileName);
+    //     // If the extension matches the requested one
+    //     if (cstring_equals(cstr(&extension), getFileExtension(&fileName)))
+    //     {
+    //         // Add the file's name to the end of the string
+    //         // eg. /usr/dir -> /usr/dir/myfile.extension
+    //         string_write(&filePath, &path_seperator);
+    //         string_write(&filePath, &fileName);
 
-            // Make a copy of this and save it to the list
-            string_t matching = string_copy(&filePath);
-            alist_append(&matchingFiles, &matching);
-        }
-        node = node->next;
-    }
-    string_destroy(&filePath);
+    //         // Make a copy of this and save it to the list
+    //         string_t matching = string_copy(&filePath);
+    //         alist_append(&matchingFiles, &matching);
+    //     }
+    //     node = node->next;
+    // }
+    // string_destroy(&filePath);
 
 
-    // THE RECURSION PART
+    // // THE RECURSION PART
 
-    // Go through the directories
-    node = entries.directory.first_node;
-    string_t subDirPath = string_copy(&path);
-    while (node)
-    {
-        // restrict the path back to the current directory (the path recieved by this function)
-        cstr(&subDirPath)[path.len] = '\0';
+    // // Go through the directories
+    // node = entries.directory.first_node;
+    // string_t subDirPath = string_copy(&path);
+    // while (node)
+    // {
+    //     // restrict the path back to the current directory (the path recieved by this function)
+    //     cstr(&subDirPath)[path.len] = '\0';
 
-        string_t subDirName = string_make(ldirentnode(node)->d_name);
+    //     string_t subDirName = string_make(ldirentnode(node)->d_name);
 
-        if (is_normal_dir(subDirName))
-        {
-            // Make the new path's string
-            string_write(&subDirPath, &path_seperator);
-            string_write(&subDirPath, &subDirName);
-            // Look through the directory
-            alist_t subDirFiles = dir_files_with_extension_recur(subDirPath, extension);
-            list_combine(&matchingFiles, &subDirFiles);
-        }
-        node = node->next;
-    }
-    string_destroy(&subDirPath);
+    //     if (is_normal_dir(subDirName))
+    //     {
+    //         // Make the new path's string
+    //         string_write(&subDirPath, &path_seperator);
+    //         string_write(&subDirPath, &subDirName);
+    //         // Look through the directory
+    //         alist_t subDirFiles = dir_files_with_extension_recur(subDirPath, extension);
+    //         list_combine(&matchingFiles, &subDirFiles);
+    //     }
+    //     node = node->next;
+    // }
+    // string_destroy(&subDirPath);
 
     return matchingFiles;
 }
 
-int is_normal_dir(string_t dirName)
+int is_normal_dir(string_t *dirName)
 {
-    if (dirName.len <= 2)
+    if (dirName->len <= 2)
     {
-        if (cstring_equals(cstr(&dirName), ".") || cstring_equals(cstr(&dirName), ".."))
+        if (cstring_equals(cstr(dirName), ".") || cstring_equals(cstr(dirName), ".."))
         {
             return FALSE;
         }

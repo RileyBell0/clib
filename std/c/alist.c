@@ -168,10 +168,12 @@ void alist_extend(alist_t *list) {
   }
 
   if (list->fast_index) {
+    printf("\t reallocing thnigy\n");
     // Increase the ledger size to match
-    safe_realloc(list->ledger, new_len * sizeof(int32_t));
+    list->ledger = safe_realloc(list->ledger, new_len * sizeof(int32_t));
+    printf("%p\n", list->ledger);
 #ifdef CLIB_STD_ALIST_COMPLEMENT
-    safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
+    list->ledger_complement = safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
 #endif
   }
 
@@ -191,9 +193,9 @@ void alist_set_length(alist_t *list, int32_t new_len) {
 
   if (list->fast_index) {
     // Increase the ledger size to match
-    safe_realloc(list->ledger, new_len * sizeof(int32_t));
+    list->ledger = safe_realloc(list->ledger, new_len * sizeof(int32_t));
 #ifdef CLIB_STD_ALIST_COMPLEMENT
-    safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
+    list->ledger_complement = safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
 #endif
   }
 
@@ -273,7 +275,7 @@ void alist_append(alist_t *list, void *data) {
 
   if (list->fast_index) {
     // Record the location of the new node in the ledger
-    ((int32_t *)list->ledger)[list->size] = list->size;
+    list->ledger[list->size] = list->size;
   }
 
   // Add new entry to the ledger for the new node if fast indexing enabled
@@ -426,7 +428,13 @@ void alist_destroy(alist_t *list) {
   list->last = ALIST_NULL;
 #endif
 
+  // Destroy ledger information if it exists
+  destroy(list->ledger);
+#ifdef CLIB_STD_ALIST_COMPLEMENTARY
+  destroy(list->ledger_complement);
+#endif
+
   // Free the memory occupied by the list itself
-  free(list->list_start);
+  free(list->list_start); 
   list->list_start = NULL;
 }
