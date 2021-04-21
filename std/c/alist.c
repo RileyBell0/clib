@@ -168,10 +168,8 @@ void alist_extend(alist_t *list) {
   }
 
   if (list->fast_index) {
-    printf("\t reallocing thnigy\n");
     // Increase the ledger size to match
     list->ledger = safe_realloc(list->ledger, new_len * sizeof(int32_t));
-    printf("%p\n", list->ledger);
 #ifdef CLIB_STD_ALIST_COMPLEMENT
     list->ledger_complement = safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
 #endif
