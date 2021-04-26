@@ -96,8 +96,17 @@ void string_allocate(string_t* str, unsigned int newLen);
 
 /*
  * Takes a C string as an input and converts it into a string_t
+ * Copies the cstring into the string_t
+ * Memory may be allocated when copying
 */
 string_t string_make(char* src);
+
+/*
+ * takes a const cstring as an input
+ * If the given cstring is not dynamically allocated DO NOT FREE
+ * THE STRING_T THIS FUNCTION RETURNS
+*/
+string_t cstring_wrap(char* src);
 
 /*
  * Makes the string point at a preexisting C string, make sure the string it points to is mutable and not

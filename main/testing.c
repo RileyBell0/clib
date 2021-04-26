@@ -6,6 +6,8 @@
 #include "../std/array.h"
 #include "../std/configLoader.h"
 #include "../std/directory.h"
+#include "../std/alist.h"
+#include "../std/string.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -15,16 +17,17 @@
 #define APPENDTEST 50000
 #define TESTING_C_TIME_PROGRAM TRUE
 
-#define EXIT 'e'
-#define APPEND 'a'
-#define REMOVE 'r'
-#define DISPLAY 'd'
-#define TRAVERSE 't'
-#define LIST_INFO 'o'
-#define LIST_INDEX 'i'
-#define LEDGER_INFO 'l'
-#define PRINT_ARRAY 'p'
+#define EXIT '0'
+#define APPEND '1'
+#define REMOVE '2'
+#define PRINT_ARRAY '3'
+#define TRAVERSE '4'
+#define LIST_INFO '5'
+#define LIST_INDEX '6'
+#define LEDGER_INFO '7'
+#define DISPLAY '8'
 
+int code2(int argc, char **argv);
 int code(int argc, char **argv);
 void bar(char *toPrint);
 void alist_test();
@@ -60,7 +63,7 @@ void traverse_string_alist(alist_t *list) {
   if (!list->size) {
     return;
   }
-
+  
   string_t buffer = new_string(DEFAULT_BUFFER_LEN);
 
   int32_t curr = list->first;
@@ -97,6 +100,7 @@ void traverse_string_alist(alist_t *list) {
     }
   }
 }
+
 void print_string_alist(alist_t *list) {
   if (list->first == ALIST_NULL) {
     return;
@@ -143,17 +147,17 @@ int code(int argc, char **argv) {
 
   while (TRUE) {
     clearscreen();
-    // printf("%c) EXIT\n"
-    //        "%c) Append\n"
-    //        "%c) Remove\n"
-    //        "%c) Display\n"
-    //        "%c) Traverse\n"
-    //        "%c) List Info\n"
-    //        "%c) Index\n"
-    //        "%c) Ledger Info\n"
-    //        "%c) Print Array\n",
-    //        EXIT, APPEND, REMOVE, DISPLAY, TRAVERSE, LIST_INFO, LIST_INDEX,
-    //        LEDGER_INFO, PRINT_ARRAY);
+    printf("%c) EXIT\n"
+           "%c) Append\n"
+           "%c) Remove\n"
+           "%c) Print Array\n"
+           "%c) Traverse\n"
+           "%c) List Info\n"
+           "%c) Index\n"
+           "%c) Ledger Info\n"
+           "%c) Display\n",
+           EXIT, APPEND, REMOVE, PRINT_ARRAY, TRAVERSE, LIST_INFO, LIST_INDEX,
+           LEDGER_INFO, DISPLAY);
 
     if (fileio_next_line(stdin, &buffer) && buffer.len == 1) {
       input = cstr(&buffer)[0];
@@ -214,8 +218,8 @@ int code(int argc, char **argv) {
         break;
       case PRINT_ARRAY:
         printf("\nArray Contents:\n");
-        for (int32_t i = 0; i < list.size; i++){
-          printf("%d) %s\n", i, cstr(((string_t*)alist_index(&list, i))));
+        for (int32_t i = 0; i < list.size; i++) {
+          printf("%d) %s\n", i, cstr(((string_t *)alist_index(&list, i))));
         }
         pause = TRUE;
         break;
@@ -234,9 +238,7 @@ int code(int argc, char **argv) {
     //   fileio_next_line(stdin, &buffer);
     //   pause = FALSE;
     // }
-
   }
-
 
   return END_SUCCESS;
 }
@@ -272,7 +274,7 @@ int main(int argc, char **argv) {
     printf("Starting of the program, start_t = %ld\n", start_t);
   }
 
-  int errorCode = code(argc, argv);
+  int errorCode = code2(argc, argv);
 
   if (TESTING_C_TIME_PROGRAM == TRUE) {
     end_t = clock();
@@ -285,4 +287,126 @@ int main(int argc, char **argv) {
 
   bar("Program End");
   return errorCode;
+}
+
+
+
+
+
+
+
+
+
+
+
+#define B_SELECT_LIST1 '1'
+#define B_SELECT_LIST2 '2'
+#define B_APPEND_LIST '4'
+#define B_REMOVE_FROM_LIST '5'
+#define B_COMBINE_LISTS '6'
+#define B_RESET_LIST '7'
+
+void print_options_code2(){
+  printf("------------------\n");
+  printf("%c) Select List 1:\n", B_SELECT_LIST1);
+  printf("%c) Select List 2:\n", B_SELECT_LIST2);
+  printf("%c) Print current list:\n", B_SELECT_LIST2);
+  printf("%c) Append to list\n", B_APPEND_LIST);
+  printf("%c) Remove from current list\n", B_REMOVE_FROM_LIST);
+  printf("%c) Combine lists\n", B_COMBINE_LISTS);
+  printf("%c) Reset List\n", B_RESET_LIST);
+}
+
+alist_t make_single_char_str_list(char* str_in) {
+  alist_t list = new_alist(sizeof(string_t));
+  string_t str = string_make(str_in);
+
+  for (int i = 0; i < str.len; i++) {
+    string_t new_element = new_string(0);
+    string_write_char(&new_element, str_in[i]);
+    alist_append(&list, &new_element);
+  }
+
+  string_destroy(&str);
+  
+  return list;
+}
+
+int code2(int argc, char **argv){
+  alist_t list1 = make_single_char_str_list("12345");
+  alist_t list2 = make_single_char_str_list("abcde");
+
+  list1.compare = string_void_compare;
+  list2.compare = string_void_compare;
+
+  char input;
+  string_t buffer = new_string(DEFAULT_BUFFER_LEN);
+  alist_t* curr_list = &list1;
+  int32_t list_num = 1;
+  while (TRUE) {
+    clearscreen();
+    printf("Current List: %d\n", list_num);
+    print_options_code2();
+
+    if (fileio_next_line(stdin, &buffer) && buffer.len == 1) {
+      input = cstr(&buffer)[0];
+      switch (input) {
+      case EXIT:
+        return EXIT_SUCCESS;
+      case B_SELECT_LIST1:
+        curr_list = &list1;
+        list_num = 1;
+        break;
+      case B_SELECT_LIST2:
+        curr_list = &list2;
+        list_num = 2;
+        break;
+      case PRINT_ARRAY:
+        printf("\nArray Contents:\n");
+        for (int32_t i = 0; i < curr_list->size; i++) {
+          printf("%d) %s\n", i, cstr(((string_t *)alist_index(curr_list, i))));
+        }
+        break;
+      case B_APPEND_LIST:
+        printf("Enter what you would like to append:\n");
+        if (fileio_next_line(stdin, &buffer)) {
+          printf("APPENDING \"%s\"\n\n", cstr(&buffer));
+          string_t input = string_copy(&buffer);
+          alist_append(curr_list, &input);
+        }
+        break;
+      case B_REMOVE_FROM_LIST:
+        printf("What would you like to remove?\n");
+        if (fileio_next_line(stdin, &buffer)) {
+          if (alist_remove(curr_list, &buffer)) {
+            printf("REMOVED NODE\n");
+          } else {
+            printf("COULD NOT FIND OR REMOVE\n");
+          }
+        }
+        break;
+      case B_COMBINE_LISTS:
+        alist_combine(&list1, &list2);
+        break;
+      case B_RESET_LIST:
+        curr_list->size = 0;
+        curr_list->first = ALIST_NULL;
+        curr_list->last = ALIST_NULL;
+        break;
+      default:
+        printf("INVALID INPUT\n");
+        break;
+      }
+    } else {
+      printf("\nError - invalid input\n\n");
+    }
+
+    // if (pause){
+    //   printf("\nEnter anything to continue... ");
+    //   fileio_next_line(stdin, &buffer);
+    //   pause = FALSE;
+    // }
+  }
+
+  return END_SUCCESS;
 }

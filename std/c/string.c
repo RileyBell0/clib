@@ -1,6 +1,5 @@
 #include "../string.h"
 
-
 void string_shrink(string_t* source, unsigned int new_len)
 {
     cstr(source)[new_len] = '\0';
@@ -84,9 +83,8 @@ string_t new_string(unsigned int len)
     return str;
 }
 
-string_t string_make(char* src)
-{
-    string_t str;
+string_t cstring_wrap(char* src) {
+  string_t str;
 
     str._str = src;
     str.local = FALSE;
@@ -101,6 +99,15 @@ string_t string_make(char* src)
     }
 
     str.max_len = str.len;
+
+    return str;
+}
+
+string_t string_make(char* src)
+{
+    string_t str = new_string(0);
+
+    string_write_c(&str, src);
 
     return str;
 }
@@ -214,6 +221,9 @@ void string_write_char(string_t *base, char toAdd)
     // Write the char
     cstr(base)[base->len] = toAdd;
     base->len += 1;
+
+    // Null terminate the string
+    cstr(base)[base->len] = '\0';
 }
 
 string_t* string_write_c_multi(string_t *base, char* source, ...)
@@ -248,7 +258,7 @@ string_t* string_write_c(string_t *base, char* source)
      * goes over all chars in 'source', extending the str where necessary
      * TODO implement this method, will make the strings faster
     */
-    string_t extension = string_make(source);
+    string_t extension = cstring_wrap(source);
     
     string_write(base, &extension);
 

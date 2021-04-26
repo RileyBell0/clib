@@ -7,9 +7,7 @@ alist_t new_alist(size_t element_size) {
 
   list.list_start = NULL;
   list.ledger = NULL;
-#ifdef CLIB_STD_ALIST_COMPLEMENT
   list.ledger_complement = NULL;
-#endif
   list.fast_index = TRUE;
   list.first = ALIST_NULL;
   list.last = ALIST_NULL;
@@ -32,7 +30,6 @@ void *alist_index(alist_t *list, int32_t index) {
                            list->block_size))[ALIST_ELEMENT];
 }
 
-#ifdef CLIB_STD_ALIST_COMPLEMENT
 int32_t *alist_generate_complementary_ledger(alist_t *list) {
   if (list->capacity == 0) {
     return NULL;
@@ -58,7 +55,6 @@ int32_t *alist_generate_complementary_ledger(alist_t *list) {
 
   return ledger;
 }
-#endif
 
 int32_t *alist_generate_ledger(alist_t *list) {
   if (list->capacity == 0) {
@@ -86,10 +82,14 @@ int32_t *alist_generate_ledger(alist_t *list) {
   return ledger;
 }
 
+// TODO this doesnt combine the lists if list1 is empty
+// it should in that case copy the list
+// need to make that function
 alist_t *alist_combine(alist_t *list1, alist_t *list2) {
   // Cannot combine two lists of different types
   // Note that this does not check types, only the size of types
-  if (list1->element_size != list2->element_size) {
+  uint32_t combined_size = list1->size + list2->size;
+  if (list1->element_size != list2->element_size || combined_size >= INT32_MAX) {
     return NULL;
   }
   if (list2->size == 0) {
@@ -97,14 +97,14 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
   }
 
   // Allocate enough space to store the combined lists
-  if (list1->size + list2->size > list1->capacity) {
-    alist_set_length(list1, list1->size + list2->size);
+  if (combined_size > list1->capacity) {
+    alist_set_length(list1, combined_size);
   }
 
   alist_node_t *list1_end =
       array_get_element(list1->list_start, list1->size, list1->block_size);
   alist_node_t *list2_first = array_get_element(
-      list1->list_start, list1->size + list2->first, list1->block_size);
+      list1->list_start, list1->size - 1 + list2->first, list1->block_size);
   alist_node_t *list1_last =
       array_get_element(list1->list_start, list1->last, list1->block_size);
 
@@ -113,36 +113,32 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
 
   // Patch the references between the first element in list2 and the
   // last element in list 1
-  list2_first->prev = list1->last - list1->size - list2->first;
-  list1_last->next = list1->size + list2->first - list1->last;
+  list2_first->prev = list1->last - list1->size - 1 + list2->first;
+  list1_last->next = list1->size - 1 + list2->first - list1->last;
 
   // New last element
-  list1->last = list1->size + list2->last;
+  list1->last = list1->size - 1 + list2->last;
 
   // Update the ledgers
   if (list1->fast_index) {
     // Get the ledger information from the second list
     if (list2->fast_index) {
       assert(
-          memcpy(list1->ledger, list2->ledger, list2->size * sizeof(int32_t)));
+          memcpy(&list1->ledger[list1->size], list2->ledger, list2->size * sizeof(int32_t)));
 
-#ifdef CLIB_STD_ALIST_COMPLEMENT
-      assert(memcpy(list1->ledger_complement, list2->ledger_complement,
+      assert(memcpy(&list1->ledger_complement[list1->size], list2->ledger_complement,
                     list2->size * sizeof(int32_t)));
-#endif
     } else {
       // No ledger information existed, generate it
       int32_t *ledger_2 = alist_generate_ledger(list2);
-      assert(memcpy(list1->ledger, ledger_2, list2->size * sizeof(int32_t)));
+      assert(memcpy(&list1->ledger[list1->size], ledger_2, list2->size * sizeof(int32_t)));
       free(ledger_2);
 
-#ifdef CLIB_STD_ALIST_COMPLEMENT
       int32_t *ledger_complementary =
           alist_generate_complementary_ledger(list2);
-      assert(memcpy(list1->ledger_complement, ledger_complementary,
+      assert(memcpy(&list1->ledger_complement[list1->size], ledger_complementary,
                     list2->size * sizeof(int32_t)));
       free(ledger_complementary);
-#endif
     }
 
     // Update the new ledger information to make it consistent with the
@@ -150,9 +146,7 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
     for (int32_t i = list1->size; i < list1->size + list2->size; i++) {
       list1->ledger[i] += list1->size;
 
-#ifdef CLIB_STD_ALIST_COMPLEMENT
       list1->ledger_complement[i] += list1->size;
-#endif
     }
   }
 
@@ -174,10 +168,8 @@ void alist_extend(alist_t *list) {
   if (list->fast_index) {
     // Increase the ledger size to match
     list->ledger = safe_realloc(list->ledger, new_len * sizeof(int32_t));
-#ifdef CLIB_STD_ALIST_COMPLEMENT
     list->ledger_complement =
         safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
-#endif
   }
 
   // Convert new_len from num elements into num bytes
@@ -197,25 +189,23 @@ void alist_set_length(alist_t *list, int32_t new_len) {
   if (list->fast_index) {
     // Increase the ledger size to match
     list->ledger = safe_realloc(list->ledger, new_len * sizeof(int32_t));
-#ifdef CLIB_STD_ALIST_COMPLEMENT
     list->ledger_complement =
         safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
-#endif
   }
 
   // Convert new_len from num elements into num bytes
-  size_t new_capacity = (sizeof(alist_node_t) + list->element_size) * new_len;
+  size_t new_capacity = list->block_size * new_len;
 
   // Extend the list's memory and update its capacity
   list->list_start = safe_realloc(list->list_start, new_capacity);
   list->capacity = new_len;
 }
 
-#ifdef CLIB_STD_ALIST_COMPLEMENT
 void alist_fix_ledger(alist_t *list, int32_t removed_node) {
   int32_t orig = list->ledger_complement[removed_node];
 
-  // TODO should only be +1 if the removal has already occured
+  // TODO remember should only be +1 if the removal has already occured
+  // this works fine unless you moved where this is called from
   list->ledger_complement[removed_node] = list->ledger_complement[list->size];
 
   for (int32_t i = 0; i < list->size; i++) {
@@ -229,22 +219,6 @@ void alist_fix_ledger(alist_t *list, int32_t removed_node) {
     list->ledger[list->ledger_complement[i]] = i;
   }
 }
-#else
-void alist_fix_ledger(alist_t *list, int32_t removed_node) {
-  size_t elemsize = list->block_size;
-  int32_t curr = list->first;
-
-  if (curr != ALIST_NULL) {
-    int32_t curr_node = 0;
-    while (curr >= 0) {
-      alist_node_t *node = array_get_element(list->list_start, curr, elemsize);
-      list->ledger[curr_node] = curr;
-      curr += node->next;
-      ++curr_node;
-    }
-  }
-}
-#endif
 
 void alist_append(alist_t *list, void *data) {
   // Make space for the new element
@@ -283,9 +257,7 @@ void alist_append(alist_t *list, void *data) {
 
   // Add new entry to the ledger for the new node if fast indexing enabled
   if (list->fast_index) {
-#ifdef CLIB_STD_ALIST_COMPLEMENT
     list->ledger_complement[list->size] = list->size;
-#endif
     list->ledger[list->size] = list->size;
   }
 
@@ -417,10 +389,6 @@ int alist_remove(alist_t *list, void *element) {
 
     // Check if it matches the given element, if so, remove it
     if (list->compare(element, &node[ALIST_ELEMENT]) == 0) {
-      printf("Found element\n");
-      printf("Found element\n");
-      printf("Found element\n");
-      printf("Found element\n");
       
       alist_remove_node(list, node, curr);
 
@@ -468,9 +436,7 @@ void alist_destroy(alist_t *list) {
 
   // Destroy ledger information if it exists
   destroy(list->ledger);
-#ifdef CLIB_STD_ALIST_COMPLEMENT
   destroy(list->ledger_complement);
-#endif
 
   // Free the memory occupied by the list itself
   free(list->list_start);
