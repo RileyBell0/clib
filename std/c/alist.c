@@ -2,12 +2,14 @@
 
 // alist_relative_ptr = int32_t dest - int32_t src
 
-
 alist_t new_alist(size_t element_size) {
   alist_t list;
 
   list.list_start = NULL;
   list.ledger = NULL;
+#ifdef CLIB_STD_ALIST_COMPLEMENT
+  list.ledger_complement = NULL;
+#endif
   list.fast_index = TRUE;
   list.first = ALIST_NULL;
   list.last = ALIST_NULL;
@@ -21,16 +23,22 @@ alist_t new_alist(size_t element_size) {
   return list;
 }
 
-
-#ifdef CLIB_STD_ALIST_COMPLEMENTARY
-int32_t* alist_generate_complementary_ledger(alist_t* list)
-{
-  if (list->capacity == 0)
-  {
+void *alist_index(alist_t *list, int32_t index) {
+  if (index < 0 || index >= list->size) {
     return NULL;
   }
 
-  int32_t* ledger = safe_malloc(sizeof(int32_t) * list->capacity);
+  return &((alist_node_t*)array_get_element(list->list_start, list->ledger[index],
+                           list->block_size))[ALIST_ELEMENT];
+}
+
+#ifdef CLIB_STD_ALIST_COMPLEMENT
+int32_t *alist_generate_complementary_ledger(alist_t *list) {
+  if (list->capacity == 0) {
+    return NULL;
+  }
+
+  int32_t *ledger = safe_malloc(sizeof(int32_t) * list->capacity);
 
   int32_t curr = list->first;
   if (curr != ALIST_NULL) {
@@ -52,14 +60,12 @@ int32_t* alist_generate_complementary_ledger(alist_t* list)
 }
 #endif
 
-int32_t* alist_generate_ledger(alist_t* list)
-{
-  if (list->capacity == 0)
-  {
+int32_t *alist_generate_ledger(alist_t *list) {
+  if (list->capacity == 0) {
     return NULL;
   }
 
-  int32_t* ledger = safe_malloc(sizeof(int32_t) * list->capacity);
+  int32_t *ledger = safe_malloc(sizeof(int32_t) * list->capacity);
 
   int32_t curr = list->first;
   if (curr != ALIST_NULL) {
@@ -126,30 +132,28 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
 #endif
     } else {
       // No ledger information existed, generate it
-      int32_t* ledger_2 = alist_generate_ledger(list2);
-      assert(
-          memcpy(list1->ledger, ledger_2, list2->size * sizeof(int32_t)));
+      int32_t *ledger_2 = alist_generate_ledger(list2);
+      assert(memcpy(list1->ledger, ledger_2, list2->size * sizeof(int32_t)));
       free(ledger_2);
 
 #ifdef CLIB_STD_ALIST_COMPLEMENT
-      int32_t* ledger_complementary = alist_generate_complementary_ledger(list2);
+      int32_t *ledger_complementary =
+          alist_generate_complementary_ledger(list2);
       assert(memcpy(list1->ledger_complement, ledger_complementary,
                     list2->size * sizeof(int32_t)));
       free(ledger_complementary);
 #endif
-
     }
 
-      // Update the new ledger information to make it consistent with the
-      // new combined list
-      for (int32_t i = list1->size; i < list1->size + list2->size; i++) {
-        list1->ledger[i] += list1->size;
+    // Update the new ledger information to make it consistent with the
+    // new combined list
+    for (int32_t i = list1->size; i < list1->size + list2->size; i++) {
+      list1->ledger[i] += list1->size;
 
 #ifdef CLIB_STD_ALIST_COMPLEMENT
-        list1->ledger_complement[i] += list1->size;
+      list1->ledger_complement[i] += list1->size;
 #endif
-      }
-
+    }
   }
 
   // New list size
@@ -171,7 +175,8 @@ void alist_extend(alist_t *list) {
     // Increase the ledger size to match
     list->ledger = safe_realloc(list->ledger, new_len * sizeof(int32_t));
 #ifdef CLIB_STD_ALIST_COMPLEMENT
-    list->ledger_complement = safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
+    list->ledger_complement =
+        safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
 #endif
   }
 
@@ -193,7 +198,8 @@ void alist_set_length(alist_t *list, int32_t new_len) {
     // Increase the ledger size to match
     list->ledger = safe_realloc(list->ledger, new_len * sizeof(int32_t));
 #ifdef CLIB_STD_ALIST_COMPLEMENT
-    list->ledger_complement = safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
+    list->ledger_complement =
+        safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
 #endif
   }
 
@@ -210,8 +216,7 @@ void alist_fix_ledger(alist_t *list, int32_t removed_node) {
   int32_t orig = list->ledger_complement[removed_node];
 
   // TODO should only be +1 if the removal has already occured
-  list->ledger_complement[removed_node] =
-      list->ledger_complement[list->size + 1];
+  list->ledger_complement[removed_node] = list->ledger_complement[list->size];
 
   for (int32_t i = 0; i < list->size; i++) {
     if (list->ledger_complement[i] > orig) {
@@ -299,64 +304,100 @@ void alist_append(alist_t *list, void *data) {
 
 void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
   // Calculate the positions of the surrounding nodes
-  uint32_t next = curr + node->next;
-  uint32_t prev = curr + node->prev;
+  int32_t next = curr + node->next; // alist min
+  int32_t prev = curr + node->prev; // 1
+  int32_t list_final = list->size - 1; // 2
 
-  // Patching references around the removed node
+  // Make the nodes around the removed node point at eachother
   if (prev >= 0) {
-    ((alist_node_t *)array_get_element(list->list_start, prev,
-                                       list->block_size))
-        ->next = next;
+    alist_node_t *prevnode = ((alist_node_t *)array_get_element(
+        list->list_start, prev, list->block_size));
+    if (next >= 0) {
+      prevnode->next = next - prev;
+    } else {
+      prevnode->next = ALIST_NULL;
+    }
+
+    // Fix overall list references
+    if (list->last == curr) {
+      list->last = prev;
+    }
+    else {
+      list->last = ALIST_NULL;
+    }
   }
   if (next >= 0) {
-    ((alist_node_t *)array_get_element(list->list_start, next,
-                                       list->block_size))
-        ->prev = prev;
-  }
+    alist_node_t *nextnode = ((alist_node_t *)array_get_element(
+        list->list_start, next, list->block_size));
+    if (prev >= 0) {
+      nextnode->prev = prev - next;
+    } else {
+      nextnode->prev = ALIST_NULL;
+    }
 
-  // Fix the list's first and last refernces
-  if (list->first == curr) {
-    list->first = next;
-  }
-  if (list->last == curr) {
-    list->last = prev;
+    // Fix overall list references
+    if (list->first == curr) {
+      list->first = next;
+    } else {
+      list->first = ALIST_NULL;
+    }
   }
 
   // Fill the empty spot in the array (if one exists)
-  if (curr != list->size - 1) {
+  if (curr != list_final) {
 
     // Get the last (array[-1]) element in the array
-    alist_node_t *moved_node =
-        array_get_element(list->list_start, list->size - 1, list->block_size);
+    int32_t node_orig_pos = list_final;
+    alist_node_t *base_node =
+        array_get_element(list->list_start, node_orig_pos, list->block_size);
+
+    int32_t base_next = base_node->next;
+    int32_t base_prev = base_node->prev;
 
     // Fill new empty spot in the array with the current final element
-    array_set_element(list->list_start, moved_node, curr, list->block_size);
+    array_set_element(list->list_start, base_node, curr, list->block_size);
+    alist_node_t *moved_node =
+        array_get_element(list->list_start, curr, list->block_size);
+
+    // Update the pointers of the moved node to match its new position
+    if (base_next != ALIST_NULL) {
+      moved_node->next = list_final + base_next - curr;
+    }
+    if (base_prev != ALIST_NULL) {
+
+      moved_node->prev = list_final + base_prev - curr;
+    }
 
     // Fix the surrounding node pointers
     if (moved_node->prev != ALIST_NULL) {
-      ((alist_node_t *)array_get_element(list->list_start, moved_node->prev,
+      int32_t prev_node_pos = node_orig_pos + base_prev;
+      ((alist_node_t *)array_get_element(list->list_start, prev_node_pos,
                                          list->block_size))
-          ->next = curr;
+          ->next = curr - prev_node_pos;
     }
     if (moved_node->next != ALIST_NULL) {
-      ((alist_node_t *)array_get_element(list->list_start, moved_node->next,
+      int32_t next_node_pos = node_orig_pos + base_next;
+      ((alist_node_t *)array_get_element(list->list_start, next_node_pos,
                                          list->block_size))
-          ->prev = curr;
+          ->prev = curr - next_node_pos;
     }
   }
 
   // Patch the overall list first/last references to match the new list info
-  if (list->size - 1 == list->last) {
+  if (list_final == list->last) {
     list->last = curr;
   }
-  if (list->size - 1 == list->first) {
+  if (list_final == list->first) {
     list->first = curr;
   }
+
+  list->size -= 1;
 
   if (list->fast_index) {
     /*
      * Fix the ledger information
      */
+    alist_fix_ledger(list, curr);
   }
 }
 
@@ -371,18 +412,17 @@ int alist_remove(alist_t *list, void *element) {
   while (curr >= 0) {
 
     // Get the address of the current list element
-    alist_node_t *node = array_get_element(list->list_start, curr, list->block_size);
+    alist_node_t *node =
+        array_get_element(list->list_start, curr, list->block_size);
 
     // Check if it matches the given element, if so, remove it
     if (list->compare(element, &node[ALIST_ELEMENT]) == 0) {
+      printf("Found element\n");
+      printf("Found element\n");
+      printf("Found element\n");
+      printf("Found element\n");
+      
       alist_remove_node(list, node, curr);
-
-      // Fix the ledger
-      if (list->fast_index) {
-        alist_fix_ledger(list, curr);
-      }
-
-      list->size -= 1;
 
       return TRUE;
     }
@@ -428,11 +468,11 @@ void alist_destroy(alist_t *list) {
 
   // Destroy ledger information if it exists
   destroy(list->ledger);
-#ifdef CLIB_STD_ALIST_COMPLEMENTARY
+#ifdef CLIB_STD_ALIST_COMPLEMENT
   destroy(list->ledger_complement);
 #endif
 
   // Free the memory occupied by the list itself
-  free(list->list_start); 
+  free(list->list_start);
   list->list_start = NULL;
 }

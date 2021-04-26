@@ -15,12 +15,15 @@
 #define APPENDTEST 50000
 #define TESTING_C_TIME_PROGRAM TRUE
 
-#define APPEND '1'
-#define REMOVE '2'
-#define DISPLAY '3'
-#define TRAVERSE '4'
-#define LIST_INFO '5'
-#define EXIT '6'
+#define EXIT 'e'
+#define APPEND 'a'
+#define REMOVE 'r'
+#define DISPLAY 'd'
+#define TRAVERSE 't'
+#define LIST_INFO 'o'
+#define LIST_INDEX 'i'
+#define LEDGER_INFO 'l'
+#define PRINT_ARRAY 'p'
 
 int code(int argc, char **argv);
 void bar(char *toPrint);
@@ -44,8 +47,11 @@ void print_string_alist(alist_t *list);
  */
 // Write your code here
 
+// TODO remove
+void printline(const char *line) { printf("%s\n", line); }
+
 void clearscreen() {
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 3; i++) {
     printf("\n");
   }
 }
@@ -56,30 +62,32 @@ void traverse_string_alist(alist_t *list) {
   }
 
   string_t buffer = new_string(DEFAULT_BUFFER_LEN);
-  size_t elemsize = list->block_size;
 
   int32_t curr = list->first;
-  uint32_t pos = 0;
+  int32_t pos = 1;
 
-  while (curr >= 0) {
+  while (TRUE) {
     alist_node_t *node =
         array_get_element(list->list_start, curr, list->block_size);
 
-    printf("CURRENT NODE: %u, %s\n", pos,
-           cstr((string_t *)&node[ALIST_ELEMENT]));
+    printf("CURRENT NODE: index: %u, str: %s, node: %d\n", curr,
+           cstr((string_t *)&node[ALIST_ELEMENT]), pos);
+    printf("%d) \tnext: %12d\tprev %12d\n", curr, node->next, node->prev);
     fileio_next_line(stdin, &buffer);
 
     if (cstring_equals(cstr(&buffer), "b")) {
       if (node->prev != ALIST_NULL) {
-        printf("GOING BACK\n");
-        node = array_get_element(list->list_start, node->prev + curr, elemsize);
+        printf("GOING BACK %d\n", node->prev);
+        curr += node->prev;
+        --pos;
       } else {
         printf("AT START OF LIST\n");
       }
     } else if (cstring_equals(cstr(&buffer), "n")) {
       if (node->next != ALIST_NULL) {
-        printf("GOING FORWARD\n");
-        node = array_get_element(list->list_start, node->next + curr, elemsize);
+        printf("GOING FORWARD %d\n", node->next);
+        curr += node->next;
+        ++pos;
       } else {
         printf("AT END OF LIST\n");
       }
@@ -95,28 +103,38 @@ void print_string_alist(alist_t *list) {
   }
 
   printf("First: %u\n", list->first);
+  for (int x = 0; x < list->size; x++) {
+    printf("%d ", list->ledger[x]);
+  }
+  printf("\n");
+  int32_t curr = list->first;
 
-  uint32_t i = 0;
+  while (curr >= 0) {
+    alist_node_t *node =
+        array_get_element(list->list_start, curr, list->block_size);
 
-  while (TRUE) {
-    alist_node_t* node = array_get_element(list->list_start, i, list->block_size);
-
-    printf("%d) Entry:\n\tnext: %u\n\tprev %u\n", i, node->next, node->prev);
+    printf("%d) \tnext: %12d\tprev %12d", curr, node->next, node->prev);
 
     strinfo(*((string_t *)(&node[ALIST_ELEMENT])));
 
-    if (i + 1 == list->size) {
-      printf("endof list\n");
-      break;
-    }
-
-    i++;
-    node = array_get_element(list->list_start, i, list->block_size);
+    curr += node->next;
   }
+  printf("endof list\n");
 }
 
 int code(int argc, char **argv) {
+  char pause = FALSE;
   alist_t list = new_alist(sizeof(string_t));
+  string_t str = string_make("1");
+  alist_append(&list, &str);
+  str = string_make("2");
+  alist_append(&list, &str);
+  str = string_make("3");
+  alist_append(&list, &str);
+  str = string_make("4");
+  alist_append(&list, &str);
+  str = string_make("5");
+  alist_append(&list, &str);
 
   list.compare = string_void_compare;
 
@@ -125,9 +143,17 @@ int code(int argc, char **argv) {
 
   while (TRUE) {
     clearscreen();
-    printf("%c = APPEND, %c = REMOVE, %c = DISPLAY, %c = TRAVERSE, %c = LIST "
-           "INFO, %c = EXIT\n",
-           APPEND, REMOVE, DISPLAY, TRAVERSE, LIST_INFO, EXIT);
+    // printf("%c) EXIT\n"
+    //        "%c) Append\n"
+    //        "%c) Remove\n"
+    //        "%c) Display\n"
+    //        "%c) Traverse\n"
+    //        "%c) List Info\n"
+    //        "%c) Index\n"
+    //        "%c) Ledger Info\n"
+    //        "%c) Print Array\n",
+    //        EXIT, APPEND, REMOVE, DISPLAY, TRAVERSE, LIST_INFO, LIST_INDEX,
+    //        LEDGER_INFO, PRINT_ARRAY);
 
     if (fileio_next_line(stdin, &buffer) && buffer.len == 1) {
       input = cstr(&buffer)[0];
@@ -154,6 +180,7 @@ int code(int argc, char **argv) {
         printf(" first: %u\n Last: %u\n capacity: %u\n size: %u\n\n",
                list.first, list.last, list.capacity, list.size);
         print_string_alist(&list);
+        pause = TRUE;
         break;
       case TRAVERSE:
         traverse_string_alist(&list);
@@ -162,6 +189,35 @@ int code(int argc, char **argv) {
         printf("List Information:\n\tCAPACITY:\n\t\t%u\n\tSIZE:\n\t\t%u\n",
                list.capacity, list.size);
         print_string_alist(&list);
+        pause = TRUE;
+        break;
+      case LIST_INDEX:
+        printf("What index?\n");
+        if (fileio_next_line(stdin, &buffer)) {
+          int32_t index = atoi(cstr(&buffer));
+          string_t *element = alist_index(&list, index);
+          printf("element at index %d: %s\n", index, cstr(element));
+        }
+        pause = TRUE;
+        break;
+      case LEDGER_INFO:
+        // TODO remove
+        printf("Ledger Information:\nLedger:\n");
+        for (int32_t i = 0; i < list.size; i++) {
+          printf("%d ", list.ledger[i]);
+        }
+        printf("\nComplement:\n");
+        for (int32_t i = 0; i < list.size; i++) {
+          printf("%d ", list.ledger_complement[i]);
+        }
+        printf("\n");
+        break;
+      case PRINT_ARRAY:
+        printf("\nArray Contents:\n");
+        for (int32_t i = 0; i < list.size; i++){
+          printf("%d) %s\n", i, cstr(((string_t*)alist_index(&list, i))));
+        }
+        pause = TRUE;
         break;
       case EXIT:
         return EXIT_SUCCESS;
@@ -172,14 +228,23 @@ int code(int argc, char **argv) {
     } else {
       printf("\nError - invalid input\n\n");
     }
+
+    // if (pause){
+    //   printf("\nEnter anything to continue... ");
+    //   fileio_next_line(stdin, &buffer);
+    //   pause = FALSE;
+    // }
+
   }
+
 
   return END_SUCCESS;
 }
 
 void strinfo(string_t info) {
-  printf("\tlen: %d\n\tmax: %d\n\tstr: %s\n", info.len, info.max_len,
-         cstr(&info));
+  // printf("\tlen: %d\n\tmax: %d\n\tstr: %s\n", info.len, info.max_len,
+  //        cstr(&info));
+  printf("\tstr: %s\n", cstr(&info));
 }
 
 // For formatting program output

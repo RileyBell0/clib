@@ -17,7 +17,8 @@
       "array.h": "c",
       "stdarg.h": "c",
       "stdint.h": "c",
-      "__tuple": "c"
+      "__tuple": "c",
+      "general.h": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{ ColumnLimit: 80 }",
 }
