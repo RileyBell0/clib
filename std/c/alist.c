@@ -1,14 +1,18 @@
 #include "../alist.h"
 
+// NOTE - for fixing code
 // alist_relative_ptr = int32_t dest - int32_t src
+
+char alist_iterator_done(alist_iterator_t *iterator);
+void* alist_iterator_first_node(alist_iterator_t* iterator);
+void* alist_iterator_next_node(alist_iterator_t* iterator);
+void* alist_iterator_prev_node(alist_iterator_t* iterator);
 
 alist_t new_alist(size_t element_size) {
   alist_t list;
 
   list.list_start = NULL;
-  list.ledger = NULL;
-  list.ledger_complement = NULL;
-  list.fast_index = TRUE;
+  list.destroy_on_remove = TRUE;
   list.first = ALIST_NULL;
   list.last = ALIST_NULL;
   list.size = 0;
@@ -21,13 +25,106 @@ alist_t new_alist(size_t element_size) {
   return list;
 }
 
+alist_iterator_t new_alist_iterator(alist_t* list, char from_start) {
+  alist_iterator_t iterator;
+  iterator.list = list;
+  iterator.done = alist_iterator_done;
+  iterator.index = ALIST_NULL;
+  iterator.from_start = from_start;
+
+  // Set direction dependent information
+  if (from_start) {
+    iterator.next_node_pos = list->first;
+    iterator.next = alist_iterator_next_node;
+  }
+  else {
+    iterator.next_node_pos = list->last;
+    iterator.next = alist_iterator_prev_node;
+  }
+
+  // Hook the iterator up to the first node in the given direction
+  iterator.first = alist_iterator_first_node;
+
+  return iterator;
+}
+
+char alist_iterator_done(alist_iterator_t *iterator) {
+  return iterator->curr_node_pos < 0;
+}
+
+void* alist_iterator_first_node(alist_iterator_t* iterator) {
+  // Get the index of the starting node
+  if (iterator->from_start) {
+    iterator->next_node_pos = iterator->list->first;
+  } else {
+    iterator->next_node_pos = iterator->list->last;
+  }
+
+  // Get the first element
+  void* element = iterator->next(iterator);
+
+  // Get the index of the starting node
+  if (iterator->from_start) {
+    iterator->index = 0;
+  } else {
+    iterator->index = iterator->list->size - 1;
+  }
+
+  return element;
+}
+
+void* alist_iterator_next_node(alist_iterator_t* iterator) {
+  // Moving to the next element
+  iterator->curr_node_pos = iterator->next_node_pos;
+  iterator->curr_node = array_get_element(iterator->list->list_start, 
+                                          iterator->next_node_pos, 
+                                          iterator->list->block_size);
+  iterator->next_node_pos += iterator->curr_node->next;
+  iterator->element = (void*)&iterator->curr_node[ALIST_ELEMENT];
+
+  iterator->index += 1;
+  // Returns non-null if not done
+  return iterator->element;
+}
+
+void* alist_iterator_prev_node(alist_iterator_t* iterator) {
+  // Moving to the next element
+  iterator->curr_node_pos = iterator->next_node_pos;
+  iterator->curr_node = array_get_element(iterator->list->list_start, 
+                                          iterator->next_node_pos, 
+                                          iterator->list->block_size);
+  iterator->next_node_pos += iterator->curr_node->prev;
+  iterator->element = (void*)&iterator->curr_node[ALIST_ELEMENT];
+
+  iterator->index -= 1;
+  // Returns non-null if not done
+  return iterator->element;
+}
+
+// TODO this could be made a fair bit faster removing the bloat of the
+// list iterator and just hard-coding it
 void *alist_index(alist_t *list, int32_t index) {
   if (index < 0 || index >= list->size) {
     return NULL;
   }
 
-  return &((alist_node_t*)array_get_element(list->list_start, list->ledger[index],
-                           list->block_size))[ALIST_ELEMENT];
+  // Create the iterator
+  alist_iterator_t it;
+  if (index <= list->size / 2) {
+    it = new_alist_iterator(list, TRUE);
+  } else {
+    it = new_alist_iterator(list, FALSE);
+  }
+
+  // return a pointer to the element at the given index
+  for (it.first(&it); !it.done(&it); it.next(&it)) {
+    if (it.index == index) {
+      return it.element;
+    }
+  }
+  
+  // This should only return null at this point if the list is invalid
+  return NULL;
 }
 
 int32_t *alist_generate_complementary_ledger(alist_t *list) {
@@ -89,6 +186,7 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
   // Cannot combine two lists of different types
   // Note that this does not check types, only the size of types
   uint32_t combined_size = list1->size + list2->size;
+
   if (list1->element_size != list2->element_size || combined_size >= INT32_MAX) {
     return NULL;
   }
@@ -101,57 +199,30 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
     alist_set_length(list1, combined_size);
   }
 
-  alist_node_t *list1_end =
-      array_get_element(list1->list_start, list1->size, list1->block_size);
-  alist_node_t *list2_first = array_get_element(
-      list1->list_start, list1->size - 1 + list2->first, list1->block_size);
-  alist_node_t *list1_last =
-      array_get_element(list1->list_start, list1->last, list1->block_size);
 
+  alist_node_t *list1_end = array_get_element(list1->list_start, 
+                                              list1->size, 
+                                              list1->block_size);
+
+  alist_node_t *list2_first = array_get_element(list1->list_start, 
+                                                list1->size + list2->first, 
+                                                list1->block_size);
+
+  alist_node_t *list1_last = array_get_element(list1->list_start, 
+                                               list1->last, 
+                                               list1->block_size);
+    
   // Copy list2's data across and ensure the copy succeeds
   assert(memcpy(list1_end, list2->list_start, list2->block_size * list2->size));
 
-  // Patch the references between the first element in list2 and the
-  // last element in list 1
-  list2_first->prev = list1->last - list1->size - 1 + list2->first;
-  list1_last->next = list1->size - 1 + list2->first - list1->last;
+  list2_first->prev = list1->last - list1->size - list2->first;
+  list1_last->next = list1->size + list2->first - list1->last;
 
   // New last element
-  list1->last = list1->size - 1 + list2->last;
-
-  // Update the ledgers
-  if (list1->fast_index) {
-    // Get the ledger information from the second list
-    if (list2->fast_index) {
-      assert(
-          memcpy(&list1->ledger[list1->size], list2->ledger, list2->size * sizeof(int32_t)));
-
-      assert(memcpy(&list1->ledger_complement[list1->size], list2->ledger_complement,
-                    list2->size * sizeof(int32_t)));
-    } else {
-      // No ledger information existed, generate it
-      int32_t *ledger_2 = alist_generate_ledger(list2);
-      assert(memcpy(&list1->ledger[list1->size], ledger_2, list2->size * sizeof(int32_t)));
-      free(ledger_2);
-
-      int32_t *ledger_complementary =
-          alist_generate_complementary_ledger(list2);
-      assert(memcpy(&list1->ledger_complement[list1->size], ledger_complementary,
-                    list2->size * sizeof(int32_t)));
-      free(ledger_complementary);
-    }
-
-    // Update the new ledger information to make it consistent with the
-    // new combined list
-    for (int32_t i = list1->size; i < list1->size + list2->size; i++) {
-      list1->ledger[i] += list1->size;
-
-      list1->ledger_complement[i] += list1->size;
-    }
-  }
+  list1->last = list1->size + list2->last;
 
   // New list size
-  list1->size = list1->size + list2->size;
+  list1->size = combined_size;
 
   return list1;
 }
@@ -163,13 +234,6 @@ void alist_extend(alist_t *list) {
   // Increment to avoid new_len getting stuck at 0 or 1
   if (new_len <= 1) {
     ++new_len;
-  }
-
-  if (list->fast_index) {
-    // Increase the ledger size to match
-    list->ledger = safe_realloc(list->ledger, new_len * sizeof(int32_t));
-    list->ledger_complement =
-        safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
   }
 
   // Convert new_len from num elements into num bytes
@@ -186,38 +250,12 @@ void alist_set_length(alist_t *list, int32_t new_len) {
     return;
   }
 
-  if (list->fast_index) {
-    // Increase the ledger size to match
-    list->ledger = safe_realloc(list->ledger, new_len * sizeof(int32_t));
-    list->ledger_complement =
-        safe_realloc(list->ledger_complement, new_len * sizeof(int32_t));
-  }
-
   // Convert new_len from num elements into num bytes
   size_t new_capacity = list->block_size * new_len;
 
   // Extend the list's memory and update its capacity
   list->list_start = safe_realloc(list->list_start, new_capacity);
   list->capacity = new_len;
-}
-
-void alist_fix_ledger(alist_t *list, int32_t removed_node) {
-  int32_t orig = list->ledger_complement[removed_node];
-
-  // TODO remember should only be +1 if the removal has already occured
-  // this works fine unless you moved where this is called from
-  list->ledger_complement[removed_node] = list->ledger_complement[list->size];
-
-  for (int32_t i = 0; i < list->size; i++) {
-    if (list->ledger_complement[i] > orig) {
-      list->ledger_complement[i] -= 1;
-    }
-  }
-
-  // Create the ledger from the complementary list
-  for (int32_t i = 0; i < list->size; i++) {
-    list->ledger[list->ledger_complement[i]] = i;
-  }
 }
 
 void alist_append(alist_t *list, void *data) {
@@ -249,17 +287,6 @@ void alist_append(alist_t *list, void *data) {
 
   // Copy the data in and Ensure the copy succeeds
   assert(memcpy(&newNode[ALIST_ELEMENT], data, list->element_size));
-
-  if (list->fast_index) {
-    // Record the location of the new node in the ledger
-    list->ledger[list->size] = list->size;
-  }
-
-  // Add new entry to the ledger for the new node if fast indexing enabled
-  if (list->fast_index) {
-    list->ledger_complement[list->size] = list->size;
-    list->ledger[list->size] = list->size;
-  }
 
   list->size += 1;
 }
@@ -315,6 +342,14 @@ void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
     }
   }
 
+  alist_node_t *moved_node =
+      array_get_element(list->list_start, curr, list->block_size);
+
+  // Delete the data from the node if requested
+  if (list->destroy_on_remove && list->destroy) {
+    list->destroy(&moved_node[ALIST_ELEMENT]);
+  }
+
   // Fill the empty spot in the array (if one exists)
   if (curr != list_final) {
 
@@ -328,8 +363,6 @@ void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
 
     // Fill new empty spot in the array with the current final element
     array_set_element(list->list_start, base_node, curr, list->block_size);
-    alist_node_t *moved_node =
-        array_get_element(list->list_start, curr, list->block_size);
 
     // Update the pointers of the moved node to match its new position
     if (base_next != ALIST_NULL) {
@@ -364,13 +397,6 @@ void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
   }
 
   list->size -= 1;
-
-  if (list->fast_index) {
-    /*
-     * Fix the ledger information
-     */
-    alist_fix_ledger(list, curr);
-  }
 }
 
 int alist_remove(alist_t *list, void *element) {
@@ -378,24 +404,13 @@ int alist_remove(alist_t *list, void *element) {
     return FALSE;
   }
 
-  int32_t curr = list->first;
-
   // Find the first occurance of the given element in the list and remove it
-  while (curr >= 0) {
-
-    // Get the address of the current list element
-    alist_node_t *node =
-        array_get_element(list->list_start, curr, list->block_size);
-
-    // Check if it matches the given element, if so, remove it
-    if (list->compare(element, &node[ALIST_ELEMENT]) == 0) {
-      
-      alist_remove_node(list, node, curr);
-
+  alist_iterator_t iterator = new_alist_iterator(list, TRUE);
+  for (void* node_data = iterator.first(&iterator); !iterator.done(&iterator); node_data = iterator.next(&iterator)) {
+    if (list->compare(element, node_data) == 0) {
+      alist_remove_node(list, iterator.curr_node, iterator.next_node_pos - iterator.curr_node->next);
       return TRUE;
     }
-
-    curr += node->next;
   }
 
   return FALSE;
@@ -433,10 +448,6 @@ void alist_destroy(alist_t *list) {
   list->first = ALIST_NULL;
   list->last = ALIST_NULL;
 #endif
-
-  // Destroy ledger information if it exists
-  destroy(list->ledger);
-  destroy(list->ledger_complement);
 
   // Free the memory occupied by the list itself
   free(list->list_start);

@@ -9,7 +9,7 @@
 #define ALIST_NULL INT32_MIN
 #define ALIST_SAFE_DESTROY
 #define ALIST_ELEMENT 1
-#define CLIB_STD_ALIST_COMPLEMENT TRUE
+#include "string.h"
 
 /*
  * All of these lists use -1 as a NULL value
@@ -31,11 +31,7 @@ typedef struct alist_node_t {
  */
 typedef struct alist_t {
   void *list_start;
-  int32_t *ledger; // node x is at index ledger[x] in the array
-#ifdef CLIB_STD_ALIST_COMPLEMENT
-  int32_t *ledger_complement; // ledger_complement[x] is node x in the list
-#endif
-  char fast_index;
+  char destroy_on_remove;
   int32_t first;
   int32_t last;
   int32_t size;
@@ -46,23 +42,27 @@ typedef struct alist_t {
   void (*destroy)(void *data);
 } alist_t;
 
-#ifdef CLIB_STD_ALIST_COMPLEMENT
-/*
- * Generates a complementary ledger for a given list
-*/
-int32_t* alist_generate_complementary_ledger(alist_t* list);
-#endif
+typedef struct alist_iterator_t {
+  alist_t* list;
+  char from_start;
+  int32_t next_node_pos; // Next node's position in the array
+  int32_t curr_node_pos; // Current node's position in the array
+  int32_t index; // current node's index in the list
+  alist_node_t* curr_node;
+  void* element;
+  void* (*next)(struct alist_iterator_t* iterator);
+  char (*done)(struct alist_iterator_t* iterator);
+  void* (*first)(struct alist_iterator_t* iterator);
+} alist_iterator_t;
+
+// Creates a list iterator for the alist
+alist_iterator_t new_alist_iterator(alist_t* list, char from_start);
 
 /*
  * returns the element at the given index, or Null
  * if out of bounds of the list
 */
 void* alist_index(alist_t* list, int32_t index);
-
-/*
- * Given a list, generates a ledger array for the alist
-*/
-int32_t* alist_generate_ledger(alist_t* list);
 
 /*
  * Given two alists, combines them into list1 by appending list2
@@ -94,12 +94,6 @@ void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr);
  * Removes the first element in the alist matching the provided element
  */
 int alist_remove(alist_t *list, void *element);
-
-/*
- * Fixes the ledger for faster indexing 
- * Call immediately after removing a node
-*/
-void alist_fix_ledger(alist_t *list, int32_t removed_node);
 
 /*
  * Ensures the given list has at least the capacity 'new_len', if not

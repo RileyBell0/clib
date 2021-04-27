@@ -24,8 +24,7 @@
 #define TRAVERSE '4'
 #define LIST_INFO '5'
 #define LIST_INDEX '6'
-#define LEDGER_INFO '7'
-#define DISPLAY '8'
+#define DISPLAY '7'
 
 int code2(int argc, char **argv);
 int code(int argc, char **argv);
@@ -107,9 +106,6 @@ void print_string_alist(alist_t *list) {
   }
 
   printf("First: %u\n", list->first);
-  for (int x = 0; x < list->size; x++) {
-    printf("%d ", list->ledger[x]);
-  }
   printf("\n");
   int32_t curr = list->first;
 
@@ -154,10 +150,9 @@ int code(int argc, char **argv) {
            "%c) Traverse\n"
            "%c) List Info\n"
            "%c) Index\n"
-           "%c) Ledger Info\n"
            "%c) Display\n",
            EXIT, APPEND, REMOVE, PRINT_ARRAY, TRAVERSE, LIST_INFO, LIST_INDEX,
-           LEDGER_INFO, DISPLAY);
+            DISPLAY);
 
     if (fileio_next_line(stdin, &buffer) && buffer.len == 1) {
       input = cstr(&buffer)[0];
@@ -203,18 +198,6 @@ int code(int argc, char **argv) {
           printf("element at index %d: %s\n", index, cstr(element));
         }
         pause = TRUE;
-        break;
-      case LEDGER_INFO:
-        // TODO remove
-        printf("Ledger Information:\nLedger:\n");
-        for (int32_t i = 0; i < list.size; i++) {
-          printf("%d ", list.ledger[i]);
-        }
-        printf("\nComplement:\n");
-        for (int32_t i = 0; i < list.size; i++) {
-          printf("%d ", list.ledger_complement[i]);
-        }
-        printf("\n");
         break;
       case PRINT_ARRAY:
         printf("\nArray Contents:\n");
@@ -333,8 +316,9 @@ alist_t make_single_char_str_list(char* str_in) {
 }
 
 int code2(int argc, char **argv){
-  alist_t list1 = make_single_char_str_list("12345");
-  alist_t list2 = make_single_char_str_list("abcde");
+  alist_t list1 = make_single_char_str_list("0123456789");
+  alist_t list2 = make_single_char_str_list("abcdefghij");
+  string_t nullstr = string_make("NULL");
 
   list1.compare = string_void_compare;
   list2.compare = string_void_compare;
@@ -362,9 +346,31 @@ int code2(int argc, char **argv){
         list_num = 2;
         break;
       case PRINT_ARRAY:
+        printf("List information\nsize: %d\n", curr_list->size);
         printf("\nArray Contents:\n");
-        for (int32_t i = 0; i < curr_list->size; i++) {
-          printf("%d) %s\n", i, cstr(((string_t *)alist_index(curr_list, i))));
+        alist_iterator_t iterator = new_alist_iterator(curr_list, TRUE);
+        int i = 0;
+        for (string_t *element = (string_t *)iterator.first(&iterator);
+             !iterator.done(&iterator); element = iterator.next(&iterator)) {
+          printf("%03d| %s  ", iterator.index, cstr(element));
+          printf("prev ");
+          if (iterator.curr_node->prev == ALIST_NULL) {
+            printf("%11s", cstr(&nullstr));
+          } else {
+            printf("%11d", iterator.curr_node->prev);
+          }
+          printf(" next ");
+          if (iterator.curr_node->next == ALIST_NULL) {
+            printf("%11s", cstr(&nullstr));
+          }
+          else{
+            printf("%11d", iterator.curr_node->next);
+          }
+          printf("\n");
+          i++;
+          if (i > 20){
+            break;
+          }
         }
         break;
       case B_APPEND_LIST:

@@ -18,7 +18,9 @@
       "stdarg.h": "c",
       "stdint.h": "c",
       "__tuple": "c",
-      "general.h": "c"
+      "general.h": "c",
+      "bitset": "c",
+      "utility": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{ ColumnLimit: 80 }",
 }
