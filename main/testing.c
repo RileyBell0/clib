@@ -349,7 +349,6 @@ int code2(int argc, char **argv){
         printf("List information\nsize: %d\n", curr_list->size);
         printf("\nArray Contents:\n");
         alist_iterator_t iterator = new_alist_iterator(curr_list, TRUE);
-        int i = 0;
         for (string_t *element = (string_t *)iterator.first(&iterator);
              !iterator.done(&iterator); element = iterator.next(&iterator)) {
           printf("%03d| %s  ", iterator.index, cstr(element));
@@ -367,10 +366,6 @@ int code2(int argc, char **argv){
             printf("%11d", iterator.curr_node->next);
           }
           printf("\n");
-          i++;
-          if (i > 20){
-            break;
-          }
         }
         break;
       case B_APPEND_LIST:

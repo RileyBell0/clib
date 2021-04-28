@@ -226,7 +226,7 @@ config_t read_config_file(char *filePath)
                 currentConfigSaved = TRUE;
 
                 array_t convertedFields = dynamic_array_to_array(&fields);
-                newVar.data = convertedFields.dat;
+                newVar.data = convertedFields.data;
                 newVar.len = convertedFields.len;
 
                 dynamic_array_append(&results, &newVar);
@@ -240,7 +240,7 @@ config_t read_config_file(char *filePath)
     if (!currentConfigSaved)
     {
         array_t convertedFields = dynamic_array_to_array(&fields);
-        newVar.data = convertedFields.dat;
+        newVar.data = convertedFields.data;
         newVar.len = convertedFields.len;
 
         dynamic_array_append(&results, &newVar);
@@ -252,7 +252,7 @@ config_t read_config_file(char *filePath)
     array_destroy(restricted);
 
     config.len = final.len;
-    config.vars = final.dat;
+    config.vars = final.data;
     config.modified = FALSE;
     config.configLocation = filePath;
 

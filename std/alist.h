@@ -59,6 +59,11 @@ typedef struct alist_iterator_t {
 alist_iterator_t new_alist_iterator(alist_t* list, char from_start);
 
 /*
+ * Converts an alist into an array and returns it
+*/
+array_t alist_to_array(alist_t* list);
+
+/*
  * returns the element at the given index, or Null
  * if out of bounds of the list
 */

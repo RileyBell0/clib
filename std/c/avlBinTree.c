@@ -181,7 +181,7 @@ void avl_bin_tree_fill_arr(array_t *arr, avl_bin_tree_node_t *node, int *pos, un
     avl_bin_tree_fill_arr(arr, node->left, pos, elementSize);
 
     // Add the element in the node to the array
-    array_set_element(arr->dat, node->data, *pos, elementSize);
+    array_set_element(arr->data, node->data, *pos, elementSize);
     *pos += 1;
 
     /* then recur on right child */

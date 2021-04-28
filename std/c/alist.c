@@ -76,6 +76,11 @@ void* alist_iterator_first_node(alist_iterator_t* iterator) {
 void* alist_iterator_next_node(alist_iterator_t* iterator) {
   // Moving to the next element
   iterator->curr_node_pos = iterator->next_node_pos;
+
+  if (iterator->next_node_pos < 0) {
+    return NULL;
+  } 
+
   iterator->curr_node = array_get_element(iterator->list->list_start, 
                                           iterator->next_node_pos, 
                                           iterator->list->block_size);
@@ -90,6 +95,11 @@ void* alist_iterator_next_node(alist_iterator_t* iterator) {
 void* alist_iterator_prev_node(alist_iterator_t* iterator) {
   // Moving to the next element
   iterator->curr_node_pos = iterator->next_node_pos;
+
+  if (iterator->next_node_pos < 0) {
+    return NULL;
+  } 
+
   iterator->curr_node = array_get_element(iterator->list->list_start, 
                                           iterator->next_node_pos, 
                                           iterator->list->block_size);
@@ -122,75 +132,54 @@ void *alist_index(alist_t *list, int32_t index) {
       return it.element;
     }
   }
-  
+
   // This should only return null at this point if the list is invalid
   return NULL;
 }
 
-int32_t *alist_generate_complementary_ledger(alist_t *list) {
-  if (list->capacity == 0) {
-    return NULL;
+alist_t alist_copy(alist_t* list) {
+  alist_t new_list;
+
+  // The list being copied is empty, so return an empty list of the same
+  // element size
+  if (list->size == 0) {
+    new_list = new_alist(list->element_size);
+    return new_list;
+
   }
 
-  int32_t *ledger = safe_malloc(sizeof(int32_t) * list->capacity);
+  new_list.block_size = list->block_size;
+  new_list.capacity = list->capacity;
+  new_list.compare = list->compare;
+  new_list.destroy = list->destroy;
+  new_list.destroy_on_remove = list->destroy_on_remove;
+  new_list.element_size = list->element_size;
+  new_list.first = list->first;
+  new_list.last = list->last;
+  new_list.size = list->size;
+  new_list.list_start = safe_malloc(new_list.block_size * new_list.size);
+  assert(memcpy(new_list.list_start, list->list_start, new_list.block_size * new_list.size));
 
-  int32_t curr = list->first;
-  if (curr != ALIST_NULL) {
-    int32_t curr_node = 0;
-    while (curr >= 0) {
-      alist_node_t *node =
-          array_get_element(list->list_start, curr, list->block_size);
-
-      // Save the location of the current node to the ledger
-      ledger[curr] = curr_node;
-
-      // Move on to the next node
-      curr += node->next;
-      ++curr_node;
-    }
-  }
-
-  return ledger;
+  return new_list;
 }
 
-int32_t *alist_generate_ledger(alist_t *list) {
-  if (list->capacity == 0) {
-    return NULL;
-  }
-
-  int32_t *ledger = safe_malloc(sizeof(int32_t) * list->capacity);
-
-  int32_t curr = list->first;
-  if (curr != ALIST_NULL) {
-    int32_t curr_node = 0;
-    while (curr >= 0) {
-      alist_node_t *node =
-          array_get_element(list->list_start, curr, list->block_size);
-
-      // Save the location of the current node to the ledger
-      ledger[curr_node] = curr;
-
-      // Move on to the next node
-      curr += node->next;
-      ++curr_node;
-    }
-  }
-
-  return ledger;
-}
-
-// TODO this doesnt combine the lists if list1 is empty
-// it should in that case copy the list
-// need to make that function
 alist_t *alist_combine(alist_t *list1, alist_t *list2) {
+  if (!list1 || !list2) {
+    return list1;
+  }
   // Cannot combine two lists of different types
   // Note that this does not check types, only the size of types
   uint32_t combined_size = list1->size + list2->size;
 
   if (list1->element_size != list2->element_size || combined_size >= INT32_MAX) {
-    return NULL;
+    return list1;
   }
   if (list2->size == 0) {
+    return list1;
+  }
+  if (list1->size == 0) {
+    alist_destroy(list1);
+    *list1 = alist_copy(list2);
     return list1;
   }
 
@@ -291,54 +280,66 @@ void alist_append(alist_t *list, void *data) {
   list->size += 1;
 }
 
-/*
- * so we want an array which is instantly accessable
- * and yet also changes
- * is there a way we can do this?
- * im not sure if its even possible
- * im starting to think that it may not be
- * if we delete an element in a list,
- * fixing the ledger is easy
- */
+array_t alist_to_array(alist_t* list) {
+  array_t array = new_array(list->size, list->element_size);
+
+  // Populate the array
+  alist_iterator_t it = new_alist_iterator(list, TRUE);
+  for (it.first(&it); !it.done(&it); it.next(&it)) {
+    array_set_index(&array, it.index, it.element);
+  }
+
+  return array;
+}
 
 void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
   // Calculate the positions of the surrounding nodes
-  int32_t next = curr + node->next; // alist min
-  int32_t prev = curr + node->prev; // 1
-  int32_t list_final = list->size - 1; // 2
+  int32_t next = curr + node->next;
+  int32_t prev = curr + node->prev;
+  int32_t list_final = list->size - 1;
 
   // Make the nodes around the removed node point at eachother
   if (prev >= 0) {
     alist_node_t *prevnode = ((alist_node_t *)array_get_element(
         list->list_start, prev, list->block_size));
+
+    // Have the previous node point at the next node
     if (next >= 0) {
       prevnode->next = next - prev;
     } else {
       prevnode->next = ALIST_NULL;
     }
 
-    // Fix overall list references
-    if (list->last == curr) {
-      list->last = prev;
-    }
-    else {
-      list->last = ALIST_NULL;
-    }
   }
   if (next >= 0) {
     alist_node_t *nextnode = ((alist_node_t *)array_get_element(
         list->list_start, next, list->block_size));
+    
+    // Have the next node point at the previous node
     if (prev >= 0) {
       nextnode->prev = prev - next;
     } else {
       nextnode->prev = ALIST_NULL;
     }
+  }
 
-    // Fix overall list references
-    if (list->first == curr) {
+  // Fix overall list references
+  if (list->first == curr) {
+    if (next >= 0) {
       list->first = next;
-    } else {
+    }
+    else {
       list->first = ALIST_NULL;
+    }
+  }
+
+  // Fix overall list references
+  if (list->last == curr) {
+    if (prev >= 0) {
+      list->last = next;
+    }
+    else {
+      list->last = ALIST_NULL;
     }
   }
 
