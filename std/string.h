@@ -28,6 +28,34 @@
  *      cstring compare
  *      cstring compare with len
  *      string compare with len 
+ * 
+ * need to be able to write a certain number of characters to a string
+ * like given a char array write the given number of characters
+*/
+
+/*
+ * Could do with a const bool
+ * which we could chuck into the local bool
+ * 1 means local non-const
+ * 0 means non-local non-const
+ * 2 means const non-local
+ * 3 means const and local
+ * 
+ * this would make destroying any string safe
+ * so you could chuck const strings into a list
+ * and forget about them
+ * and it means that reallocing wont hpapen to thiem
+ * and yeah
+ * safe
+ * no destroy
+ * might be worth checking or looking into
+ * because currently thats a huge downside is that you can chuck any old
+ * cstring into here but it makes issues happen when youre not suppoed to edit it
+ * so the easiest thing to do would be to remove that option entirely
+ * and have cstrings be forced to be copied into here
+ * but idk
+ * 
+ * also yeah more method ideads
 */
 
 #ifndef CLIB_STD_STRING_H
@@ -80,6 +108,7 @@ typedef struct string_t
  * thats not that big of a deal in terms of performmae and istnte really an issue
 */
 
+void string_set_max_len(string_t* str, uint32_t max_len);
 
 /*
  * Removes all data from the string, making its length zero
@@ -109,12 +138,6 @@ string_t string_make(char* src);
  * THE STRING_T THIS FUNCTION RETURNS
 */
 string_t cstring_wrap(char* src);
-
-/*
- * Makes the string point at a preexisting C string, make sure the string it points to is mutable and not
- * referenced elsewhere as it will now be managed by string_t
-*/
-string_t* string_set(string_t *str, char* src);
 
 /*
  * returns a new empty string with the max length of 'len'

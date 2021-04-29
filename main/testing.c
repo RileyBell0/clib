@@ -316,6 +316,18 @@ alist_t make_single_char_str_list(char* str_in) {
 }
 
 int code2(int argc, char **argv){
+  printf("im cool\n");
+  strlen(NULL);
+  int val = 1;
+  char * yes = safe_malloc(100);
+  printf("awesome\n");
+  strcat(yes, NULL);
+  printf("cool\n");
+  val *= 1.5f;
+  for (int i = 0; i < 5; i++) {
+    printf("%d\n", val);
+  }
+  return 0;
   alist_t list1 = make_single_char_str_list("0123456789");
   alist_t list2 = make_single_char_str_list("abcdefghij");
   string_t nullstr = string_make("NULL");

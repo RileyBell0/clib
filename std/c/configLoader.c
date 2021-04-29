@@ -355,7 +355,7 @@ config_var_t *config_get_var(config_t *config, char *name)
     // len is 1 because a config_var_t can store multiple values
     key.len = 1;
 
-    string_set(&key.varName, name);
+    // string_set(&key.varName, name);
 
     /*
      * Search the sorted config list for the requested var
