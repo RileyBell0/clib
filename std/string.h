@@ -15,7 +15,6 @@
  * any tangible performance benefit could arise as a result
 */
 
-
 /*
  * TO IMPLEMENT
  *      String split
@@ -36,16 +35,14 @@
 
 #include <string.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include "array.h"
-
-//TODO remove stdio
-#include <stdio.h>
 
 #define SPACE_FOR_NULL 1
 #define REALLOC_MULTIPLIER 1.5
 #define EXTENSION_ASSURANCE 1
 #define SPACE_FOR_LOCAL_BOOL 1
-#define SHORT_STR_BUF (__WORDSIZE-8)-sizeof(void*) - SPACE_FOR_LOCAL_BOOL
+#define SHORT_STR_BUF __WORDSIZE - sizeof(void*) - (2 * sizeof(int32_t)) - SPACE_FOR_LOCAL_BOOL
 #define SHORT_STR_LEN SHORT_STR_BUF-SPACE_FOR_NULL
 /*
  * Dealing with strings, do the same thing youd normally do, pass a pointer
@@ -61,8 +58,8 @@
 typedef struct string_t
 {
     char *_str;
-    unsigned int len;
-    unsigned int max_len;
+    uint32_t len;
+    uint32_t max_len; // number of characaters able to be stored - 1 (does not count left for null char)
     // boolean value
     char local;
     char small[SHORT_STR_BUF];
@@ -90,9 +87,14 @@ typedef struct string_t
 void string_clear(string_t* to_clear);
 
 /*
+ * Returns a new empty string
+*/
+string_t empty_string();
+
+/*
  * If the capacity of the string is not newLen or greater, extends it to be of said length
 */
-void string_allocate(string_t* str, unsigned int newLen);
+void string_allocate(string_t* str, uint32_t newLen);
 
 /*
  * Takes a C string as an input and converts it into a string_t
@@ -117,7 +119,7 @@ string_t* string_set(string_t *str, char* src);
 /*
  * returns a new empty string with the max length of 'len'
 */
-string_t new_string(unsigned int len);
+string_t new_string(uint32_t len);
 
 /*
  * strcmp() called on both cstring components of the strings given
@@ -147,12 +149,12 @@ string_t string_copy(string_t *source);
 /*
  * Shrinks the given string to the new length.
 */
-void string_shrink(string_t* source, unsigned int new_len);
+void string_shrink(string_t* source, uint32_t new_len);
 
 /*
  * Adds 'len' capacity to the string
 */
-void string_lengthen(string_t *toExtend, unsigned int len);
+void string_lengthen(string_t *str, uint32_t len);
 
 /*
  * Returns TRUE if the given strings are equal within the given
@@ -160,7 +162,7 @@ void string_lengthen(string_t *toExtend, unsigned int len);
  * 
  * If you want to compare the strings just use strcmp
 */
-int cstring_equals_range(char* str1, char* str2, int compareRange);
+int cstring_equals_range(char* str1, char* str2, int compare_range);
 int cstring_equals(char* str1, char* str2);
 int string_equals(string_t *str1, string_t *str2);
 
@@ -168,7 +170,7 @@ int string_equals(string_t *str1, string_t *str2);
 void string_null_terminate(string_t* str);
 
 // Writes the given char to the end of the string
-void string_write_char(string_t *base, char toAdd);
+void string_write_char(string_t *base, char to_add);
 
 // /*
 //  * Splits a string based on the given delimiting character
@@ -181,7 +183,7 @@ void string_write_char(string_t *base, char toAdd);
  * Counts the number of times a given character appears within
  * a string
 */
-unsigned int string_count_occurances(string_t* source, char delim);
+uint32_t string_count_occurances(string_t* source, char delim);
 
 /*
  * Appends the given cstrings to the string 'base'
@@ -230,10 +232,10 @@ string_t* string_concat_multi(string_t *base, string_t *extension, ...);
 string_t* string_concat(string_t *base, string_t *extension);
 
 // Realloc's the given string, updating its length
-void string_extend(string_t *toExtend);
+void string_extend(string_t *str);
 
 // murders a string in cold blood
-void string_destroy(string_t *toDestroy);
+void string_destroy(string_t *str);
 
 /*
  * Same as string_destroy but doesnt throw errors
@@ -242,6 +244,6 @@ void string_destroy(string_t *toDestroy);
  * 
  * Primarily, this just quietens compiler warnings
 */
-void void_string_destroy(void *toDestroy);
+void void_string_destroy(void *str);
 
 #endif

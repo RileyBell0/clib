@@ -20,7 +20,8 @@
       "__tuple": "c",
       "general.h": "c",
       "bitset": "c",
-      "utility": "c"
+      "utility": "c",
+      "iosfwd": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{ ColumnLimit: 80 }",
 }

@@ -21,7 +21,7 @@
 #include "alist.h"
 #include "fileIO.h"
 
-typedef struct ordered_dirent_t 
+typedef struct categorised_dirent_t 
 {
     alist_t block;
     alist_t character;
@@ -31,7 +31,7 @@ typedef struct ordered_dirent_t
     alist_t regular;
     alist_t socket;
     alist_t unknown;
-} ordered_dirent_t ;
+} categorised_dirent_t ;
 
 unsigned char get_file_type(char *path);
 
@@ -52,13 +52,13 @@ alist_t dir_all_entries_list(string_t* path);
 */
 alist_t dir_all_entries_of_type(string_t* path, unsigned char type);
 
-ordered_dirent_t new_ordered_dirent_t();
+categorised_dirent_t new_categorised_dirent_t();
 
-void ordered_dirent_insert(ordered_dirent_t *ordered, struct dirent *entry);
+void categorised_dirent_insert(categorised_dirent_t *ordered, struct dirent *entry);
 
-void ordered_dirent_destroy(ordered_dirent_t* ordered);
+void categorised_dirent_destroy(categorised_dirent_t* ordered);
 
-ordered_dirent_t dir_all_entries_categorised(string_t* path);
+categorised_dirent_t dir_all_entries_categorised(string_t* path);
 
 alist_t dir_files_with_extension_recur(string_t* path, string_t* extension);
 
