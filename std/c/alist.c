@@ -1,7 +1,7 @@
 #include "../alist.h"
 
 // NOTE - for fixing code
-// alist_relative_ptr = int32_t dest - int32_t src
+// alist_relative_ptr = int dest - int src
 
 char alist_iterator_done(alist_iterator_t *iterator);
 void* alist_iterator_first_node(alist_iterator_t* iterator);
@@ -113,7 +113,8 @@ void* alist_iterator_prev_node(alist_iterator_t* iterator) {
 
 // TODO this could be made a fair bit faster removing the bloat of the
 // list iterator and just hard-coding it
-void *alist_index(alist_t *list, int32_t index) {
+// Index is an int instead of unsigned int to demonstrate the limited size of an 
+void *alist_index(alist_t *list, int index) {
   if (index < 0 || index >= list->size) {
     return NULL;
   }
@@ -169,7 +170,7 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
   }
   // Cannot combine two lists of different types
   // Note that this does not check types, only the size of types
-  uint32_t combined_size = list1->size + list2->size;
+  unsigned int combined_size = list1->size + list2->size;
 
   if (list1->element_size != list2->element_size || combined_size >= INT32_MAX) {
     return list1;
@@ -218,7 +219,7 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
 
 void alist_extend(alist_t *list) {
   // Calculate the new length, realloc factor set to be 1.5x
-  int32_t new_len = list->capacity + list->capacity / 2;
+  int new_len = list->capacity + list->capacity / 2;
 
   // Increment to avoid new_len getting stuck at 0 or 1
   if (new_len <= 1) {
@@ -233,7 +234,7 @@ void alist_extend(alist_t *list) {
   list->capacity = new_len;
 }
 
-void alist_set_length(alist_t *list, int32_t new_len) {
+void alist_set_length(alist_t *list, int new_len) {
   // Can only increase the list's length
   if (new_len <= list->capacity) {
     return;
@@ -292,11 +293,11 @@ array_t alist_to_array(alist_t* list) {
   return array;
 }
 
-void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
+void alist_remove_node(alist_t *list, alist_node_t *node, unsigned int curr) {
   // Calculate the positions of the surrounding nodes
-  int32_t next = curr + node->next;
-  int32_t prev = curr + node->prev;
-  int32_t list_final = list->size - 1;
+  int next = curr + node->next;
+  int prev = curr + node->prev;
+  int list_final = list->size - 1;
 
   // Make the nodes around the removed node point at eachother
   if (prev >= 0) {
@@ -355,12 +356,12 @@ void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
   if (curr != list_final) {
 
     // Get the last (array[-1]) element in the array
-    int32_t node_orig_pos = list_final;
+    int node_orig_pos = list_final;
     alist_node_t *base_node =
         array_get_element(list->list_start, node_orig_pos, list->block_size);
 
-    int32_t base_next = base_node->next;
-    int32_t base_prev = base_node->prev;
+    int base_next = base_node->next;
+    int base_prev = base_node->prev;
 
     // Fill new empty spot in the array with the current final element
     array_set_element(list->list_start, base_node, curr, list->block_size);
@@ -376,13 +377,13 @@ void alist_remove_node(alist_t *list, alist_node_t *node, uint32_t curr) {
 
     // Fix the surrounding node pointers
     if (moved_node->prev != ALIST_NULL) {
-      int32_t prev_node_pos = node_orig_pos + base_prev;
+      int prev_node_pos = node_orig_pos + base_prev;
       ((alist_node_t *)array_get_element(list->list_start, prev_node_pos,
                                          list->block_size))
           ->next = curr - prev_node_pos;
     }
     if (moved_node->next != ALIST_NULL) {
-      int32_t next_node_pos = node_orig_pos + base_next;
+      int next_node_pos = node_orig_pos + base_next;
       ((alist_node_t *)array_get_element(list->list_start, next_node_pos,
                                          list->block_size))
           ->prev = curr - next_node_pos;
@@ -417,7 +418,7 @@ int alist_remove(alist_t *list, void *element) {
   return FALSE;
 }
 
-void *alist_get_element(alist_t *list, uint32_t element) {
+void *alist_get_element(alist_t *list, unsigned int element) {
   alist_node_t *node = (alist_node_t *)array_get_element(
       list->list_start, element, list->element_size + sizeof(alist_node_t));
   return (void *)&node[ALIST_ELEMENT];
@@ -433,7 +434,7 @@ void alist_destroy(alist_t *list) {
   if (list->destroy) {
 
     // Go through the list and destroy each element
-    for (uint32_t i = 0; i < list->size; i++) {
+    for (unsigned int i = 0; i < list->size; i++) {
 
       // Get a reference to and destroy the current element in the list
       alist_node_t *node =

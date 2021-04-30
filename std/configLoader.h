@@ -77,7 +77,7 @@ typedef struct config_t
  * 
  * complexField will be set to true if the field read was enclosed by quotes
 */
-int extract_field(string_t str, unsigned int *pos, string_t *dest, int *complexField);
+int extract_field(string_t* str, unsigned int *pos, string_t *dest, int *complexField);
 
 /*
  * Loads all variables in a suitable config file into

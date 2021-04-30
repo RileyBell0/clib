@@ -7,6 +7,7 @@
 #define CLIB_STD_GENERAL_H
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <assert.h>
 #include "bool.h"
 

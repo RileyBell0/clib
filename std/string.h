@@ -70,7 +70,7 @@
 #define REALLOC_MULTIPLIER 1.5
 #define EXTENSION_ASSURANCE 1
 #define SPACE_FOR_LOCAL_BOOL 1
-#define SHORT_STR_BUF __WORDSIZE - sizeof(void*) - (2 * sizeof(int32_t)) - SPACE_FOR_LOCAL_BOOL
+#define SHORT_STR_BUF __WORDSIZE - sizeof(void*) - (2 * sizeof(int)) - SPACE_FOR_LOCAL_BOOL
 #define SHORT_STR_LEN SHORT_STR_BUF-SPACE_FOR_NULL
 /*
  * Dealing with strings, do the same thing youd normally do, pass a pointer
@@ -86,8 +86,8 @@
 typedef struct string_t
 {
     char *_str;
-    uint32_t len;
-    uint32_t max_len; // number of characaters able to be stored - 1 (does not count left for null char)
+    unsigned int len;
+    unsigned int max_len; // number of characaters able to be stored - 1 (does not count left for null char)
     // boolean value
     char local;
     char small[SHORT_STR_BUF];
@@ -108,7 +108,7 @@ typedef struct string_t
  * thats not that big of a deal in terms of performmae and istnte really an issue
 */
 
-void string_set_max_len(string_t* str, uint32_t max_len);
+void string_set_max_len(string_t* str, unsigned int max_len);
 
 /*
  * Removes all data from the string, making its length zero
@@ -123,7 +123,7 @@ string_t empty_string();
 /*
  * If the capacity of the string is not newLen or greater, extends it to be of said length
 */
-void string_allocate(string_t* str, uint32_t newLen);
+void string_allocate(string_t* str, unsigned int newLen);
 
 /*
  * Takes a C string as an input and converts it into a string_t
@@ -142,7 +142,7 @@ string_t cstring_wrap(char* src);
 /*
  * returns a new empty string with the max length of 'len'
 */
-string_t new_string(uint32_t len);
+string_t new_string(unsigned int len);
 
 /*
  * strcmp() called on both cstring components of the strings given
@@ -172,12 +172,12 @@ string_t string_copy(string_t *source);
 /*
  * Shrinks the given string to the new length.
 */
-void string_shrink(string_t* source, uint32_t new_len);
+void string_shrink(string_t* source, unsigned int new_len);
 
 /*
  * Adds 'len' capacity to the string
 */
-void string_lengthen(string_t *str, uint32_t len);
+void string_lengthen(string_t *str, unsigned int len);
 
 /*
  * Returns TRUE if the given strings are equal within the given
@@ -206,7 +206,7 @@ void string_write_char(string_t *base, char to_add);
  * Counts the number of times a given character appears within
  * a string
 */
-uint32_t string_count_occurances(string_t* source, char delim);
+unsigned int string_count_occurances(string_t* source, char delim);
 
 /*
  * Appends the given cstrings to the string 'base'

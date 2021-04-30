@@ -1,7 +1,7 @@
 #include "../string.h"
 
 // RE-CHECKED 30/04/2021
-void string_shrink(string_t *source, uint32_t new_len) {
+void string_shrink(string_t *source, unsigned int new_len) {
   cstr(source)[new_len] = '\0';
   source->len = new_len;
 }
@@ -13,7 +13,7 @@ void string_shrink(string_t *source, uint32_t new_len) {
 string_t empty_string() { return new_string(0); }
 
 // RE-CHECKED 30/04/2021
-string_t new_string(uint32_t len) {
+string_t new_string(unsigned int len) {
   string_t str;
 
   str.len = 0;
@@ -129,13 +129,13 @@ int cstring_equals_range(char *str_1, char *str_2, int compare_range) {
 
 // RE-CHECKED 29/04/2021
 // VERIFIED
-uint32_t string_count_occurances(string_t *source, char delim) {
-  uint32_t occurances = 0;
+unsigned int string_count_occurances(string_t *source, char delim) {
+  unsigned int occurances = 0;
 
   char *src_start = cstr(source);
 
   // Count the number of times delim appears in the str
-  for (uint32_t index = 0; index < source->len; index++) {
+  for (unsigned int index = 0; index < source->len; index++) {
     if (src_start[index] == delim) {
       ++occurances;
     }
@@ -200,7 +200,7 @@ string_t *string_write_c_multi(string_t *base, char *source, ...) {
 // VERIFIED
 string_t *string_write_c(string_t *base, char *source) {
   // Allocate space to store the extension
-  uint32_t len = strlen(source);
+  unsigned int len = strlen(source);
 
   if (len == 0) {
     return base;
@@ -208,12 +208,12 @@ string_t *string_write_c(string_t *base, char *source) {
   
   string_set_max_len(base, base->len + len);
 
-  uint32_t source_pos = 0;
-  uint32_t final_len = base->len + len;
+  unsigned int source_pos = 0;
+  unsigned int final_len = base->len + len;
   char *base_start = cstr(base);
 
   // Copy the data from source across
-  for (uint32_t i = base->len; i < final_len; i++) {
+  for (unsigned int i = base->len; i < final_len; i++) {
     base_start[i] = source[source_pos++];
   }
 
@@ -255,15 +255,15 @@ string_t *string_write(string_t *base, string_t *source) {
   }
 
   char *base_start = cstr(base);
-  uint32_t source_pos = 0;
-  uint32_t final_len = base->len + source->len;
+  unsigned int source_pos = 0;
+  unsigned int final_len = base->len + source->len;
 
   // Allocate enough space to fit the extension
   string_set_max_len(base, base->len + source->len);
 
 
   // Write from source onto base
-  for (uint32_t index = base->len; index < final_len; index++) {
+  for (unsigned int index = base->len; index < final_len; index++) {
     base_start[index] = src_start[source_pos++];
   }
 
@@ -281,7 +281,7 @@ string_t *string_write(string_t *base, string_t *source) {
 
 // RE-CONFIRMED 29/04/2021
 // VERIFIED
-void string_set_max_len(string_t* str, uint32_t max_len)
+void string_set_max_len(string_t* str, unsigned int max_len)
 {
   if (max_len > str->max_len) {
     // If the current string is a short string
@@ -306,7 +306,7 @@ void string_set_max_len(string_t* str, uint32_t max_len)
 // RE-CHECKED 30/04/2021
 // VERIFIED
 void string_extend(string_t *str) {
-  uint32_t new_len = REALLOC_MULTIPLIER * (str->max_len + SPACE_FOR_NULL);
+  unsigned int new_len = REALLOC_MULTIPLIER * (str->max_len + SPACE_FOR_NULL);
 
   /*
    * For cases when a string has a max length of 0 or 1
@@ -322,7 +322,7 @@ void string_extend(string_t *str) {
 
 // RE-CHECKED 30/04/2021
 // VERIFIED
-void string_lengthen(string_t *str, uint32_t len) {
+void string_lengthen(string_t *str, unsigned int len) {
   string_set_max_len(str, str->len + len);
 }
 
@@ -391,11 +391,11 @@ string_t string_copy(string_t *source) {
 // RE-CHECKED
 // VERIFIED
 char *cstring_copy(const char *source) {
-  uint32_t len = strlen(source);
+  unsigned int len = strlen(source);
   char *str = safe_malloc((len + SPACE_FOR_NULL) * sizeof(char));
 
   // copying 'source' onto the new string
-  for (uint32_t index = 0; index < len; index++) {
+  for (unsigned int index = 0; index < len; index++) {
     str[index] = source[index];
   }
   // null terminating
