@@ -23,7 +23,9 @@
       "vector": "c",
       "chrono": "c",
       "alist.h": "c",
-      "directory.h": "c"
+      "directory.h": "c",
+      "memory": "c",
+      "filepath.h": "c"
     }
 	}
 }
