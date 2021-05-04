@@ -35,16 +35,33 @@
 #include "../string.h"
 
 /*
- * returns a list of type (struct dirent*)
- * of all entries in the directory at the given path
- * TODO put the destroy function in the alist in this function
-*/
-alist_t dir_all_entries_alist(string_t* path);
+ * Returns an alist of type (struct dirent) of all entries within the
+ * given directory 'path'
+ * 
+ * Destroy the alist with alist_destroy once finished with
+ */
+alist_t dir_all_entries_alist(string_t *path);
 
-alist_t dir_all_files_recur(string_t* path);
+/*
+ * Returns an alist of type (string_t) containing all files within the given
+ * directory 'path'
+ * 
+ * destroy the alist with alist_destroy once finished with
+ */
+alist_t dir_all_files_recur(string_t *path);
 
+/*
+ * Returns an alist of type (string_t) containing all files with the given
+ * extension within the given directory 'path'
+ * 
+ * destroy the alist with alist_destroy once finished with
+ */
 alist_t dir_files_with_extension_recur(string_t* path, string_t* extension);
 
+/*
+ * Returns TRUE if the given d_name string is either "." or ".."
+ * returns FALSE otherwise
+*/
 int is_relative_dir_entry(string_t* dirName);
 
 #endif

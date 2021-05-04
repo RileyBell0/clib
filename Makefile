@@ -1,13 +1,13 @@
 all: projectMake projectScan testing
 
-projectMake: projectMake.o directory.o avlBinTree.o sorting.o list.o fileIO.o array.o stacklist.o filePath.o string.o configLoader.o alist.o general.o int.o
-	clang -arch arm64 -Wall -O3 -o build/projectMake objects/projectMake.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/fileIO.o objects/array.o objects/stacklist.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/general.o objects/int.o -g
+projectMake: projectMake.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stacklist.o filePath.o string.o configLoader.o alist.o int.o
+	clang -arch arm64 -Wall -O3 -o build/projectMake objects/projectMake.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stacklist.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/int.o -g
 
-projectScan: projectScan.o directory.o avlBinTree.o sorting.o list.o fileIO.o array.o stacklist.o filePath.o string.o configLoader.o alist.o general.o int.o
-	clang -arch arm64 -Wall -O3 -o build/projectScan objects/projectScan.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/fileIO.o objects/array.o objects/stacklist.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/general.o objects/int.o -g
+projectScan: projectScan.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stacklist.o filePath.o string.o configLoader.o alist.o int.o
+	clang -arch arm64 -Wall -O3 -o build/projectScan objects/projectScan.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stacklist.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/int.o -g
 
-testing: testing.o directory.o avlBinTree.o sorting.o list.o fileIO.o array.o stacklist.o filePath.o string.o configLoader.o alist.o general.o int.o
-	clang -arch arm64 -Wall -O3 -o build/testing objects/testing.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/fileIO.o objects/array.o objects/stacklist.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/general.o objects/int.o -g
+testing: testing.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stacklist.o filePath.o string.o configLoader.o alist.o int.o
+	clang -arch arm64 -Wall -O3 -o build/testing objects/testing.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stacklist.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/int.o -g
 
 projectMake.o: src/main/projectMake.c
 	clang -arch arm64 -Wall -O3 -c -o objects/projectMake.o src/main/projectMake.c -g
@@ -17,6 +17,9 @@ projectScan.o: src/main/projectScan.c
 
 testing.o: src/main/testing.c
 	clang -arch arm64 -Wall -O3 -c -o objects/testing.o src/main/testing.c -g
+
+console.o: src/std/cmd/c/console.c
+	clang -arch arm64 -Wall -O3 -c -o objects/console.o src/std/cmd/c/console.c -g
 
 directory.o: src/std/dir/c/directory.c
 	clang -arch arm64 -Wall -O3 -c -o objects/directory.o src/std/dir/c/directory.c -g
@@ -29,6 +32,9 @@ sorting.o: src/std/c/sorting.c
 
 list.o: src/std/c/list.c
 	clang -arch arm64 -Wall -O3 -c -o objects/list.o src/std/c/list.c -g
+
+memory.o: src/std/c/memory.c
+	clang -arch arm64 -Wall -O3 -c -o objects/memory.o src/std/c/memory.c -g
 
 fileIO.o: src/std/c/fileIO.c
 	clang -arch arm64 -Wall -O3 -c -o objects/fileIO.o src/std/c/fileIO.c -g
@@ -50,9 +56,6 @@ configLoader.o: src/std/c/configLoader.c
 
 alist.o: src/std/c/alist.c
 	clang -arch arm64 -Wall -O3 -c -o objects/alist.o src/std/c/alist.c -g
-
-general.o: src/std/c/general.c
-	clang -arch arm64 -Wall -O3 -c -o objects/general.o src/std/c/general.c -g
 
 int.o: src/std/c/int.c
 	clang -arch arm64 -Wall -O3 -c -o objects/int.o src/std/c/int.c -g

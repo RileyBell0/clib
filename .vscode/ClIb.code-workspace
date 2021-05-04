@@ -25,7 +25,11 @@
       "alist.h": "c",
       "directory.h": "c",
       "memory": "c",
-      "filepath.h": "c"
+      "filepath.h": "c",
+      "console.h": "c",
+      "stdio.h": "c",
+      "string.h": "c",
+      "memory.h": "c"
     }
 	}
 }

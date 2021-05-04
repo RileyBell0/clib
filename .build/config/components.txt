@@ -1,7 +1,9 @@
+src/std/cmd/c/console.c
 src/std/dir/c/directory.c
 src/std/c/avlBinTree.c
 src/std/c/sorting.c
 src/std/c/list.c
+src/std/c/memory.c
 src/std/c/fileIO.c
 src/std/c/array.c
 src/std/c/stacklist.c
@@ -9,5 +11,4 @@ src/std/c/filePath.c
 src/std/c/string.c
 src/std/c/configLoader.c
 src/std/c/alist.c
-src/std/c/general.c
 src/std/c/int.c

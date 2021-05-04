@@ -1,20 +1,46 @@
 
 
 Indepth Check:
-  String
-  General
-  Bool
-  directory
+  Done
+    04/05/2021    string
+    04/05/2021    memory
+    04/05/2021    bool
+    04/05/2021    directory
+    04/05/2021    console
 
-Probably Fine
-  Alist
+  Probably Fine
+    Alist
 
-ToDo:
-  array
-  avlbintree
-  configloader
-  fileio
-  filepath
-  Indepthlist
-  sorting
-  stacklist
+  ToDo:
+    array
+    avlbintree
+    configloader
+    fileio
+    filepath
+    Indepthlist
+    sorting
+    stacklist
+
+
+
+Memory_Check
+  Done 
+    04/05/2021 console
+    04/05/2021 bool
+    04/05/2021 memory
+    04/05/2021 directory
+
+  ToDo
+    String
+    Alist
+    array
+    avlbintree
+    configloader
+    fileio
+    filepath
+    Indepthlist
+    sorting
+    stacklist
+
+    projectmake
+    projectScan

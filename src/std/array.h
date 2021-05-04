@@ -6,7 +6,7 @@
 #ifndef CLIB_STD_ARRAY_H
 #define CLIB_STD_ARRAY_H
 
-#include "general.h"
+#include "memory.h"
 #include <stdint.h>
 #include <string.h>
 

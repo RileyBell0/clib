@@ -1,4 +1,4 @@
-#include "../general.h"
+#include "../memory.h"
 
 void *safe_malloc(size_t size) {
   void *newData = malloc(size);

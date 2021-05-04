@@ -67,7 +67,7 @@ array_t alist_to_array(alist_t* list);
  * returns the element at the given index, or Null
  * if out of bounds of the list
 */
-void* alist_index(alist_t* list, unsigned int index);
+void* alist_index(alist_t* list, int index);
 
 /*
  * Given two alists, combines them into list1 by appending list2
@@ -104,7 +104,7 @@ int alist_remove(alist_t *list, void *element);
  * Ensures the given list has at least the capacity 'new_len', if not
  * resizes the list to fit
 */
-void alist_set_length(alist_t *list, unsigned int new_len);
+void alist_set_length(alist_t *list, int new_len);
 
 /*
  * Given an alist, destroys its contents

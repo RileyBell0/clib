@@ -1,6 +1,7 @@
 #include "../directory.h"
 
-// TODO why did i think this method was clunky? i like it now
+// RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
 alist_t dir_all_entries_alist(string_t *path) {
   DIR *d = opendir(cstr(path));
   alist_t entries = new_alist(sizeof(struct dirent));
@@ -10,13 +11,6 @@ alist_t dir_all_entries_alist(string_t *path) {
   }
 
   struct dirent *entry;
-
-  // there's a good chance the filepath may be longer than the small string
-  // size, so pre-allocating it
-  string_t file_path = new_string(DEFAULT_BUFFER_LEN);
-  string_write(&file_path, path);
-  string_write_c(&file_path, PATH_SEPERATOR);
-
   while ((entry = readdir(d))) {
     // Copy the contents of 'entry'
     alist_append(&entries, entry);
@@ -24,15 +18,16 @@ alist_t dir_all_entries_alist(string_t *path) {
 
   // CLEANUP
   closedir(d);
-  string_destroy(&file_path);
 
   return entries;
 }
 
 // RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
 alist_t dir_all_files_recur(string_t* path) {
   // The return type is a list containing the paths to all matching files
   alist_t valid_files = new_alist(sizeof(string_t));
+  valid_files.destroy = void_string_destroy;
 
   // Converting the system-specific path seperator into a string
   string_t base_path = new_string(path->len + strlen(PATH_SEPERATOR));
@@ -63,9 +58,11 @@ alist_t dir_all_files_recur(string_t* path) {
         // Get all files from the sub dir with the matching extension
         alist_t sub_dir_files =
             dir_all_files_recur(&entry_path);
+        sub_dir_files.destroy = void_string_destroy;
 
         // Add the files to the alist
         alist_combine(&valid_files, &sub_dir_files);
+        alist_destroy(&sub_dir_files);
 
         closedir(d);
 
@@ -79,15 +76,19 @@ alist_t dir_all_files_recur(string_t* path) {
     }
   }
 
+  string_destroy(&base_path);
   string_destroy(&file_name);
+  alist_destroy(&entries);
 
   return valid_files;
 }
 
 // RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
 alist_t dir_files_with_extension_recur(string_t *path, string_t *extension) {
   // The return type is a list containing the paths to all matching files
   alist_t valid_files = new_alist(sizeof(string_t));
+  valid_files.destroy = void_string_destroy;
 
   // Converting the system-specific path seperator into a string
   string_t base_path = new_string(path->len + strlen(PATH_SEPERATOR));
@@ -96,6 +97,7 @@ alist_t dir_files_with_extension_recur(string_t *path, string_t *extension) {
 
   // Getting all the directory entries in the current directory
   alist_t entries = dir_all_entries_alist(path);
+
   string_t file_name = new_string(0);
 
   alist_iterator_t it = new_alist_iterator(&entries, TRUE);
@@ -117,12 +119,13 @@ alist_t dir_files_with_extension_recur(string_t *path, string_t *extension) {
         // Get all files from the sub dir with the matching extension
         alist_t sub_dir_files =
             dir_files_with_extension_recur(&entry_path, extension);
+        sub_dir_files.destroy = void_string_destroy;
 
         // Add the files to the alist
         alist_combine(&valid_files, &sub_dir_files);
+        alist_destroy(&sub_dir_files);
 
         closedir(d);
-
         string_destroy(&entry_path);
       } else {
         // Add the current file if it has the required extension
@@ -134,6 +137,7 @@ alist_t dir_files_with_extension_recur(string_t *path, string_t *extension) {
         else {
           string_destroy(&entry_path);
         }
+        string_destroy(&file_extension);
       }
     }
     else {
@@ -141,12 +145,15 @@ alist_t dir_files_with_extension_recur(string_t *path, string_t *extension) {
     }
   }
 
+  string_destroy(&base_path);
   string_destroy(&file_name);
+  alist_destroy(&entries);
 
   return valid_files;
 }
 
 // RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
 int is_relative_dir_entry(string_t *path) {
   if (path->len == 1) {
     if (cstring_equals(cstr(path), ".")) {
