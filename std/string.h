@@ -213,6 +213,14 @@ unsigned int string_count_occurances(string_t* source, char delim);
  * Last argument must be null
 */
 string_t* string_write_c_multi(string_t *base, char* source, ...);
+
+/*
+ * Writes the given string source of length 'len' from source to base
+ * len should be the same as strlen(len) (num_chars not including null
+ * termination)
+ */
+string_t* string_write_c_len(string_t* base, char* source, unsigned int len);
+
 /*
  * Appends the cstring to the string 'base'
 */

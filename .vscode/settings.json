@@ -21,7 +21,8 @@
       "general.h": "c",
       "bitset": "c",
       "utility": "c",
-      "iosfwd": "c"
+      "iosfwd": "c",
+      "configloader.h": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{ ColumnLimit: 80 }",
 }

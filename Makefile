@@ -21,8 +21,8 @@ testing.o: main/testing.c
 avlBinTree.o: std/c/avlBinTree.c
 	clang -arch arm64 -Wall -O3 -c -o objects/avlBinTree std/c/avlBinTree.c -g
 
-directory.o: std/c/directory.c
-	clang -arch arm64 -Wall -O3 -c -o objects/directory std/c/directory.c -g
+directory.o: std/dir/c/directory.c
+	clang -arch arm64 -Wall -O3 -c -o objects/directory std/dir/c/directory.c -g
 
 sorting.o: std/c/sorting.c
 	clang -arch arm64 -Wall -O3 -c -o objects/sorting std/c/sorting.c -g

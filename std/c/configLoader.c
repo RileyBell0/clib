@@ -18,7 +18,7 @@ int extract_field(string_t* str, unsigned int *pos, string_t *dest,
   /*
    * Ignore leading whitespaces and tabs
    */
-  char *str_start = cstr(&str);
+  char *str_start = cstr(str);
   unsigned int i;
   for (i = *pos; i < str->len; i++) {
     if (str_start[i] != CONFIG_IGNORE_CHAR && str_start[i] != '\t') {
@@ -120,16 +120,26 @@ int extract_field(string_t* str, unsigned int *pos, string_t *dest,
   return TRUE;
 }
 
+// RE-CHECKED 01/05/2021
+config_var_t new_config_var(string_t* var_name) {
 
+  config_var_t var;
 
+  var.data = NULL;
+  var.len = 0;
+  var.var_name = string_copy(var_name);
 
+  return var;
+}
 
-
+// RE-CHECKED 01/05/2021
 config_t read_config_file(char *filePath) {
   // Storing the processed data
   dynamic_array_t results = new_dynamic_array(sizeof(config_var_t));
+
+  // Stores the fields associated with the current variable
   dynamic_array_t fields = new_dynamic_array(sizeof(string_t));
-  config_var_t newVar;
+  config_var_t var;
   config_t config;
 
   // Open the config file
@@ -144,98 +154,134 @@ config_t read_config_file(char *filePath) {
   /*
    * Read every line in the file
    */
-  int inArray = FALSE;
-  int named = FALSE;
-  int currField = CONFIG_FIELD_NAME;
-  int complexField = FALSE;
-  int currentConfigSaved = TRUE;
-  int addedDeclaration = FALSE;
+  int within_array_declaration = FALSE;
+  int has_var_been_named = FALSE;
+  int curr_field_type = CONFIG_FIELD_NAME;
+  int within_quotes = FALSE;
+  int current_var_finalised = TRUE;
+  /*
+   * Has the current var thats being loaded in got at least one
+   * value loaded in from the file
+  */
+  int var_has_value = FALSE; 
+
+  // Read in and process the whole config file
   while (fileio_next_line(configFile, &buffer)) {
     // Read in a line from the file
     printf("BUFFER: %s\n", cstr(&buffer));
     
     unsigned int pos = 0;
-    while (extract_field(&buffer, &pos, &field, &complexField)) {
-
-      printf("\t- %s\n", cstr(&field));
-      // what does this mean??
-      if (!complexField && field.len == 1) {
-        char *fieldstr = cstr(&field);
-        if (fieldstr[0] == CONFIG_COMMENT_CHAR) {
-          break;
-        } else if (fieldstr[0] == CONFIG_FIELD_DECLARATION_CHAR) {
-          currField = CONFIG_FIELD_DECLARATION;
-          continue;
-        } else if (fieldstr[0] == CONFIG_ARRAY_START_CHAR) {
-          inArray = TRUE;
-          continue;
-        } else if (fieldstr[0] == CONFIG_ARRAY_END_CHAR) {
-          currField = CONFIG_FIELD_NONE;
-          inArray = FALSE;
-        }
+    while (extract_field(&buffer, &pos, &field, &within_quotes)) {
+      if (field.len == 0) {
+        continue;
       }
 
-      if (currField == CONFIG_FIELD_NAME) {
-        if (!named && field.len != 0) {
-          currentConfigSaved = FALSE;
-          newVar.varName = string_copy(&field);
-          newVar.data = NULL;
-          newVar.len = 0;
+      // Process field decleration chars
+      if (!within_quotes && field.len == 1) {
+        // Extract the char from the string representing the field_type
+        char field_type = cstr(&field)[0];
+
+        if (field_type == CONFIG_COMMENT_CHAR) {
+          // Ignore the whole line, comment has started
+          break;
+        }
+
+        switch (field_type) {
+          case CONFIG_FIELD_DECLARATION_CHAR:
+            curr_field_type = CONFIG_FIELD_DECLARATION;
+            continue;
+          case CONFIG_ARRAY_START_CHAR:
+            within_array_declaration = TRUE;
+            continue;
+          case CONFIG_ARRAY_END_CHAR:
+            curr_field_type = CONFIG_FIELD_NAME;
+            within_array_declaration = FALSE;
+            continue;
+        } 
+      }
+      
+      switch (curr_field_type) {
+        case CONFIG_FIELD_NAME:
+          // TODO had if(!has_var_been_named) around whole section, is this needed?
+          // Reached a new config_var
+          current_var_finalised = FALSE;
+
+          // Name the new variable
+          var = new_config_var(&field);
+          has_var_been_named = TRUE;
+          var_has_value = FALSE;
 
           // Reset the array for storing the new data
           fields.len = 0;
-          named = TRUE;
-          addedDeclaration = FALSE;
-        }
-      } else if (currField == CONFIG_FIELD_DECLARATION) {
-        if (field.len != 0 && ((!inArray && !addedDeclaration) || inArray)) {
-          string_t fieldCpy = string_copy(&field);
-
-          // Add the current field to the dynamic array
-          dynamic_array_append(&fields, &fieldCpy);
-        }
+          break;
+        case CONFIG_FIELD_DECLARATION:
+          if (within_array_declaration || !var_has_value) {
+            // Associate the current field with the current variable
+            string_t field_value = string_copy(&field);
+            dynamic_array_append(&fields, &field_value);
+          }
+          break;
       }
     }
 
-    if (!inArray) {
-      if (!currentConfigSaved) {
-        currentConfigSaved = TRUE;
-
+    // Check if the current var is completed, if so, save it to the config
+    // Only arrays can be multi-line, therefore if its not in the array
+    // declaration and the line is over, -> the variable is done
+    if (!within_array_declaration) {
+      if (!current_var_finalised) {
+        
+        // Convert to an array
         array_t convertedFields = dynamic_array_to_array(&fields);
-        newVar.data = convertedFields.data;
-        newVar.len = convertedFields.len;
 
-        dynamic_array_append(&results, &newVar);
+        // Save the array into the var 
+        var.data = convertedFields.data;
+        var.len = convertedFields.len;
+
+        // Save the current variable to the given array
+        dynamic_array_append(&results, &var);
+
+        // Saved
+        current_var_finalised = TRUE;
       }
-      currField = CONFIG_FIELD_NAME;
-      named = FALSE;
+
+      // Ready for the next field
+      curr_field_type = CONFIG_FIELD_NAME;
+      has_var_been_named = FALSE;
     }
   }
+
+  // Whole file has been loaded in now
   fclose(configFile);
 
-  if (!currentConfigSaved) {
+  // This should only be called when within an array declaration 
+  // at the end of the file, save what data we can anyway
+  if (!current_var_finalised) {
+    // Convert to an array
     array_t convertedFields = dynamic_array_to_array(&fields);
-    newVar.data = convertedFields.data;
-    newVar.len = convertedFields.len;
-
-    dynamic_array_append(&results, &newVar);
+    
+    // Load the array into the var
+    var.data = convertedFields.data;
+    var.len = convertedFields.len;
+    
+    // Save the current var to the given array
+    dynamic_array_append(&results, &var);
   }
 
-  array_t restricted = dynamic_array_to_array(&results);
-  array_t final =
-      tree_sort(restricted, sizeof(config_var_t), config_var_compare);
+  // Sort the vars (ready for log(n) var retrieval time)
+  array_t unsorted_vars = dynamic_array_to_array(&results);
+  array_t sorted_vars =
+      tree_sort(unsorted_vars, sizeof(config_var_t), config_var_compare);
 
-  array_destroy(restricted);
+  array_destroy(unsorted_vars);
 
-  config.len = final.len;
-  config.vars = final.data;
+  config.len = sorted_vars.len;
+  config.vars = sorted_vars.data;
   config.modified = FALSE;
   config.configLocation = filePath;
 
-  // Dealing with memory
+  // Cleanup
   string_destroy(&buffer);
   string_destroy(&field);
-
   dynamic_array_destroy(results);
   dynamic_array_destroy(fields);
 
@@ -291,7 +337,7 @@ int config_save(config_t config) {
    */
   fprintf(cfgOut, CONFIG_STANDARD_DESCRIPTION);
   for (int i = 0; i < config.len; i++) {
-    config_encode(&processed, &config.vars[i].varName);
+    config_encode(&processed, &config.vars[i].var_name);
 
     fprintf(cfgOut, "\"%s\" = [\n", cstr(&processed));
 
@@ -324,7 +370,7 @@ config_var_t *config_get_var(config_t *config, char *name) {
   // len is 1 because a config_var_t can store multiple values
   key.len = 1;
 
-  key.varName = cstring_wrap(name);
+  key.var_name = cstring_wrap(name);
 
   /*
    * Search the sorted config list for the requested var
@@ -338,8 +384,8 @@ config_var_t *config_get_var(config_t *config, char *name) {
 int config_var_compare(const void *var1, const void *var2) {
   config_var_t *a = (config_var_t *)var1;
   config_var_t *b = (config_var_t *)var2;
-  char *astr = cstr(&a->varName);
-  char *bstr = cstr(&b->varName);
+  char *astr = cstr(&a->var_name);
+  char *bstr = cstr(&b->var_name);
 
   if (!a || !astr) {
     if (!b || !bstr) {
@@ -368,7 +414,7 @@ void config_destroy(config_t config) {
   for (int i = 0; i < config.len; i++) {
     config_var_t var = config.vars[i];
 
-    string_destroy(&var.varName);
+    string_destroy(&var.var_name);
     for (int i = 0; i < var.len; i++) {
       string_destroy(&var.data[i]);
     }
@@ -380,7 +426,7 @@ void config_destroy(config_t config) {
 void config_print_vars(config_t config) {
   printf("CONFIG Contents:\n-----------------\n");
   for (int i = 0; i < config.len; i++) {
-    printf("%s\n", cstr(&config.vars[i].varName));
+    printf("%s\n", cstr(&config.vars[i].var_name));
     if (config.vars[i].len == 0) {
       printf("\t\"(null)\"\n");
     } else {

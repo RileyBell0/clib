@@ -5,7 +5,7 @@
 
 #include "../std/array.h"
 #include "../std/configLoader.h"
-#include "../std/directory.h"
+#include "../std/dir/directory.h"
 #include "../std/alist.h"
 #include "../std/string.h"
 #include <stdio.h>
@@ -27,6 +27,7 @@
 #define DISPLAY '7'
 
 int code2(int argc, char **argv);
+int code3(int argc, char** argv);
 int code(int argc, char **argv);
 void bar(char *toPrint);
 void alist_test();
@@ -49,9 +50,64 @@ void print_string_alist(alist_t *list);
  */
 // Write your code here
 
+int code3(int argc, char** argv) {
+  printf("Code 3\n");
+  return 0;
+}
+
 // TODO remove
 void printline(const char *line) { printf("%s\n", line); }
 
+// For formatting program output
+void bar(char *toPrint) {
+  int len = strlen(toPrint);
+  for (int i = 0; i < len + 1; i++) {
+    printf("-");
+  }
+  printf("\n");
+  printf("%s\n", toPrint);
+  for (int i = 0; i < len + 1; i++) {
+    printf("-");
+  }
+  printf("\n");
+}
+
+// Entrypoint of the program. Prints headers before and after entering the
+// user's code
+int main(int argc, char **argv) {
+  bar("Program Start");
+  clock_t start_t, end_t;
+
+  if (TESTING_C_TIME_PROGRAM == TRUE) {
+    start_t = clock();
+    printf("Starting of the program, start_t = %ld\n", start_t);
+  }
+
+  int errorCode = code3(argc, argv);
+
+  if (TESTING_C_TIME_PROGRAM == TRUE) {
+    end_t = clock();
+    printf("End time end_t = %ld\n", end_t);
+    printf("Difference: %ld\n", end_t - start_t);
+    double timetaken = (double)(end_t - start_t) / CLOCKS_PER_SEC;
+    printf("Total time taken by CPU: %lf\n", timetaken);
+    printf("Exiting of the program...\n");
+  }
+
+  bar("Program End");
+  return errorCode;
+}
+
+
+
+
+
+
+
+
+
+
+/*
 void clearscreen() {
   for (int i = 0; i < 3; i++) {
     printf("\n");
@@ -232,45 +288,7 @@ void strinfo(string_t info) {
   printf("\tstr: %s\n", cstr(&info));
 }
 
-// For formatting program output
-void bar(char *toPrint) {
-  int len = strlen(toPrint);
-  for (int i = 0; i < len + 1; i++) {
-    printf("-");
-  }
-  printf("\n");
-  printf("%s\n", toPrint);
-  for (int i = 0; i < len + 1; i++) {
-    printf("-");
-  }
-  printf("\n");
-}
 
-// Entrypoint of the program. Prints headers before and after entering the
-// user's code
-int main(int argc, char **argv) {
-  bar("Program Start");
-  clock_t start_t, end_t;
-
-  if (TESTING_C_TIME_PROGRAM == TRUE) {
-    start_t = clock();
-    printf("Starting of the program, start_t = %ld\n", start_t);
-  }
-
-  int errorCode = code2(argc, argv);
-
-  if (TESTING_C_TIME_PROGRAM == TRUE) {
-    end_t = clock();
-    printf("End time end_t = %ld\n", end_t);
-    printf("Difference: %ld\n", end_t - start_t);
-    double timetaken = (double)(end_t - start_t) / CLOCKS_PER_SEC;
-    printf("Total time taken by CPU: %lf\n", timetaken);
-    printf("Exiting of the program...\n");
-  }
-
-  bar("Program End");
-  return errorCode;
-}
 
 
 
@@ -315,19 +333,39 @@ alist_t make_single_char_str_list(char* str_in) {
   return list;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int code2(int argc, char **argv){
-  printf("im cool\n");
-  strlen(NULL);
-  int val = 1;
-  char * yes = safe_malloc(100);
-  printf("awesome\n");
-  strcat(yes, NULL);
-  printf("cool\n");
-  val *= 1.5f;
-  for (int i = 0; i < 5; i++) {
-    printf("%d\n", val);
-  }
-  return 0;
+  // string_t path = string_make(".");
+  // string_t extension = string_make("c");
+  // // printf("Getting files with extension \"%s\" - recursive\n", cstr(&extension));
+  // printf("Getting files - recursive\n");
+  // alist_t entries = dir_all_files_recur(&path);
+  // // alist_t entries = dir_files_with_extension_recur(&path, &extension);
+
+  // printf("\n\n");
+  // printf("RECURSIVE ENTRIES: %d\n", entries.size);
+  // alist_iterator_t it = new_alist_iterator(&entries, TRUE);
+
+  // for (string_t* element = it.first(&it); !it.done(&it); element = it.next(&it)) {
+  //   printf("\t%s\n", cstr(element));
+  // }  
+  // printf("\n\n");
+  // return 0;
+
+
   alist_t list1 = make_single_char_str_list("0123456789");
   alist_t list2 = make_single_char_str_list("abcdefghij");
   string_t nullstr = string_make("NULL");
@@ -423,3 +461,4 @@ int code2(int argc, char **argv){
 
   return END_SUCCESS;
 }
+*/

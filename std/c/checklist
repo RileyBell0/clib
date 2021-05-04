@@ -4,6 +4,7 @@ Indepth Check:
   String
   General
   Bool
+  directory
 
 Probably Fine
   Alist
@@ -12,7 +13,6 @@ ToDo:
   array
   avlbintree
   configloader
-  directory
   fileio
   filepath
   Indepthlist

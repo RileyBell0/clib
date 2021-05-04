@@ -56,7 +56,7 @@
 typedef struct config_var_t
 {
     // Name of the variable
-    string_t varName;
+    string_t var_name;
 
     // Array of values in the variable
     string_t* data;
@@ -70,6 +70,8 @@ typedef struct config_t
     config_var_t* vars;
     char* configLocation;
 } config_t;
+
+config_var_t new_config_var(string_t* var_name);
 
 /*
  * Returns a string containing the next valid field in the string 'str'

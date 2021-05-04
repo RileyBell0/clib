@@ -87,20 +87,24 @@ int string_compare(string_t *str1, string_t *str2) {
 // component
 // so if they're both null then TRUE
 // or if either one of them is null then FALSE
+#include <stdio.h>
 int string_equals(string_t *str1, string_t *str2) {
+  printf("In the function...\n");
   if (str1->len != str2->len) {
+    printf("Different lengths... %d %d\n", str1->len, str2->len);
     return FALSE;
   }
-
+  
   char* string_1 = cstr(str1);
   char* string_2 = cstr(str2);
-
+  printf("Im here\n");
   // Do a null string comparison
   if (string_1 == NULL && string_2 == NULL) {
     return TRUE;
   } else if (string_1 == NULL || string_2 == NULL) {
     return FALSE;
   }
+  printf("Up to the strcmp\n");
 
   return strcmp(string_1, string_2) == 0;
 }
@@ -193,19 +197,11 @@ string_t *string_write_c_multi(string_t *base, char *source, ...) {
   return base;
 }
 
-// TODO this will work fine but is this really any faster than just
-// calling cstring_wrap then string_write?
-// 
-// RE-CHECKED 29/04/2021
-// VERIFIED
-string_t *string_write_c(string_t *base, char *source) {
-  // Allocate space to store the extension
-  unsigned int len = strlen(source);
-
+string_t* string_write_c_len(string_t* base, char* source, unsigned int len) {
   if (len == 0) {
     return base;
   }
-  
+
   string_set_max_len(base, base->len + len);
 
   unsigned int source_pos = 0;
@@ -224,6 +220,19 @@ string_t *string_write_c(string_t *base, char *source) {
   // base's string component can no longer be null at this point
   base_start[base->len] = '\0';
 
+  return base;
+}
+
+// TODO this will work fine but is this really any faster than just
+// calling cstring_wrap then string_write?
+// 
+// RE-CHECKED 29/04/2021
+// VERIFIED
+string_t *string_write_c(string_t *base, char *source) {
+  // Allocate space to store the extension
+  unsigned int len = strlen(source);
+  string_write_c_len(base, source, len);
+  
   return base;
 }
 

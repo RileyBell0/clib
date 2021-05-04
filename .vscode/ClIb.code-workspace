@@ -13,16 +13,17 @@
 			"unused": true
 		},
 		"files.associations": {
-			"string": "c",
-			"array": "c",
-			"string_view": "c",
-			"initializer_list": "c",
-			"utility": "c",
-			"sstream": "c",
-			"__node_handle": "c",
-			"vector": "c",
-			"chrono": "c",
-			"alist.h": "c"
-		}
+      "string": "c",
+      "array": "c",
+      "string_view": "c",
+      "initializer_list": "c",
+      "utility": "c",
+      "sstream": "c",
+      "__node_handle": "c",
+      "vector": "c",
+      "chrono": "c",
+      "alist.h": "c",
+      "directory.h": "c"
+    }
 	}
 }

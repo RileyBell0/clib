@@ -10,7 +10,8 @@
 
 #include <stdio.h>
 #include "filePath.h"
-#include "list.h"
+#include "string.h"
+#include "alist.h"
 
 #define MODE_READ "r"
 #define MODE_WRITE "w"
@@ -55,15 +56,13 @@ int fileio_next_line(FILE *file, string_t *buffer);
  * MEMORY IS ALLOCATED, ensure you destroy the returned string when
  * done with it
 */
-string_t getFileName(string_t* path);
+string_t get_file_name_from_path(string_t* path);
 
 /*
- * returns a pointer to the start of the file extension
- * in the given string
- * 
- * returns NULL on failure
+ * returns a string containing the file extension, or an empty
+ * string if no such extension exists
 */
-char* getFileExtension(string_t *fileName);
+string_t get_file_extension(string_t *fileName);
 
 /*
  * Modifies the given cstring, removing the file
@@ -73,26 +72,28 @@ char* getFileExtension(string_t *fileName);
  * char* pointer, allowing nesting in function
  * calls 
 */
-char *removeFileExtension(char *fileName);
+string_t *remove_file_extension(string_t* file_name);
+
+char* remove_file_extension_c(char* file_name, unsigned int name_len);
 
 /*
  * Given a list of files, the paths to the files are removed
  * and their filename is returned
  * /User/Desktop/myFile.txt -> myFile.txt
 */
-list_t get_file_names(list_t files);
+alist_t get_file_names_from_paths(alist_t* files);
 
 /*
  * Given a list of files, removes the file extensions from
  * each file
  * /Folder/myFile.txt -> /Folder/myFile
 */
-void remove_file_extensions(list_t files);
+void remove_file_extensions(alist_t* files);
 
 /*
  * Reads all lines in the given file into a list
  * List is of type string_t
 */
-list_t fileio_read_all_lines_list(char *fileName);
+alist_t fileio_read_all_lines_alist(char *fileName);
 
 #endif
