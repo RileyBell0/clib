@@ -6,7 +6,7 @@ src/std/c/list.c
 src/std/c/memory.c
 src/std/c/fileIO.c
 src/std/c/array.c
-src/std/c/stacklist.c
+src/std/c/stack.c
 src/std/c/filePath.c
 src/std/c/string.c
 src/std/c/configLoader.c

@@ -28,8 +28,9 @@ FILE *fileio_open_safe(char *filePath, int isReading);
  * Returns a pointer to the start of the file extension
  * within this string.
  * Does not modify the input string and does not allocate memory
+ * Returns NULL on failure
 */
-char *path_file_extension(char *fileName);
+char *get_file_extension_start(char *file_name);
 
 /*
  * Attempts to open a file in the given mode
@@ -53,16 +54,18 @@ int fileio_next_line(FILE *file, string_t *buffer);
  * the rest of the path is removed and just the file name
  * is returned in a *new* string
  * 
- * MEMORY IS ALLOCATED, ensure you destroy the returned string when
- * done with it
+ * MEMORY may be allocated, ensure you destroy the returned string when
+ * done with it using string_destroy
 */
 string_t get_file_name_from_path(string_t* path);
 
 /*
  * returns a string containing the file extension, or an empty
  * string if no such extension exists
+ * MEMORY may be allocated, ensure you destroy the returned string with
+ * string_destroy when done with it
 */
-string_t get_file_extension(string_t *fileName);
+string_t get_file_extension(string_t *file_name);
 
 /*
  * Modifies the given cstring, removing the file
@@ -74,11 +77,16 @@ string_t get_file_extension(string_t *fileName);
 */
 string_t *remove_file_extension(string_t* file_name);
 
+/*
+ * Given a c-string, removes the file extension, modifying the original
+ * c-string passed to the function
+*/
 char* remove_file_extension_c(char* file_name, unsigned int name_len);
 
 /*
  * Given a list of files, the paths to the files are removed
- * and their filename is returned
+ * and their file_name is returned in an alist of type (string_t)
+ * destroy with alist_destroy when done with the returned alist
  * /User/Desktop/myFile.txt -> myFile.txt
 */
 alist_t get_file_names_from_paths(alist_t* files);
@@ -92,8 +100,9 @@ void remove_file_extensions(alist_t* files);
 
 /*
  * Reads all lines in the given file into a list
- * List is of type string_t
+ * the alist is of type (string_t)
+ * destroy with alist_destroy when done with it
 */
-alist_t fileio_read_all_lines_alist(char *fileName);
+alist_t fileio_read_all_lines_alist(char *file_name);
 
 #endif

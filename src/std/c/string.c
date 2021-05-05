@@ -1,18 +1,27 @@
 #include "../string.h"
 
 // RE-CHECKED 30/04/2021
+// MEMORY_SAFE 06/05/2021
+// NULL_STR_SAFE 06/05/2021
 void string_shrink(string_t *source, unsigned int new_len) {
-  cstr(source)[new_len] = '\0';
-  source->len = new_len;
+  char* str = cstr(source);
+  if (str) {
+    cstr(source)[new_len] = '\0';
+    source->len = new_len;
+  }
 }
 
 // RE-CHECKED 30/04/2021
+// MEMORY_SAFE 06/05/2021
+// NULL_STR_SAFE 06/05/2021
 // Function has no real purpose other than making code slightly
 // cleaner by removing the magic 0 function argument
 // can make code using this clearer
 string_t empty_string() { return new_string(0); }
 
 // RE-CHECKED 30/04/2021
+// MEMORY_SAFE 06/05/2021
+// NULL_STR_SAFE 06/05/2021
 string_t new_string(unsigned int len) {
   string_t str;
 
@@ -35,7 +44,8 @@ string_t new_string(unsigned int len) {
 }
 
 // RE-CHECKED 30/04/2021
-// VERIFIED
+// MEMORY_SAFE 06/05/2021
+// TODO check if nullstr safe
 string_t cstring_wrap(char *src) {
   string_t str;
 

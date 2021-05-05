@@ -1,100 +1,110 @@
 #include "../fileIO.h"
 
-char *path_file_extension(char *fileName) {
-  if (!fileName) {
-    return NULL;
-  }
+// RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
+char *get_file_extension_start(char *file_name) {
   char *extension = NULL;
 
   int i = 0;
-  while (fileName[i] != '\0') {
-    if (fileName[i] == EXTENSION_SEPERATING_CHAR) {
+  while (file_name[i] != '\0') {
+    if (file_name[i] == EXTENSION_SEPERATING_CHAR) {
       // We havent reached the end of the string
-      if (fileName[i + 1] != '\0') {
+      if (file_name[i + 1] != '\0') {
         // We have the start of what could be a valid extension
         // The last valid potential extension start-point is returned
-        extension = &fileName[i + 1];
+        extension = &file_name[i + 1];
       }
     }
 
     ++i;
   }
 
+  if (!extension) {
+    // Return a string of length 0
+    return &file_name[i];
+  }
   return extension;
 }
 
-FILE *fileio_open_safe_advanced(char *filePath, char *mode) {
-  FILE *newFile = NULL;
+// RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
+FILE *fileio_open_safe_advanced(char *file_path, char *mode) {
+  FILE *file = NULL;
 
-  newFile = fopen(filePath, mode);
+  file = fopen(file_path, mode);
 
-  assert(newFile);
+  assert(file);
 
-  return newFile;
+  return file;
 }
 
-FILE *fileio_open_safe(char *filePath, int isReading) {
-  FILE *newFile = NULL;
+// RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
+FILE *fileio_open_safe(char *file_path, int is_reading) {
+  FILE *file = NULL;
 
-  if (isReading) {
-    newFile = fopen(filePath, MODE_READ);
+  if (is_reading) {
+    file = fopen(file_path, MODE_READ);
   } else {
-    newFile = fopen(filePath, MODE_WRITE);
+    file = fopen(file_path, MODE_WRITE);
   }
 
-  assert(newFile);
+  assert(file);
 
-  return newFile;
+  return file;
 }
 
-FILE *fileio_open(char *filePath, int isReading) {
-  FILE *newFile = NULL;
+// RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
+FILE *fileio_open(char *file_path, int is_reading) {
+  FILE *new_file = NULL;
 
-  if (isReading) {
-    newFile = fopen(filePath, MODE_READ);
+  if (is_reading) {
+    new_file = fopen(file_path, MODE_READ);
   } else {
-    newFile = fopen(filePath, MODE_WRITE);
+    new_file = fopen(file_path, MODE_WRITE);
   }
 
-  return newFile;
+  return new_file;
 }
 
-FILE *fileio_open_advanced(char *filePath, char *mode) {
-  FILE *newFile = NULL;
+// RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
+FILE *fileio_open_advanced(char *file_path, char *mode) {
+  FILE *file = NULL;
 
-  newFile = fopen(filePath, mode);
+  file = fopen(file_path, mode);
 
-  return newFile;
+  return file;
 }
 
+// RE-CHECKED 04/05/2021
+// MEMORY_SAFE 04/05/2021
 void fileio_close(FILE *file) {
-  if (file != NULL) {
+  if (file) {
     fclose(file);
   }
 }
 
+// MEMORY_SAFE 05/05/2021
 int fileio_next_line(FILE *file, string_t *buffer) {
-  if (file == NULL || buffer == NULL) {
-    return FALSE;
-  }
-
   char c;
-  char *bufferstr = cstr(buffer);
-  unsigned int charsWritten = 0;
+  char *buffer_str = cstr(buffer);
+  unsigned int chars_written = 0;
   while ((c = getc(file)) != EOF && c != '\n' && c != '\r') {
     // Need more room to store the next line
-    if (charsWritten == buffer->max_len) {
+    if (chars_written == buffer->max_len) {
       string_extend(buffer);
     }
 
-    bufferstr[charsWritten++] = c;
+    buffer_str[chars_written++] = c;
   }
-  buffer->len = charsWritten;
+  buffer->len = chars_written;
 
-  bufferstr[buffer->len] = '\0';
+  buffer_str[buffer->len] = '\0';
 
   // Failed to read anything
-  if (c == EOF && charsWritten == 0) {
+  if (c == EOF && chars_written == 0) {
     return FALSE;
   }
 
@@ -103,6 +113,7 @@ int fileio_next_line(FILE *file, string_t *buffer) {
 }
 
 // RE-CHECKED 04/05/2021
+// MEMORY_SAFE 05/05/2021
 string_t get_file_name_from_path(string_t *path) {
   string_t file_name;
   char *path_str = cstr(path);
@@ -123,6 +134,8 @@ string_t get_file_name_from_path(string_t *path) {
   return string_copy(path);
 }
 
+// RE-CHECKED 05/05/2021
+// MEMORY_SAFE 05/05/2021
 char *remove_file_extension_c(char *file_name, unsigned int name_len) {
   // Start at the end of the string and work backwards
   // until the extension seperating char is recieved
@@ -136,11 +149,12 @@ char *remove_file_extension_c(char *file_name, unsigned int name_len) {
 }
 
 // RE-CHECKED 04/05/2021
+// MEMORY_SAFE 05/05/2021
 string_t* remove_file_extension(string_t *file_name) {
   char* file_name_str = cstr(file_name);
 
   // If the first char is . -> hidden file, dont remove the rest
-  // of the str
+  // of the str, hence i >= 1
   for (unsigned int i = file_name->len; i >= 1; i--) {
     if (file_name_str[i] == EXTENSION_SEPERATING_CHAR) {
       string_shrink(file_name, i);
@@ -151,6 +165,8 @@ string_t* remove_file_extension(string_t *file_name) {
   return file_name;
 }
 
+// RE-CHECKED 05/05/2021
+// MEMORY_SAFE 05/05/2021
 void remove_file_extensions(alist_t* files) {
   // Removing the extension from the program names
   alist_iterator_t it = new_alist_iterator(files, TRUE);
@@ -160,6 +176,8 @@ void remove_file_extensions(alist_t* files) {
   }
 }
 
+// RE-CHECKED 05/05/2021
+// MEMORY_SAFE 05/05/2021
 string_t get_file_extension(string_t *file_name) {
   // Start at the end of the string and work backwards
   // until the extension seperating char is recieved
@@ -180,9 +198,11 @@ string_t get_file_extension(string_t *file_name) {
 }
 
 // RE-CHECKED 04/05/2021
+// MEMORY_SAFE 05/05/2021
 alist_t get_file_names_from_paths(alist_t* files) {
   alist_t file_names = new_alist(sizeof(string_t));
-  
+  file_names.destroy = void_string_destroy;
+
   alist_iterator_t it = new_alist_iterator(files, TRUE);
   for (string_t* file = it.first(&it); !it.done(&it); file = it.next(&it)) {
     // Extract the file names from the file paths
@@ -194,8 +214,10 @@ alist_t get_file_names_from_paths(alist_t* files) {
 }
 
 // RE-CHECKED 04/05/2021
+// MEMORY_SAFE 05/05/2021
 alist_t fileio_read_all_lines_alist(char *file_name) {
   alist_t lines = new_alist(sizeof(string_t));
+  lines.destroy = void_string_destroy;
 
   // Open the given file
   FILE *file = fopen(file_name, MODE_READ);

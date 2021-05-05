@@ -58,7 +58,6 @@ alist_t dir_all_files_recur(string_t* path) {
         // Get all files from the sub dir with the matching extension
         alist_t sub_dir_files =
             dir_all_files_recur(&entry_path);
-        sub_dir_files.destroy = void_string_destroy;
 
         // Add the files to the alist
         alist_combine(&valid_files, &sub_dir_files);
@@ -117,9 +116,10 @@ alist_t dir_files_with_extension_recur(string_t *path, string_t *extension) {
       DIR *d = opendir(cstr(&entry_path));
       if (d) {
         // Get all files from the sub dir with the matching extension
+        // Make sure to not destroy the strings on the destruction of
+        // the alist returned
         alist_t sub_dir_files =
             dir_files_with_extension_recur(&entry_path, extension);
-        sub_dir_files.destroy = void_string_destroy;
 
         // Add the files to the alist
         alist_combine(&valid_files, &sub_dir_files);
@@ -137,6 +137,7 @@ alist_t dir_files_with_extension_recur(string_t *path, string_t *extension) {
         else {
           string_destroy(&entry_path);
         }
+
         string_destroy(&file_extension);
       }
     }

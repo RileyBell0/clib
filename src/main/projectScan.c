@@ -2,8 +2,6 @@
  * Gets all 'c' files that are to be compiled
  */
 
-// #include "../std/directory.h"
-// #include "../std/configLoader.h"
 #include "../std/configLoader.h"
 #include "../std/dir/directory.h"
 #include <stdio.h>
@@ -36,13 +34,8 @@ config_var_t *safe_cfg_get_var(config_t *config, char *name) {
   return returned_var;
 }
 
-// TODO this function does nothing as of yet
 void add_src_files_from_dir(FILE *out_file, string_t *base_path,
                             string_t *path_sep, string_t *extension) {
-  if (!out_file) {
-    out_file = stdout;
-  }
-
   alist_t files = dir_files_with_extension_recur(base_path, extension);
 
   // Print all files in the subdirectory

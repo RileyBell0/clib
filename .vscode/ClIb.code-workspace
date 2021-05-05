@@ -29,7 +29,9 @@
       "console.h": "c",
       "stdio.h": "c",
       "string.h": "c",
-      "memory.h": "c"
+      "memory.h": "c",
+      "stack.h": "c",
+      "bool.h": "c"
     }
 	}
 }

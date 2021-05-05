@@ -141,6 +141,8 @@ string_t cstring_wrap(char* src);
 
 /*
  * returns a new empty string with the max length of 'len'
+ * May allocate memory
+ * Remember to destroy with string_destroy or void_string_destroy
 */
 string_t new_string(unsigned int len);
 

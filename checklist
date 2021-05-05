@@ -1,4 +1,5 @@
-
+TODO:
+  projectmake doesnt care if you want debug or not - it makes u take it
 
 Indepth Check:
   Done
@@ -16,6 +17,7 @@ Indepth Check:
     avlbintree
     configloader
     fileio
+      int fileio_next_line(FILE *file, string_t *buffer) needs re-checking
     filepath
     Indepthlist
     sorting
@@ -29,6 +31,7 @@ Memory_Check
     04/05/2021 bool
     04/05/2021 memory
     04/05/2021 directory
+    05/05/2021 fileio
 
   ToDo
     String
@@ -36,7 +39,6 @@ Memory_Check
     array
     avlbintree
     configloader
-    fileio
     filepath
     Indepthlist
     sorting

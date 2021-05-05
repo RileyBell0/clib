@@ -3,8 +3,8 @@
  * Creation Date:   16/10/2020
 */
 
-#ifndef CLIB_STD_GENERAL_H
-#define CLIB_STD_GENERAL_H
+#ifndef CLIB_STD_MEMORY_H
+#define CLIB_STD_MEMORY_H
 
 #include <stdlib.h>
 #include <stdint.h>

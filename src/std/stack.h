@@ -3,8 +3,8 @@
  * Creation Date:   29/10/2020
 */
 
-#ifndef CLIB_STD_STACKLIST_H
-#define CLIB_STD_STACKLIST_H
+#ifndef CLIB_STD_STACK_H
+#define CLIB_STD_STACK_H
 
 #include "list.h"
 

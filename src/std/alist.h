@@ -45,8 +45,8 @@ typedef struct alist_t {
 typedef struct alist_iterator_t {
   alist_t* list;
   char from_start;
-  unsigned int next_node_pos; // Next node's position in the array
-  unsigned int curr_node_pos; // Current node's position in the array
+  int next_node_pos; // Next node's position in the array
+  int curr_node_pos; // Current node's position in the array
   unsigned int index; // current node's index in the list
   alist_node_t* curr_node;
   void* element;
