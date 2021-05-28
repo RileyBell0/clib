@@ -29,6 +29,18 @@ alist_t dir_all_files_recur(string_t* path) {
   alist_t valid_files = new_alist(sizeof(string_t));
   valid_files.destroy = void_string_destroy;
 
+  /*
+   * What's happening is that its treating it recursively
+   * we instead need to make it search at a top level, then add
+   * recursively to avoid having the base path provided included
+   * so like we'll take dir_all_files_indepth(path)
+   * which gets the names of all files in the current folder using all entries
+   * then goes through the entries, adds all files by filename, or calls
+   * dir_all_files_recur for all folders
+   * TODO write this funtion described above. Should call dir_all_files_recur 
+   * within it
+  */
+
   // Converting the system-specific path seperator into a string
   string_t base_path = new_string(path->len + strlen(PATH_SEPERATOR));
   string_write(&base_path, path);
@@ -39,6 +51,7 @@ alist_t dir_all_files_recur(string_t* path) {
   string_t file_name = new_string(0);
 
   alist_iterator_t it = new_alist_iterator(&entries, TRUE);
+      
   for (struct dirent *entry = it.first(&it); !it.done(&it);
        entry = it.next(&it)) {
 
@@ -58,16 +71,18 @@ alist_t dir_all_files_recur(string_t* path) {
         // Get all files from the sub dir with the matching extension
         alist_t sub_dir_files =
             dir_all_files_recur(&entry_path);
+        sub_dir_files.destroy_on_remove = FALSE;
+        closedir(d);
 
         // Add the files to the alist
         alist_combine(&valid_files, &sub_dir_files);
         alist_destroy(&sub_dir_files);
 
-        closedir(d);
 
         string_destroy(&entry_path);
       } else {
         alist_append(&valid_files, &entry_path);
+        printf("%s\n", cstr(&entry_path));
       }
     }
     else {

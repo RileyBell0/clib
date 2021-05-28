@@ -64,5 +64,8 @@ alist_t dir_files_with_extension_recur(string_t* path, string_t* extension);
 */
 int is_relative_dir_entry(string_t* dirName);
 
+
+alist_t dir_all_entries_alist(string_t *path);
+
 #endif
 #endif

@@ -1,169 +1,24 @@
-#include "../alist.h"
+#include "../blist.h"
 
 // NOTE - for fixing code
 // alist_relative_ptr = int dest - int src
+
+/*
+TODO
+ * What are some issues at the moment?
+ * What's going wrong
+ * when we copy the list, all it does is make a carbon copy of it, thats
+ * fine, thats all we want, if we want to do an indepth copy we'll have to
+ * iterate over the elements, use a copy method and append
+*/
+
 
 char alist_iterator_done(alist_iterator_t *iterator);
 void* alist_iterator_first_node(alist_iterator_t* iterator);
 void* alist_iterator_next_node(alist_iterator_t* iterator);
 void* alist_iterator_prev_node(alist_iterator_t* iterator);
 
-alist_t new_alist(size_t element_size) {
-  alist_t list;
-
-  list.list_start = NULL;
-  list.destroy_on_remove = TRUE;
-  list.first = ALIST_NULL;
-  list.last = ALIST_NULL;
-  list.size = 0;
-  list.capacity = 0;
-  list.element_size = element_size;
-  list.block_size = element_size + sizeof(alist_node_t);
-  list.compare = NULL;
-  list.destroy = NULL;
-
-  return list;
-}
-
-alist_iterator_t new_alist_iterator(alist_t* list, char from_start) {
-  alist_iterator_t iterator;
-  iterator.list = list;
-  iterator.done = alist_iterator_done;
-  iterator.index = ALIST_NULL;
-  iterator.from_start = from_start;
-
-  // Set direction dependent information
-  if (from_start) {
-    iterator.next_node_pos = list->first;
-    iterator.next = alist_iterator_next_node;
-  }
-  else {
-    iterator.next_node_pos = list->last;
-    iterator.next = alist_iterator_prev_node;
-  }
-
-  // Hook the iterator up to the first node in the given direction
-  iterator.first = alist_iterator_first_node;
-
-  return iterator;
-}
-
-char alist_iterator_done(alist_iterator_t *iterator) {
-  return iterator->curr_node_pos < 0;
-}
-
-void* alist_iterator_first_node(alist_iterator_t* iterator) {
-  // Get the index of the starting node
-  if (iterator->from_start) {
-    iterator->next_node_pos = iterator->list->first;
-  } else {
-    iterator->next_node_pos = iterator->list->last;
-  }
-
-  // Get the first element
-  void* element = iterator->next(iterator);
-
-  // Get the index of the starting node
-  if (iterator->from_start) {
-    iterator->index = 0;
-  } else {
-    iterator->index = iterator->list->size - 1;
-  }
-
-  return element;
-}
-
-void* alist_iterator_next_node(alist_iterator_t* iterator) {
-  // Moving to the next element
-  iterator->curr_node_pos = iterator->next_node_pos;
-
-  if (iterator->next_node_pos < 0) {
-    return NULL;
-  } 
-
-  iterator->curr_node = array_get_element(iterator->list->list_start, 
-                                          iterator->next_node_pos, 
-                                          iterator->list->block_size);
-  iterator->next_node_pos += iterator->curr_node->next;
-  iterator->element = (void*)&iterator->curr_node[ALIST_ELEMENT];
-
-  iterator->index += 1;
-  // Returns non-null if not done
-  return iterator->element;
-}
-
-void* alist_iterator_prev_node(alist_iterator_t* iterator) {
-  // Moving to the next element
-  iterator->curr_node_pos = iterator->next_node_pos;
-
-  if (iterator->next_node_pos < 0) {
-    return NULL;
-  } 
-
-  iterator->curr_node = array_get_element(iterator->list->list_start, 
-                                          iterator->next_node_pos, 
-                                          iterator->list->block_size);
-  iterator->next_node_pos += iterator->curr_node->prev;
-  iterator->element = (void*)&iterator->curr_node[ALIST_ELEMENT];
-
-  iterator->index -= 1;
-  // Returns non-null if not done
-  return iterator->element;
-}
-
-// TODO this could be made a fair bit faster removing the bloat of the
-// list iterator and just hard-coding it
-// Index is an int instead of unsigned int to demonstrate the limited size of an 
-void *alist_index(alist_t *list, int index) {
-  if (index < 0 || index >= list->size) {
-    return NULL;
-  }
-
-  // Create the iterator
-  alist_iterator_t it;
-  if (index <= list->size / 2) {
-    it = new_alist_iterator(list, TRUE);
-  } else {
-    it = new_alist_iterator(list, FALSE);
-  }
-
-  // return a pointer to the element at the given index
-  for (it.first(&it); !it.done(&it); it.next(&it)) {
-    if (it.index == index) {
-      return it.element;
-    }
-  }
-
-  // This should only return null at this point if the list is invalid
-  return NULL;
-}
-
-alist_t alist_copy(alist_t* list) {
-  alist_t new_list;
-
-  // The list being copied is empty, so return an empty list of the same
-  // element size
-  if (list->size == 0) {
-    new_list = new_alist(list->element_size);
-    return new_list;
-
-  }
-
-  new_list.block_size = list->block_size;
-  new_list.capacity = list->capacity;
-  new_list.compare = list->compare;
-  new_list.destroy = list->destroy;
-  new_list.destroy_on_remove = list->destroy_on_remove;
-  new_list.element_size = list->element_size;
-  new_list.first = list->first;
-  new_list.last = list->last;
-  new_list.size = list->size;
-  new_list.list_start = safe_malloc(new_list.block_size * new_list.size);
-  assert(memcpy(new_list.list_start, list->list_start, new_list.block_size * new_list.size));
-
-  return new_list;
-}
-
+#include <stdio.h>
 alist_t *alist_combine(alist_t *list1, alist_t *list2) {
   if (!list1 || !list2) {
     return list1;
@@ -178,39 +33,29 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
   else if (list2->size == 0) {
     return list1;
   }
-  
+
   // Allocate enough space to store the combined lists
   if (combined_size > list1->capacity) {
     alist_set_length(list1, combined_size);
-  }
-
-  char has_last = TRUE;
-  if (list1->last == ALIST_NULL){
-    has_last = FALSE;
   }
 
   alist_node_t *list1_end = array_get_element(list1->list_start, 
                                               list1->size, 
                                               list1->block_size);
 
-  // Copy list2's data across and ensure the copy succeeds
-  assert(memcpy(list1_end, list2->list_start, list2->block_size * list2->size));
-
   alist_node_t *list2_first = array_get_element(list1->list_start, 
                                                 list1->size + list2->first, 
                                                 list1->block_size);
 
-  if (has_last){
-    alist_node_t *list1_last = array_get_element(list1->list_start, 
-                                                list1->last, 
-                                                list1->block_size);
-    list1_last->next = list1->size + list2->first - list1->last;
-    list2_first->prev = list1->last - list1->size - list2->first;
-  }
-  else {
-    list2_first->prev = ALIST_NULL;
-    list1->first = list2->first;
-  }
+  alist_node_t *list1_last = array_get_element(list1->list_start, 
+                                               list1->last, 
+                                               list1->block_size);
+    
+  // Copy list2's data across and ensure the copy succeeds
+  assert(memcpy(list1_end, list2->list_start, list2->block_size * list2->size));
+
+  list2_first->prev = list1->last - list1->size - list2->first;
+  list1_last->next = list1->size + list2->first - list1->last;
 
   // New last element
   list1->last = list1->size + list2->last;
@@ -221,6 +66,7 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
   return list1;
 }
 
+#include <stdio.h>
 void alist_extend(alist_t *list) {
   // Calculate the new length, realloc factor set to be 1.5x
   int new_len = list->capacity + (list->capacity / 2);
@@ -251,12 +97,13 @@ void alist_set_length(alist_t *list, int new_len) {
   list->capacity = new_len;
 }
 
+#include <stdio.h>
 void alist_append(alist_t *list, void *data) {
   // Make space for the new element
   if (list->capacity <= list->size) {
     alist_extend(list);
   }
-
+  printf("Capacity: %d Size: %d\n", list->capacity, list->size);
   alist_node_t *newNode = (alist_node_t *)array_get_element(
       list->list_start, list->size, list->block_size);
 
@@ -434,7 +281,14 @@ void alist_destroy(alist_t *list) {
   }
 
   // Check if there is a method for destroying the elements in the list
-  if (list->destroy_on_remove && list->destroy) {
+  if (list->destroy) {
+    printf("destroying\n");
+
+    printf("Num elements: %d\n", list->size);
+    alist_iterator_t it = new_alist_iterator(list, TRUE);
+    for (string_t* element = it.first(&it);!it.done(&it); element=it.next(&it)){
+      printf("\t- %s\n",cstr(element));
+    }
 
     // Go through the list and destroy each element
     for (unsigned int i = 0; i < list->size; i++) {
@@ -442,11 +296,14 @@ void alist_destroy(alist_t *list) {
       // Get a reference to and destroy the current element in the list
       alist_node_t *node =
           array_get_element(list->list_start, i, list->block_size);
+      printf("destroying element\n");
       list->destroy(&node[ALIST_ELEMENT]);
+      printf("destroyed element\n");
     }
   }
 
   destroy(list->list_start);
+  printf("destroyed\n");
 
 #ifdef ALIST_SAFE_DESTROY
   // Reset the list, meaning if someone tries to use it again
