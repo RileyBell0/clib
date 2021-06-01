@@ -23,7 +23,10 @@
       "utility": "c",
       "iosfwd": "c",
       "configloader.h": "c",
-      "blist.h": "c"
+      "blist.h": "c",
+      "directory.h": "c",
+      "string.h": "c",
+      "complex": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{ ColumnLimit: 80 }",
 }

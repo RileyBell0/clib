@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
     string_write_multi(&all_obj_names, element, &ext_seperator, obj_ext,
                        &whitespace, NULL);
   }
-  string_shrink(&all_obj_names,
+  string_limit(&all_obj_names,
                 all_obj_names.len - 1); // Remove the trailing whitespace
 
   // Write all object paths to a string, as need to use this multiple times
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
     string_write_multi(&all_obj_paths, obj_out, &path_sep, element,
                        &ext_seperator, obj_ext, &whitespace, NULL);
   }
-  string_shrink(&all_obj_paths,
+  string_limit(&all_obj_paths,
                 all_obj_paths.len - 1); // Remove the trailing whitespace
 
   string_t *compiler = var_compiler->data;
@@ -310,7 +310,7 @@ int main(int argc, char **argv) {
     string_write_multi(&global_flags, &flag_start, &var_flags->data[i],
                        &whitespace, NULL);
   }
-  string_shrink(&global_flags,
+  string_limit(&global_flags,
                 global_flags.len - 1); // Remove the trailing whitespace
 
   string_t obj_flags = new_string(DEFAULT_BUFFER_LEN);
@@ -318,7 +318,7 @@ int main(int argc, char **argv) {
     string_write_multi(&obj_flags, &flag_start, &var_obj_flags->data[i],
                        &whitespace, NULL);
   }
-  string_shrink(&obj_flags,
+  string_limit(&obj_flags,
                 obj_flags.len - 1); // Remove the trailing whitespace
   
   string_t prog_flags = new_string(DEFAULT_BUFFER_LEN);
@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
     string_write_multi(&prog_flags, &flag_start, &var_prog_flags->data[i],
                        &whitespace, NULL);
   }
-  string_shrink(&prog_flags,
+  string_limit(&prog_flags,
                 prog_flags.len - 1); // Remove the trailing whitespace
 
   string_t debug_flags = new_string(DEFAULT_BUFFER_LEN);
@@ -334,7 +334,7 @@ int main(int argc, char **argv) {
     string_write_multi(&debug_flags, &flag_start, &var_debug->data[i],
                        &whitespace, NULL);
   }
-  string_shrink(&debug_flags,
+  string_limit(&debug_flags,
                 debug_flags.len - 1); // Remove the trailing whitespace
 
   // Create the makefile's file

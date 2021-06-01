@@ -3,9 +3,9 @@
 // RE-CHECKED 30/04/2021
 // MEMORY_SAFE 06/05/2021
 // NULL_STR_SAFE 06/05/2021
-void string_shrink(string_t *source, unsigned int new_len) {
-  char* str = cstr(source);
-  if (str) {
+#include <stdio.h>
+void string_limit(string_t *source, unsigned int new_len) {
+  if (source->len >= new_len) {
     cstr(source)[new_len] = '\0';
     source->len = new_len;
   }
@@ -238,6 +238,7 @@ string_t* string_write_c_len(string_t* base, char* source, unsigned int len) {
 string_t *string_write_c(string_t *base, char *source) {
   // Allocate space to store the extension
   unsigned int len = strlen(source);
+
   string_write_c_len(base, source, len);
   
   return base;
@@ -270,13 +271,12 @@ string_t *string_write(string_t *base, string_t *source) {
     return base;
   }
 
-  char *base_start = cstr(base);
-  unsigned int source_pos = 0;
-  unsigned int final_len = base->len + source->len;
-
   // Allocate enough space to fit the extension
   string_set_max_len(base, base->len + source->len);
 
+  char *base_start = cstr(base);
+  unsigned int source_pos = 0;
+  unsigned int final_len = base->len + source->len;
 
   // Write from source onto base
   for (unsigned int index = base->len; index < final_len; index++) {

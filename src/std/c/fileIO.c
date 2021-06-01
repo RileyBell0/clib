@@ -157,7 +157,7 @@ string_t* remove_file_extension(string_t *file_name) {
   // of the str, hence i >= 1
   for (unsigned int i = file_name->len; i >= 1; i--) {
     if (file_name_str[i] == EXTENSION_SEPERATING_CHAR) {
-      string_shrink(file_name, i);
+      string_limit(file_name, i);
       return file_name;
     }
   }

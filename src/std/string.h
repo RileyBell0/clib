@@ -172,9 +172,9 @@ char* cstr(string_t* str);
 string_t string_copy(string_t *source);
 
 /*
- * Shrinks the given string to the new length.
+ * limits the given string to the new length.
 */
-void string_shrink(string_t* source, unsigned int new_len);
+void string_limit(string_t* source, unsigned int new_len);
 
 /*
  * Adds 'len' capacity to the string
@@ -266,6 +266,12 @@ string_t* string_concat(string_t *base, string_t *extension);
 
 // Realloc's the given string, updating its length
 void string_extend(string_t *str);
+
+/*
+  * If the string is longer than the given length, limit it
+  * to the requried length
+*/
+void string_limit(string_t* str, unsigned int len);
 
 // murders a string in cold blood
 void string_destroy(string_t *str);
