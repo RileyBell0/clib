@@ -49,32 +49,19 @@ alist_t dir_all_entries_alist(string_t *path) {
   return entries;
 }
 
-int depth = 0;
-FILE* logfile = NULL;
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 04/05/2021
 alist_t dir_all_files_recur(string_t* path) {
-  if (!logfile){
-    logfile = fileio_open_safe("log.txt", FALSE);
-  }
-  fprintf(logfile, "Path \"%s\" %d\n", cstr(path), path->len);
   // The return type is a list containing the paths to all matching files
   alist_t valid_files = new_alist(sizeof(string_t));
   valid_files.destroy = void_string_destroy;
-  depth += 1;
-  if (depth > 20){
-    fprintf(logfile, "DEPTH COUNTER EXITING\n");
-    return valid_files;
-  }
+  
   string_t path_sep = string_make(PATH_SEPERATOR);
-  if (path->len > 100){
-    return valid_files;
-  }
+
   string_t base_path = new_string(path->len + path_sep.len);
   string_write(&base_path, path);
   string_write(&base_path, &path_sep);
 
-  fprintf(logfile, " Base path: \"%s\" %d %d\n", cstr(&base_path), base_path.len, strlen(cstr(&base_path)));
   // Getting all the directory entries in the current directory
   alist_t entries = dir_all_entries_alist(path);
 
@@ -92,6 +79,7 @@ alist_t dir_all_files_recur(string_t* path) {
     // Generate the whole path to the entry
     string_limit(&entry_path, base_path.len);
     string_write(&entry_path, &file_name);
+
     if (!is_relative_dir_entry(&file_name)) {
       // Add all files from the sub directory
       DIR *d = opendir(cstr(&entry_path));
@@ -100,7 +88,6 @@ alist_t dir_all_files_recur(string_t* path) {
         alist_t sub_dir_files = dir_all_files_recur(&entry_path);
         sub_dir_files.destroy_on_remove = FALSE;
         closedir(d);
-        fprintf(logfile, "back to \"%s\" %d\n", cstr(&base_path), base_path.len);
 
         // Add the files to the alist
         alist_combine(&valid_files, &sub_dir_files);
@@ -128,10 +115,11 @@ alist_t dir_files_with_extension_recur(string_t *path, string_t *extension) {
   alist_t valid_files = new_alist(sizeof(string_t));
   valid_files.destroy = void_string_destroy;
 
-  // Converting the system-specific path seperator into a string
-  string_t base_path = new_string(path->len + strlen(PATH_SEPERATOR));
+  string_t path_sep = string_make(PATH_SEPERATOR);
+
+  string_t base_path = new_string(path->len + path_sep.len);
   string_write(&base_path, path);
-  string_write_c(&base_path, PATH_SEPERATOR);
+  string_write(&base_path, &path_sep);
 
   // Getting all the directory entries in the current directory
   alist_t entries = dir_all_entries_alist(path);
@@ -160,6 +148,7 @@ alist_t dir_files_with_extension_recur(string_t *path, string_t *extension) {
         // the alist returned
         alist_t sub_dir_files =
             dir_files_with_extension_recur(&entry_path, extension);
+        sub_dir_files.destroy_on_remove = FALSE;
         closedir(d);
 
         // Add the files to the alist

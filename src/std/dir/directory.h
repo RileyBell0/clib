@@ -3,6 +3,18 @@
  * Creation Date:   16/10/2020
 */
 
+/* * * * * * * * * * * * * * * * * * * * * * * * *
+ * TODO
+ * instead of having two functions:
+ * dir_all_files_recur and dir_all_files_with_extension_recur
+ * just have a single method
+ * dir_all_files_recur(path, int (*key)(string_t* filename))
+ * where only filenames that return true when put into the key function
+ * will be added to the resultant list
+ * TODO
+ * * * * * * * * * * * * * * * * * * * * * * * * *
+*/
+
 /*
  * For dealing with directories
  * 
