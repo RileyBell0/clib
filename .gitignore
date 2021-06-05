@@ -1,2 +1,4 @@
-/objects/
+/objects/**
+/build/**
 /build/
+/objects/
