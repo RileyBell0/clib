@@ -56,19 +56,22 @@ alist_t dir_all_entries_alist(string_t *path);
 
 /*
  * Returns an alist of type (string_t) containing all files within the given
- * directory 'path'
+ * path matching the given key
+ * 
+ * Key and extra are optional arguments:
+ * - Key is the function that each filename will be compared by, if Key
+ *   returns TRUE, the filename will be included
+ * 
+ * - extra is any extra data needed to be passed to the key function, for
+ *   instance, if basing around the extension of a filename, the key may be
+ *   a function comparing filename and extension, and the 'extra' var might be
+ *   a pointer to a string containing the required extension
  * 
  * destroy the alist with alist_destroy once finished with
  */
-alist_t dir_all_files_recur(string_t *path);
-
-/*
- * Returns an alist of type (string_t) containing all files with the given
- * extension within the given directory 'path'
- * 
- * destroy the alist with alist_destroy once finished with
- */
-alist_t dir_files_with_extension_recur(string_t* path, string_t* extension);
+alist_t dir_all_files_recur(string_t *path,
+                            int (*key)(string_t *file_name, void *extra),
+                            void *extra);
 
 /*
  * Returns TRUE if the given d_name string is either "." or ".."

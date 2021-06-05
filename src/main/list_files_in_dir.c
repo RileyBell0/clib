@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
         string_write_c(&output_name, DEFAULT_OUT_FILENAME);
     }
 
-    alist_t all_files = dir_all_files_recur(&path);
+    alist_t all_files = dir_all_files_recur(&path, NULL, NULL);
 
     FILE* outfile = fileio_open_safe(cstr(&output_name), FALSE);
 

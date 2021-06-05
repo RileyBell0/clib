@@ -1,26 +1,8 @@
 TODO
 
-- Make basic list implementation of that alist thing
-    - Append
-    - Remove
-    - remove must be based on comparison method recieved
-    - if the comparison is idential, happy days
-
-    now theorteically what if we made it so that our list was more of a custom data structure, as in
-    the element itself is stored directly in the array?
-    this would massively increase the size of the array which can be a huge problem with memory fragmentation but 
-    if we do this right we can handle these errors by simple chaining the lists 
-    but the thing is, if we're chainging the lsits and we remove an item from the list what do we do? 
-    should we keep track of the first empty position in the list and just fill it?
-    i guess every single removal should be a downshift
-    the thing is if we are moving list items aroundin memory this means we need to update surrounding nodes
-
-    this is easy with prev and next but not so easy with the relation being down the tree
-    this means that we have to make it so that the node knows what is above it so that it can update its references
-    accordinly when its being deleted'
-
-    so should i make a fragmented list? like a list which is a list of dynamic arrays?
-    nah, this shouldnt really be a problem as long as theyve got a bunch of memory lying aroundin
-    
-    but i should make a list_trim function which realloc's the list into a spot thats just large enough for it
-- 
+ALIST:
+  ITERATOR
+    Make it so that you can change the index that the iterator is
+    up to -> so that if we have a list 1000 elements long
+    but we want to check the last 500 elements, we dont have
+    to iterate through the first 500 elements

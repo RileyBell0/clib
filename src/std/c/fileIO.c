@@ -112,6 +112,24 @@ int fileio_next_line(FILE *file, string_t *buffer) {
   return TRUE;
 }
 
+int fileio_has_extension_key(string_t* file_name, void* extension) {
+  return fileio_has_extension(file_name, (string_t*)extension);
+}
+
+int fileio_has_extension(string_t* file_name, string_t* extension) {
+  int has_extension = FALSE;
+  
+  // Add the current file if it has the required extension
+  string_t file_extension = get_file_extension(file_name);
+
+  if (string_equals(&file_extension, extension) == TRUE) {
+    has_extension = TRUE;
+  }
+
+  string_destroy(&file_extension);
+  return has_extension;
+}
+
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 05/05/2021
 string_t get_file_name_from_path(string_t *path) {

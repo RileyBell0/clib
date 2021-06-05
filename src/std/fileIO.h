@@ -50,6 +50,18 @@ void fileio_close(FILE *file);
 int fileio_next_line(FILE *file, string_t *buffer);
 
 /*
+ * Given a file name and a required extension, returns TRUE
+ * if the given filename has the extension 'extension'
+*/
+int fileio_has_extension(string_t* file_name, string_t* extension);
+
+/*
+ * Wrapper for fileio_has_extension to ignore compiler warnings
+ * TODO is there a better way to do this?
+*/
+int fileio_has_extension_key(string_t* file_name, void* extension);
+
+/*
  * When given a string containing the path to a file,
  * the rest of the path is removed and just the file name
  * is returned in a *new* string

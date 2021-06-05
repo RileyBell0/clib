@@ -66,6 +66,7 @@
 #include <stdint.h>
 #include "array.h"
 
+#define CSTR_EQUAL 0
 #define SPACE_FOR_NULL 1
 #define REALLOC_MULTIPLIER 1.5
 #define EXTENSION_ASSURANCE 1

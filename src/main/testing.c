@@ -52,7 +52,6 @@ void print_string_alist(alist_t *list);
 
 int code(int argc, char** argv) {
   printf("Code 3\n");
-  
   return 0;
 }
 

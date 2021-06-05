@@ -7,6 +7,7 @@ char alist_iterator_done(alist_iterator_t *iterator);
 void* alist_iterator_first_node(alist_iterator_t* iterator);
 void* alist_iterator_next_node(alist_iterator_t* iterator);
 void* alist_iterator_prev_node(alist_iterator_t* iterator);
+void alist_iterator_move(alist_iterator_t* iterator, unsigned int index);
 
 alist_t new_alist(size_t element_size) {
   alist_t list;
@@ -27,9 +28,8 @@ alist_t new_alist(size_t element_size) {
 
 alist_iterator_t new_alist_iterator(alist_t* list, char from_start) {
   alist_iterator_t iterator;
-  iterator.list = list;
-  iterator.done = alist_iterator_done;
   iterator.index = ALIST_NULL;
+  iterator.list = list;
   iterator.from_start = from_start;
 
   // Set direction dependent information
@@ -41,8 +41,7 @@ alist_iterator_t new_alist_iterator(alist_t* list, char from_start) {
     iterator.next_node_pos = list->last;
     iterator.next = alist_iterator_prev_node;
   }
-
-  // Hook the iterator up to the first node in the given direction
+  iterator.done = alist_iterator_done;
   iterator.first = alist_iterator_first_node;
 
   return iterator;
@@ -448,14 +447,10 @@ void alist_destroy(alist_t *list) {
 
   destroy(list->list_start);
 
-#ifdef ALIST_SAFE_DESTROY
   // Reset the list, meaning if someone tries to use it again
   // it doesnt break anything
   list->capacity = 0;
   list->first = ALIST_NULL;
   list->last = ALIST_NULL;
   list->list_start = NULL;
-#endif
-
-  // Free the memory occupied by the list itself
 }

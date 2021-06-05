@@ -4,12 +4,13 @@
 #include "array.h"
 #include <stdarg.h>
 #include <stdint.h>
+#include <stdio.h>
+#include "string.h"
 
 #define ALIST_REALLOC_MULTIPLIER 2 // TODO currently unused
 #define ALIST_NULL INT32_MIN
 #define ALIST_SAFE_DESTROY
 #define ALIST_ELEMENT 1
-#include "string.h"
 
 /*
  * All of these lists use -1 as a NULL value
