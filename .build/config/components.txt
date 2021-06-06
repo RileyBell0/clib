@@ -10,5 +10,6 @@ src/std/c/stack.c
 src/std/c/filePath.c
 src/std/c/string.c
 src/std/c/configLoader.c
+src/std/c/argparse.c
 src/std/c/alist.c
 src/std/c/int.c

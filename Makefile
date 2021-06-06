@@ -1,19 +1,19 @@
 all: huge_array_test projectMake projectScan testing list_files_in_dir
 
-huge_array_test: huge_array_test.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o alist.o int.o
-	clang -arch arm64 -Wall -O3 -o build/huge_array_test objects/huge_array_test.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/int.o -g
+huge_array_test: huge_array_test.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -O3 -o build/huge_array_test objects/huge_array_test.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/argparse.o objects/alist.o objects/int.o -g
 
-projectMake: projectMake.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o alist.o int.o
-	clang -arch arm64 -Wall -O3 -o build/projectMake objects/projectMake.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/int.o -g
+projectMake: projectMake.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -O3 -o build/projectMake objects/projectMake.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/argparse.o objects/alist.o objects/int.o -g
 
-projectScan: projectScan.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o alist.o int.o
-	clang -arch arm64 -Wall -O3 -o build/projectScan objects/projectScan.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/int.o -g
+projectScan: projectScan.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -O3 -o build/projectScan objects/projectScan.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/argparse.o objects/alist.o objects/int.o -g
 
-testing: testing.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o alist.o int.o
-	clang -arch arm64 -Wall -O3 -o build/testing objects/testing.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/int.o -g
+testing: testing.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -O3 -o build/testing objects/testing.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/argparse.o objects/alist.o objects/int.o -g
 
-list_files_in_dir: list_files_in_dir.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o alist.o int.o
-	clang -arch arm64 -Wall -O3 -o build/list_files_in_dir objects/list_files_in_dir.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/alist.o objects/int.o -g
+list_files_in_dir: list_files_in_dir.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -O3 -o build/list_files_in_dir objects/list_files_in_dir.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/argparse.o objects/alist.o objects/int.o -g
 
 huge_array_test.o: src/main/huge_array_test.c
 	clang -arch arm64 -Wall -O3 -c -o objects/huge_array_test.o src/main/huge_array_test.c -g
@@ -65,6 +65,9 @@ string.o: src/std/c/string.c
 
 configLoader.o: src/std/c/configLoader.c
 	clang -arch arm64 -Wall -O3 -c -o objects/configLoader.o src/std/c/configLoader.c -g
+
+argparse.o: src/std/c/argparse.c
+	clang -arch arm64 -Wall -O3 -c -o objects/argparse.o src/std/c/argparse.c -g
 
 alist.o: src/std/c/alist.c
 	clang -arch arm64 -Wall -O3 -c -o objects/alist.o src/std/c/alist.c -g

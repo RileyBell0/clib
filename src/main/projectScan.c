@@ -37,7 +37,7 @@ config_var_t *safe_cfg_get_var(config_t *config, char *name) {
 void add_src_files_from_dir(FILE *out_file, string_t *base_path,
                             string_t *path_sep, string_t *extension) {
   alist_t files =
-      dir_all_files_recur(base_path, fileio_has_extension_key, extension);
+      dir_all_files_recur(base_path, fileio_has_extension_key, extension, TRUE);
 
   // Print all files in the subdirectory
   alist_iterator_t it = new_alist_iterator(&files, TRUE);
@@ -45,7 +45,7 @@ void add_src_files_from_dir(FILE *out_file, string_t *base_path,
     fprintf(out_file, "%s\n", cstr(node));
   }
 
-  // alist_destroy(&files);
+  alist_destroy(&files);
 }
 
 int main(int argc, char **argv) {
