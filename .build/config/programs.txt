@@ -1,4 +1,3 @@
-src/main/huge_array_test.c
 src/main/projectMake.c
 src/main/projectScan.c
 src/main/testing.c
