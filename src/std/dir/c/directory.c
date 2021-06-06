@@ -3,19 +3,19 @@
 /*
  * Given a path such as 'cool/awesome/file.txt'
  * returns a string containing 'awesome/file.txt'
-*/
-string_t dir_path_remove_start(string_t* path) {
+ */
+string_t dir_path_remove_start(string_t *path) {
   if (path->len == 0) {
     return new_string(0);
   }
-  
+
   /*
    * Find and return a string containing the entire path except
    * for the starting directory
-  */
-  char* pathstr = cstr(path);
+   */
+  char *pathstr = cstr(path);
   unsigned int pathsep_len = strlen(PATH_SEPERATOR);
-  for (unsigned int c = 0; c < path->len; c++){
+  for (unsigned int c = 0; c < path->len; c++) {
     if (cstring_equals_range(&pathstr[c], PATH_SEPERATOR, pathsep_len)) {
       c += pathsep_len;
       return string_make(&pathstr[c]);
@@ -49,12 +49,11 @@ alist_t dir_all_entries_alist(string_t *path) {
 
 alist_t dir_all_files_recur(string_t *path,
                             int (*key)(string_t *file_name, void *extra),
-                            void *extra,
-                            int include_base_path) {
+                            void *extra, int include_base_path) {
   // The return type is a list containing the paths to all matching files
   alist_t valid_files = new_alist(sizeof(string_t));
   valid_files.destroy = void_string_destroy;
-  
+
   string_t path_sep = string_make(PATH_SEPERATOR);
 
   string_t base_path = new_string(path->len + path_sep.len);
@@ -85,7 +84,8 @@ alist_t dir_all_files_recur(string_t *path,
       if (d) {
         // Get all files from the sub dir which are valid based
         // on the key functiono
-        alist_t sub_dir_files = dir_all_files_recur(&entry_path, key, extra, include_base_path);
+        alist_t sub_dir_files =
+            dir_all_files_recur(&entry_path, key, extra, include_base_path);
         sub_dir_files.destroy_on_remove = FALSE;
         closedir(d);
 
@@ -100,11 +100,10 @@ alist_t dir_all_files_recur(string_t *path,
         }
 
         if (append) {
-          if (include_base_path == TRUE){
+          if (include_base_path == TRUE) {
             string_t name = string_copy(&entry_path);
             alist_append(&valid_files, &name);
-          }
-          else {
+          } else {
             string_t name = dir_path_remove_start(&entry_path);
             alist_append(&valid_files, &name);
           }

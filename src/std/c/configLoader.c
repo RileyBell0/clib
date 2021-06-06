@@ -5,10 +5,10 @@
  *
  * complexString is set to TRUE iff the returned string was surrounded by quotes
  */// TODO this function is way too long
-int extract_field(string_t* str, unsigned int *pos, string_t *dest,
+int extract_field(string_t *str, unsigned int *pos, string_t *dest,
                   int *complex_field) {
   string_clear(dest);
-  
+
   // Why am i even stealing complex field?? if im just chanigng it to false
   *complex_field = FALSE;
   if (str->len <= *pos) {
@@ -121,7 +121,7 @@ int extract_field(string_t* str, unsigned int *pos, string_t *dest,
 }
 
 // RE-CHECKED 01/05/2021
-config_var_t new_config_var(string_t* var_name) {
+config_var_t new_config_var(string_t *var_name) {
 
   config_var_t var;
 
@@ -148,9 +148,10 @@ config_t read_config_file(char *filePath) {
   // Stores lines read in from the config file
   string_t buffer = new_string(DEFAULT_BUFFER_LEN);
 
-  // Storing a processed and formatted field string ready to be converted into a var
+  // Storing a processed and formatted field string ready to be converted into a
+  // var
   string_t field = new_string(DEFAULT_BUFFER_LEN);
-  
+
   /*
    * Read every line in the file
    */
@@ -162,8 +163,8 @@ config_t read_config_file(char *filePath) {
   /*
    * Has the current var thats being loaded in got at least one
    * value loaded in from the file
-  */
-  int var_has_value = FALSE; 
+   */
+  int var_has_value = FALSE;
 
   // Read in and process the whole config file
   while (fileio_next_line(configFile, &buffer)) {
@@ -186,40 +187,40 @@ config_t read_config_file(char *filePath) {
         }
 
         switch (field_type) {
-          case CONFIG_FIELD_DECLARATION_CHAR:
-            curr_field_type = CONFIG_FIELD_DECLARATION;
-            continue;
-          case CONFIG_ARRAY_START_CHAR:
-            within_array_declaration = TRUE;
-            continue;
-          case CONFIG_ARRAY_END_CHAR:
-            curr_field_type = CONFIG_FIELD_NAME;
-            within_array_declaration = FALSE;
-            continue;
-        } 
+        case CONFIG_FIELD_DECLARATION_CHAR:
+          curr_field_type = CONFIG_FIELD_DECLARATION;
+          continue;
+        case CONFIG_ARRAY_START_CHAR:
+          within_array_declaration = TRUE;
+          continue;
+        case CONFIG_ARRAY_END_CHAR:
+          curr_field_type = CONFIG_FIELD_NAME;
+          within_array_declaration = FALSE;
+          continue;
+        }
       }
-      
+
       switch (curr_field_type) {
-        case CONFIG_FIELD_NAME:
-          // TODO had if(!has_var_been_named) around whole section, is this needed?
-          // Reached a new config_var
-          current_var_finalised = FALSE;
+      case CONFIG_FIELD_NAME:
+        // TODO had if(!has_var_been_named) around whole section, is this
+        // needed? Reached a new config_var
+        current_var_finalised = FALSE;
 
-          // Name the new variable
-          var = new_config_var(&field);
-          has_var_been_named = TRUE;
-          var_has_value = FALSE;
+        // Name the new variable
+        var = new_config_var(&field);
+        has_var_been_named = TRUE;
+        var_has_value = FALSE;
 
-          // Reset the array for storing the new data
-          fields.len = 0;
-          break;
-        case CONFIG_FIELD_DECLARATION:
-          if (within_array_declaration || !var_has_value) {
-            // Associate the current field with the current variable
-            string_t field_value = string_copy(&field);
-            dynamic_array_append(&fields, &field_value);
-          }
-          break;
+        // Reset the array for storing the new data
+        fields.len = 0;
+        break;
+      case CONFIG_FIELD_DECLARATION:
+        if (within_array_declaration || !var_has_value) {
+          // Associate the current field with the current variable
+          string_t field_value = string_copy(&field);
+          dynamic_array_append(&fields, &field_value);
+        }
+        break;
       }
     }
 
@@ -228,11 +229,11 @@ config_t read_config_file(char *filePath) {
     // declaration and the line is over, -> the variable is done
     if (!within_array_declaration) {
       if (!current_var_finalised) {
-        
+
         // Convert to an array
         array_t convertedFields = dynamic_array_to_array(&fields);
 
-        // Save the array into the var 
+        // Save the array into the var
         var.data = convertedFields.data;
         var.len = convertedFields.len;
 
@@ -252,16 +253,16 @@ config_t read_config_file(char *filePath) {
   // Whole file has been loaded in now
   fclose(configFile);
 
-  // This should only be called when within an array declaration 
+  // This should only be called when within an array declaration
   // at the end of the file, save what data we can anyway
   if (!current_var_finalised) {
     // Convert to an array
     array_t convertedFields = dynamic_array_to_array(&fields);
-    
+
     // Load the array into the var
     var.data = convertedFields.data;
     var.len = convertedFields.len;
-    
+
     // Save the current var to the given array
     dynamic_array_append(&results, &var);
   }
@@ -286,12 +287,6 @@ config_t read_config_file(char *filePath) {
 
   return config;
 }
-
-
-
-
-
-
 
 void config_encode(string_t *dest, string_t *toEncode) {
   dest->len = 0;

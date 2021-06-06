@@ -3,10 +3,10 @@
  * the clib files
  */
 
+#include "../std/alist.h"
 #include "../std/array.h"
 #include "../std/configLoader.h"
 #include "../std/dir/directory.h"
-#include "../std/alist.h"
 #include "../std/string.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@
 #define DISPLAY '7'
 
 int code2(int argc, char **argv);
-int code3(int argc, char** argv);
+int code3(int argc, char **argv);
 int code(int argc, char **argv);
 void bar(char *toPrint);
 void alist_test();
@@ -50,7 +50,7 @@ void print_string_alist(alist_t *list);
  */
 // Write your code here
 
-int code(int argc, char** argv) {
+int code(int argc, char **argv) {
   printf("Code 3\n");
   return 0;
 }

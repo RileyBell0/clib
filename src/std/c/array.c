@@ -7,7 +7,8 @@ void array_set_element(void *array, void *data, unsigned int element,
   memcpy(((char *)array + (element_size * element)), data, element_size);
 }
 
-void *array_get_element(void *array, unsigned int element, size_t element_size) {
+void *array_get_element(void *array, unsigned int element,
+                        size_t element_size) {
   return (void *)((char *)array + (element * element_size));
 }
 
@@ -30,8 +31,7 @@ array_t new_array(unsigned int elements, size_t element_size) {
   return array;
 }
 
-array_t array_wrap(void* array, size_t element_size, unsigned int len)
-{
+array_t array_wrap(void *array, size_t element_size, unsigned int len) {
   array_t wrapped;
   wrapped.data = array;
   wrapped.len = len;
@@ -149,7 +149,7 @@ void dynamic_array_set_element(dynamic_array_t *array, unsigned int element,
          array->element_size);
 }
 
-void array_set_index(array_t *array, unsigned int index, void* data) {
+void array_set_index(array_t *array, unsigned int index, void *data) {
   assert(memcpy(array_index(array, index), data, array->element_size));
 }
 

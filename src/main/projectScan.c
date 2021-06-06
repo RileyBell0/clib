@@ -85,7 +85,8 @@ int main(int argc, char **argv) {
   FILE *componentOut = fileio_open_safe(cstr(&component_out), FALSE);
   for (unsigned int i = 0; i < var_src_dirs->len; i++) {
     string_t componentDirPath = var_src_dirs->data[i];
-    add_src_files_from_dir(componentOut, &componentDirPath, &path_sep, &extension);
+    add_src_files_from_dir(componentOut, &componentDirPath, &path_sep,
+                           &extension);
   }
   fclose(componentOut);
 

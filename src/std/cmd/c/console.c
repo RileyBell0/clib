@@ -5,7 +5,7 @@
 string_t console_bar(unsigned int len) {
   string_t bar = new_string(len);
 
-  char* str = cstr(&bar);
+  char *str = cstr(&bar);
 
   // make a bar of len 'len'
   for (unsigned int i = 0; i < len; i++) {
@@ -18,7 +18,7 @@ string_t console_bar(unsigned int len) {
 
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 04/05/2021
-void console_header(string_t* str) {
+void console_header(string_t *str) {
   string_t bar = console_bar(str->len);
 
   printf("%s\n%s\n%s\n", cstr(&bar), cstr(str), cstr(&bar));
@@ -28,12 +28,11 @@ void console_header(string_t* str) {
 
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 04/05/2021
-void console_header_c(char* str)
-{
-    unsigned int len = strlen(str);
-    string_t bar = console_bar(len);
-    
-    printf("%s\n%s\n%s\n", cstr(&bar), str, cstr(&bar));
+void console_header_c(char *str) {
+  unsigned int len = strlen(str);
+  string_t bar = console_bar(len);
 
-    string_destroy(&bar);
+  printf("%s\n%s\n%s\n", cstr(&bar), str, cstr(&bar));
+
+  string_destroy(&bar);
 }

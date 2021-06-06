@@ -1,7 +1,7 @@
 /*
  * Author:          Riley Bell
  * Creation Date:   16/10/2020
-*/
+ */
 
 #ifndef CLIB_STD_PATH_H
 #define CLIB_STD_PATH_H
@@ -19,15 +19,13 @@
 
 #endif
 
-
 /*
  * Returns a *new* string which is the concatenation
  * of basePath + pathSeperator + dirName
- * 
- * More efficient than doing each concatenation seperately as 
+ *
+ * More efficient than doing each concatenation seperately as
  * all required space is allocated at once
-*/
+ */
 string_t path_enter_directory(string_t basePath, string_t dirName);
-
 
 #endif

@@ -2,10 +2,10 @@
 #define CLIB_STD_ALIST_H
 
 #include "array.h"
+#include "string.h"
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "string.h"
 
 #define ALIST_REALLOC_MULTIPLIER 2 // TODO currently unused
 #define ALIST_NULL INT32_MIN
@@ -44,37 +44,37 @@ typedef struct alist_t {
 } alist_t;
 
 typedef struct alist_iterator_t {
-  alist_t* list;
+  alist_t *list;
   char from_start;
-  int next_node_pos; // Next node's position in the array
-  int curr_node_pos; // Current node's position in the array
+  int next_node_pos;  // Next node's position in the array
+  int curr_node_pos;  // Current node's position in the array
   unsigned int index; // current node's index in the list
-  alist_node_t* curr_node;
-  void* element;
-  void* (*next)(struct alist_iterator_t* iterator);
-  char (*done)(struct alist_iterator_t* iterator);
-  void* (*first)(struct alist_iterator_t* iterator);
+  alist_node_t *curr_node;
+  void *element;
+  void *(*next)(struct alist_iterator_t *iterator);
+  char (*done)(struct alist_iterator_t *iterator);
+  void *(*first)(struct alist_iterator_t *iterator);
 } alist_iterator_t;
 
 // Creates a list iterator for the alist
-alist_iterator_t new_alist_iterator(alist_t* list, char from_start);
+alist_iterator_t new_alist_iterator(alist_t *list, char from_start);
 
 /*
  * Converts an alist into an array and returns it
-*/
-array_t alist_to_array(alist_t* list);
+ */
+array_t alist_to_array(alist_t *list);
 
 /*
  * returns the element at the given index, or Null
  * if out of bounds of the list
-*/
-void* alist_index(alist_t* list, int index);
+ */
+void *alist_index(alist_t *list, int index);
 
 /*
  * Given two alists, combines them into list1 by appending list2
  * onto list1. returns list 1
-*/
-alist_t* alist_combine(alist_t* list1, alist_t *list2);
+ */
+alist_t *alist_combine(alist_t *list1, alist_t *list2);
 
 /*
  * Returns an empty alist - no memory allocated
@@ -104,12 +104,12 @@ int alist_remove(alist_t *list, void *element);
 /*
  * Ensures the given list has at least the capacity 'new_len', if not
  * resizes the list to fit
-*/
+ */
 void alist_set_length(alist_t *list, int new_len);
 
 /*
  * Given an alist, destroys its contents
-*/
-void alist_destroy(alist_t* list);
+ */
+void alist_destroy(alist_t *list);
 
 #endif

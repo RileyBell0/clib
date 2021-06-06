@@ -112,13 +112,13 @@ int fileio_next_line(FILE *file, string_t *buffer) {
   return TRUE;
 }
 
-int fileio_has_extension_key(string_t* file_name, void* extension) {
-  return fileio_has_extension(file_name, (string_t*)extension);
+int fileio_has_extension_key(string_t *file_name, void *extension) {
+  return fileio_has_extension(file_name, (string_t *)extension);
 }
 
-int fileio_has_extension(string_t* file_name, string_t* extension) {
+int fileio_has_extension(string_t *file_name, string_t *extension) {
   int has_extension = FALSE;
-  
+
   // Add the current file if it has the required extension
   string_t file_extension = get_file_extension(file_name);
 
@@ -137,9 +137,9 @@ string_t get_file_name_from_path(string_t *path) {
   char *path_str = cstr(path);
 
   for (int i = path->len; i >= 0; i--) {
-    // The string is part of a path, 
+    // The string is part of a path,
     if (path_str[i] == PATH_SEPERATOR_CHAR) {
-      
+
       // Allocate enough space for the file_name
       file_name = new_string(path->len - i);
 
@@ -168,8 +168,8 @@ char *remove_file_extension_c(char *file_name, unsigned int name_len) {
 
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 05/05/2021
-string_t* remove_file_extension(string_t *file_name) {
-  char* file_name_str = cstr(file_name);
+string_t *remove_file_extension(string_t *file_name) {
+  char *file_name_str = cstr(file_name);
 
   // If the first char is . -> hidden file, dont remove the rest
   // of the str, hence i >= 1
@@ -185,11 +185,11 @@ string_t* remove_file_extension(string_t *file_name) {
 
 // RE-CHECKED 05/05/2021
 // MEMORY_SAFE 05/05/2021
-void remove_file_extensions(alist_t* files) {
+void remove_file_extensions(alist_t *files) {
   // Removing the extension from the program names
   alist_iterator_t it = new_alist_iterator(files, TRUE);
-  
-  for (string_t* file = it.first(&it); !it.done(&it); file = it.next(&it)) {
+
+  for (string_t *file = it.first(&it); !it.done(&it); file = it.next(&it)) {
     remove_file_extension(file);
   }
 }
@@ -204,7 +204,7 @@ string_t get_file_extension(string_t *file_name) {
 
     // Check if the start of the extension has been reached
     if (file_str[i] == EXTENSION_SEPERATING_CHAR) {
-      
+
       // Return a pointer to the char after the extension seperating char
       string_t extension = new_string(file_name->len - i);
       string_write_c_len(&extension, &file_str[i + 1], file_name->len - i - 1);
@@ -217,12 +217,12 @@ string_t get_file_extension(string_t *file_name) {
 
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 05/05/2021
-alist_t get_file_names_from_paths(alist_t* files) {
+alist_t get_file_names_from_paths(alist_t *files) {
   alist_t file_names = new_alist(sizeof(string_t));
   file_names.destroy = void_string_destroy;
 
   alist_iterator_t it = new_alist_iterator(files, TRUE);
-  for (string_t* file = it.first(&it); !it.done(&it); file = it.next(&it)) {
+  for (string_t *file = it.first(&it); !it.done(&it); file = it.next(&it)) {
     // Extract the file names from the file paths
     string_t file_name = get_file_name_from_path(file);
     alist_append(&file_names, &file_name);

@@ -92,7 +92,7 @@ int string_compare(string_t *str1, string_t *str2) {
 
 // TODO this should be a compare method not an equals method
 // RE-CHECKED 30/04/2021
-// 
+//
 // not yet verified as either string could have a null
 // component
 // so if they're both null then TRUE
@@ -102,9 +102,9 @@ int string_equals(string_t *str1, string_t *str2) {
   if (str1->len != str2->len) {
     return FALSE;
   }
-  
-  char* string_1 = cstr(str1);
-  char* string_2 = cstr(str2);
+
+  char *string_1 = cstr(str1);
+  char *string_2 = cstr(str2);
 
   // Do a null string comparison
   if (string_1 == NULL && string_2 == NULL) {
@@ -119,9 +119,7 @@ int string_equals(string_t *str1, string_t *str2) {
 // TODO this should be a compare method not an equals method
 // RE-CHECKED 30/04/2021
 // VERIFIED
-int cstring_equals(char *str1, char *str2) {
-  return strcmp(str1, str2) == 0;
-}
+int cstring_equals(char *str1, char *str2) { return strcmp(str1, str2) == 0; }
 
 // TODO this should be a compare method not an equals method
 // make it cstring_compare_range instead
@@ -162,7 +160,7 @@ unsigned int string_count_occurances(string_t *source, char delim) {
 // RE-CHECKED 29/04/2021
 // VERIFIED
 void string_null_terminate(string_t *str) {
-  char* str_component = cstr(str);
+  char *str_component = cstr(str);
   if (str_component) {
     cstr(str)[str->len] = '\0';
   }
@@ -174,7 +172,7 @@ void string_write_char(string_t *base, char to_add) {
   if (to_add == '\0') {
     return;
   }
-  
+
   // + 1 due to adding a singular char
   string_set_max_len(base, base->len + 1);
 
@@ -204,7 +202,7 @@ string_t *string_write_c_multi(string_t *base, char *source, ...) {
   return base;
 }
 
-string_t* string_write_c_len(string_t* base, char* source, unsigned int len) {
+string_t *string_write_c_len(string_t *base, char *source, unsigned int len) {
   if (len == 0) {
     return base;
   }
@@ -232,7 +230,7 @@ string_t* string_write_c_len(string_t* base, char* source, unsigned int len) {
 
 // TODO this will work fine but is this really any faster than just
 // calling cstring_wrap then string_write?
-// 
+//
 // RE-CHECKED 29/04/2021
 // VERIFIED
 string_t *string_write_c(string_t *base, char *source) {
@@ -240,7 +238,7 @@ string_t *string_write_c(string_t *base, char *source) {
   unsigned int len = strlen(source);
 
   string_write_c_len(base, source, len);
-  
+
   return base;
 }
 
@@ -286,7 +284,7 @@ string_t *string_write(string_t *base, string_t *source) {
   // Update length
   base->len += source->len;
 
-  // Null terminate 
+  // Null terminate
   // Making sure the string is not a null string
   if (base_start) {
     base_start[base->len] = '\0';
@@ -297,8 +295,7 @@ string_t *string_write(string_t *base, string_t *source) {
 
 // RE-CONFIRMED 29/04/2021
 // VERIFIED
-void string_set_max_len(string_t* str, unsigned int max_len)
-{
+void string_set_max_len(string_t *str, unsigned int max_len) {
   if (max_len > str->max_len) {
     // If the current string is a short string
     if (str->local && max_len > SHORT_STR_LEN) {
@@ -312,7 +309,8 @@ void string_set_max_len(string_t* str, unsigned int max_len)
       memcpy(str->_str, str->small, (str->len + SPACE_FOR_NULL) * sizeof(char));
     } else {
       // Increase the memory block to fit the new required length
-      str->_str = safe_realloc(str->_str, (max_len + SPACE_FOR_NULL) * sizeof(char));
+      str->_str =
+          safe_realloc(str->_str, (max_len + SPACE_FOR_NULL) * sizeof(char));
     }
 
     str->max_len = max_len;
@@ -328,7 +326,7 @@ void string_extend(string_t *str) {
    * For cases when a string has a max length of 0 or 1
    * Can only occur if a cstring is wrapped into a string and the cstring
    * has a length of 0 or 1
-  */
+   */
   if (str->max_len < SHORT_STR_LEN) {
     new_len = SHORT_STR_LEN + SPACE_FOR_NULL;
   }

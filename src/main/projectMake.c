@@ -290,7 +290,7 @@ int main(int argc, char **argv) {
                        &whitespace, NULL);
   }
   string_limit(&all_obj_names,
-                all_obj_names.len - 1); // Remove the trailing whitespace
+               all_obj_names.len - 1); // Remove the trailing whitespace
 
   // Write all object paths to a string, as need to use this multiple times
   string_t all_obj_paths = new_string(DEFAULT_BUFFER_LEN);
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
                        &ext_seperator, obj_ext, &whitespace, NULL);
   }
   string_limit(&all_obj_paths,
-                all_obj_paths.len - 1); // Remove the trailing whitespace
+               all_obj_paths.len - 1); // Remove the trailing whitespace
 
   string_t *compiler = var_compiler->data;
 
@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
                        &whitespace, NULL);
   }
   string_limit(&global_flags,
-                global_flags.len - 1); // Remove the trailing whitespace
+               global_flags.len - 1); // Remove the trailing whitespace
 
   string_t obj_flags = new_string(DEFAULT_BUFFER_LEN);
   for (unsigned int i = 0; i < var_obj_flags->len; i++) {
@@ -319,15 +319,15 @@ int main(int argc, char **argv) {
                        &whitespace, NULL);
   }
   string_limit(&obj_flags,
-                obj_flags.len - 1); // Remove the trailing whitespace
-  
+               obj_flags.len - 1); // Remove the trailing whitespace
+
   string_t prog_flags = new_string(DEFAULT_BUFFER_LEN);
   for (unsigned int i = 0; i < var_prog_flags->len; i++) {
     string_write_multi(&prog_flags, &flag_start, &var_prog_flags->data[i],
                        &whitespace, NULL);
   }
   string_limit(&prog_flags,
-                prog_flags.len - 1); // Remove the trailing whitespace
+               prog_flags.len - 1); // Remove the trailing whitespace
 
   string_t debug_flags = new_string(DEFAULT_BUFFER_LEN);
   for (unsigned int i = 0; i < var_debug->len; i++) {
@@ -335,7 +335,7 @@ int main(int argc, char **argv) {
                        &whitespace, NULL);
   }
   string_limit(&debug_flags,
-                debug_flags.len - 1); // Remove the trailing whitespace
+               debug_flags.len - 1); // Remove the trailing whitespace
 
   // Create the makefile's file
   FILE *out_file = fileio_open_safe(cstr(var_makeName->data), FALSE);
@@ -366,7 +366,7 @@ int main(int argc, char **argv) {
     // Write call line
     fprintf(out_file, "%s%s%s: %s\n", cstr(prog_name), cstr(&ext_seperator),
             cstr(obj_ext), cstr(it_2.element));
-    
+
     // Write cmd line
     fprintf(out_file, "\t%s %s %s %s%s%s%s%s %s %s\n\n", cstr(compiler),
             cstr(&global_flags), cstr(&obj_flags), cstr(obj_out),

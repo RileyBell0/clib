@@ -31,7 +31,7 @@
  * so we need to make it so that resizing the list also resizes the ledger
  * or we can smack the ledger at the end of the list
  * wait no that doesnt work because, well it does it jsut means that whenever we
- * resize the list we have to resize the list, then copy the memory from the 
+ * resize the list we have to resize the list, then copy the memory from the
  * ledger's original location forward to wherever tf its new place is
  * but is that even possible? can you copy memory onto itself?
  * i dont imagine you can right?

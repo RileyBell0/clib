@@ -47,8 +47,8 @@ array_t new_array(unsigned int elements, size_t element_size);
 
 /*
  * Given a pointer to an existing array, wraps it into an array_t
-*/
-array_t array_wrap(void* array, size_t element_size, unsigned int len);
+ */
+array_t array_wrap(void *array, size_t element_size, unsigned int len);
 
 /*
  * Gets a pointer to the element at the given index in
@@ -58,8 +58,8 @@ void *array_index(array_t *array, unsigned int index);
 
 /*
  * Sets the given index in the array to the data provided
-*/
-void array_set_index(array_t *array, unsigned int index, void* data);
+ */
+void array_set_index(array_t *array, unsigned int index, void *data);
 
 /*
  * Method to set a given element from an array of an unknown type

@@ -4,10 +4,10 @@
 // alist_relative_ptr = int dest - int src
 
 char alist_iterator_done(alist_iterator_t *iterator);
-void* alist_iterator_first_node(alist_iterator_t* iterator);
-void* alist_iterator_next_node(alist_iterator_t* iterator);
-void* alist_iterator_prev_node(alist_iterator_t* iterator);
-void alist_iterator_move(alist_iterator_t* iterator, unsigned int index);
+void *alist_iterator_first_node(alist_iterator_t *iterator);
+void *alist_iterator_next_node(alist_iterator_t *iterator);
+void *alist_iterator_prev_node(alist_iterator_t *iterator);
+void alist_iterator_move(alist_iterator_t *iterator, unsigned int index);
 
 alist_t new_alist(size_t element_size) {
   alist_t list;
@@ -26,7 +26,7 @@ alist_t new_alist(size_t element_size) {
   return list;
 }
 
-alist_iterator_t new_alist_iterator(alist_t* list, char from_start) {
+alist_iterator_t new_alist_iterator(alist_t *list, char from_start) {
   alist_iterator_t iterator;
   iterator.index = ALIST_NULL;
   iterator.list = list;
@@ -36,8 +36,7 @@ alist_iterator_t new_alist_iterator(alist_t* list, char from_start) {
   if (from_start) {
     iterator.next_node_pos = list->first;
     iterator.next = alist_iterator_next_node;
-  }
-  else {
+  } else {
     iterator.next_node_pos = list->last;
     iterator.next = alist_iterator_prev_node;
   }
@@ -51,7 +50,7 @@ char alist_iterator_done(alist_iterator_t *iterator) {
   return iterator->curr_node_pos < 0;
 }
 
-void* alist_iterator_first_node(alist_iterator_t* iterator) {
+void *alist_iterator_first_node(alist_iterator_t *iterator) {
   // Get the index of the starting node
   if (iterator->from_start) {
     iterator->next_node_pos = iterator->list->first;
@@ -60,7 +59,7 @@ void* alist_iterator_first_node(alist_iterator_t* iterator) {
   }
 
   // Get the first element
-  void* element = iterator->next(iterator);
+  void *element = iterator->next(iterator);
 
   // Get the index of the starting node
   if (iterator->from_start) {
@@ -72,38 +71,38 @@ void* alist_iterator_first_node(alist_iterator_t* iterator) {
   return element;
 }
 
-void* alist_iterator_next_node(alist_iterator_t* iterator) {
+void *alist_iterator_next_node(alist_iterator_t *iterator) {
   // Moving to the next element
   iterator->curr_node_pos = iterator->next_node_pos;
 
   if (iterator->next_node_pos < 0) {
     return NULL;
-  } 
+  }
 
-  iterator->curr_node = array_get_element(iterator->list->list_start, 
-                                          iterator->next_node_pos, 
-                                          iterator->list->block_size);
+  iterator->curr_node =
+      array_get_element(iterator->list->list_start, iterator->next_node_pos,
+                        iterator->list->block_size);
   iterator->next_node_pos += iterator->curr_node->next;
-  iterator->element = (void*)&iterator->curr_node[ALIST_ELEMENT];
+  iterator->element = (void *)&iterator->curr_node[ALIST_ELEMENT];
 
   iterator->index += 1;
   // Returns non-null if not done
   return iterator->element;
 }
 
-void* alist_iterator_prev_node(alist_iterator_t* iterator) {
+void *alist_iterator_prev_node(alist_iterator_t *iterator) {
   // Moving to the next element
   iterator->curr_node_pos = iterator->next_node_pos;
 
   if (iterator->next_node_pos < 0) {
     return NULL;
-  } 
+  }
 
-  iterator->curr_node = array_get_element(iterator->list->list_start, 
-                                          iterator->next_node_pos, 
-                                          iterator->list->block_size);
+  iterator->curr_node =
+      array_get_element(iterator->list->list_start, iterator->next_node_pos,
+                        iterator->list->block_size);
   iterator->next_node_pos += iterator->curr_node->prev;
-  iterator->element = (void*)&iterator->curr_node[ALIST_ELEMENT];
+  iterator->element = (void *)&iterator->curr_node[ALIST_ELEMENT];
 
   iterator->index -= 1;
   // Returns non-null if not done
@@ -112,7 +111,7 @@ void* alist_iterator_prev_node(alist_iterator_t* iterator) {
 
 // TODO this could be made a fair bit faster removing the bloat of the
 // list iterator and just hard-coding it
-// Index is an int instead of unsigned int to demonstrate the limited size of an 
+// Index is an int instead of unsigned int to demonstrate the limited size of an
 void *alist_index(alist_t *list, int index) {
   if (index < 0 || index >= list->size) {
     return NULL;
@@ -137,7 +136,7 @@ void *alist_index(alist_t *list, int index) {
   return NULL;
 }
 
-alist_t alist_copy(alist_t* list) {
+alist_t alist_copy(alist_t *list) {
   alist_t new_list;
 
   // The list being copied is empty, so return an empty list of the same
@@ -145,7 +144,6 @@ alist_t alist_copy(alist_t* list) {
   if (list->size == 0) {
     new_list = new_alist(list->element_size);
     return new_list;
-
   }
 
   new_list.block_size = list->block_size;
@@ -158,7 +156,8 @@ alist_t alist_copy(alist_t* list) {
   new_list.last = list->last;
   new_list.size = list->size;
   new_list.list_start = safe_malloc(new_list.block_size * new_list.size);
-  assert(memcpy(new_list.list_start, list->list_start, new_list.block_size * new_list.size));
+  assert(memcpy(new_list.list_start, list->list_start,
+                new_list.block_size * new_list.size));
 
   return new_list;
 }
@@ -171,42 +170,38 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
   // Note that this does not check types, only the size of types
   unsigned int combined_size = list1->size + list2->size;
 
-  if (list1->element_size != list2->element_size || combined_size >= INT32_MAX) {
+  if (list1->element_size != list2->element_size ||
+      combined_size >= INT32_MAX) {
+    return list1;
+  } else if (list2->size == 0) {
     return list1;
   }
-  else if (list2->size == 0) {
-    return list1;
-  }
-  
+
   // Allocate enough space to store the combined lists
   if (combined_size > list1->capacity) {
     alist_set_length(list1, combined_size);
   }
 
   char has_last = TRUE;
-  if (list1->last == ALIST_NULL){
+  if (list1->last == ALIST_NULL) {
     has_last = FALSE;
   }
 
-  alist_node_t *list1_end = array_get_element(list1->list_start, 
-                                              list1->size, 
-                                              list1->block_size);
+  alist_node_t *list1_end =
+      array_get_element(list1->list_start, list1->size, list1->block_size);
 
   // Copy list2's data across and ensure the copy succeeds
   assert(memcpy(list1_end, list2->list_start, list2->block_size * list2->size));
 
-  alist_node_t *list2_first = array_get_element(list1->list_start, 
-                                                list1->size + list2->first, 
-                                                list1->block_size);
+  alist_node_t *list2_first = array_get_element(
+      list1->list_start, list1->size + list2->first, list1->block_size);
 
-  if (has_last){
-    alist_node_t *list1_last = array_get_element(list1->list_start, 
-                                                list1->last, 
-                                                list1->block_size);
+  if (has_last) {
+    alist_node_t *list1_last =
+        array_get_element(list1->list_start, list1->last, list1->block_size);
     list1_last->next = list1->size + list2->first - list1->last;
     list2_first->prev = list1->last - list1->size - list2->first;
-  }
-  else {
+  } else {
     list2_first->prev = ALIST_NULL;
     list1->first = list2->first;
   }
@@ -283,7 +278,7 @@ void alist_append(alist_t *list, void *data) {
   list->size += 1;
 }
 
-array_t alist_to_array(alist_t* list) {
+array_t alist_to_array(alist_t *list) {
   array_t array = new_array(list->size, list->element_size);
 
   // Populate the array
@@ -312,12 +307,11 @@ void alist_remove_node(alist_t *list, alist_node_t *node, unsigned int curr) {
     } else {
       prevnode->next = ALIST_NULL;
     }
-
   }
   if (next >= 0) {
     alist_node_t *nextnode = ((alist_node_t *)array_get_element(
         list->list_start, next, list->block_size));
-    
+
     // Have the next node point at the previous node
     if (prev >= 0) {
       nextnode->prev = prev - next;
@@ -330,8 +324,7 @@ void alist_remove_node(alist_t *list, alist_node_t *node, unsigned int curr) {
   if (list->first == curr) {
     if (next >= 0) {
       list->first = next;
-    }
-    else {
+    } else {
       list->first = ALIST_NULL;
     }
   }
@@ -340,8 +333,7 @@ void alist_remove_node(alist_t *list, alist_node_t *node, unsigned int curr) {
   if (list->last == curr) {
     if (prev >= 0) {
       list->last = next;
-    }
-    else {
+    } else {
       list->last = ALIST_NULL;
     }
   }
@@ -410,9 +402,11 @@ int alist_remove(alist_t *list, void *element) {
 
   // Find the first occurance of the given element in the list and remove it
   alist_iterator_t iterator = new_alist_iterator(list, TRUE);
-  for (void* node_data = iterator.first(&iterator); !iterator.done(&iterator); node_data = iterator.next(&iterator)) {
+  for (void *node_data = iterator.first(&iterator); !iterator.done(&iterator);
+       node_data = iterator.next(&iterator)) {
     if (list->compare(element, node_data) == 0) {
-      alist_remove_node(list, iterator.curr_node, iterator.next_node_pos - iterator.curr_node->next);
+      alist_remove_node(list, iterator.curr_node,
+                        iterator.next_node_pos - iterator.curr_node->next);
       return TRUE;
     }
   }
