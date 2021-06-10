@@ -51,9 +51,26 @@ void print_string_alist(alist_t *list);
 // Write your code here
 
 int code(int argc, char **argv) {
-  printf("Code 3\n");
+
+  
   return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // TODO remove
 void printline(const char *line) { printf("%s\n", line); }
@@ -80,18 +97,17 @@ int main(int argc, char **argv) {
 
   if (TESTING_C_TIME_PROGRAM == TRUE) {
     start_t = clock();
-    printf("Starting of the program, start_t = %ld\n", start_t);
   }
 
   int errorCode = code(argc, argv);
 
+  // Print time taken
   if (TESTING_C_TIME_PROGRAM == TRUE) {
+    bar("Runtime Info");
     end_t = clock();
-    printf("End time end_t = %ld\n", end_t);
-    printf("Difference: %ld\n", end_t - start_t);
+    printf("Clock Cycles: %ld\n", end_t - start_t);
     double timetaken = (double)(end_t - start_t) / CLOCKS_PER_SEC;
-    printf("Total time taken by CPU: %lf\n", timetaken);
-    printf("Exiting of the program...\n");
+    printf("Total time taken by CPU: %lf\n\n", timetaken);
   }
 
   bar("Program End");
