@@ -65,6 +65,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 #define CSTR_EQUAL 0
 #define SPACE_FOR_NULL 1
@@ -74,17 +75,7 @@
 #define SHORT_STR_BUF                                                          \
   sizeof(size_t) * 8 - sizeof(void *) - (2 * sizeof(int)) - SPACE_FOR_LOCAL_BOOL
 #define SHORT_STR_LEN SHORT_STR_BUF - SPACE_FOR_NULL
-/*
- * Dealing with strings, do the same thing youd normally do, pass a pointer
- * if you want to keep track of len and max_len
- *
- * note that you can always re-affirm the length of the string but not the max
- * length, so if in a pinch, duplicate the string and free the old one. the
- * max length will now be the length of the string
- *
- * just keep in mind that all below methods ASSUME that len is correct
- * if it isnt you need to update it using the inbuilt strlen function
- */
+
 typedef struct string_t {
   char *_str;
   unsigned int len;
@@ -95,22 +86,7 @@ typedef struct string_t {
   char small[SHORT_STR_BUF];
 } string_t;
 
-/*
- * Okay so the idea for short string optimisation
- *
- * we can make sure the string pointer is always pointing at the right place by
- * calling cstr but the problem arises once we look at string_from_cstring
- *
- * the problem is: if we make a string which is a reference to a c string then
- * some weird schenanigans can happen usually when we make a cstring itno a
- * string we kinda just store the start of the string but i say what if we just
- * treat it like a normal string? yeah that means thers going to be memory
- * duplicatoin but whatever am i rite? so like what canwe do we just send it in
- * to the string? we make a new string? what if we redefine how strings work, we
- * dont ahve a string form cstring which would mean that any constant values we
- * want to store as strings have to be loaded in thats not that big of a deal in
- * terms of performmae and istnte really an issue
- */
+void string_replace(string_t* str, char* pattern, char* replacement);
 
 void string_set_max_len(string_t *str, unsigned int max_len);
 
@@ -289,5 +265,6 @@ void string_destroy(string_t *str);
  * Primarily, this just quietens compiler warnings
  */
 void void_string_destroy(void *str);
+
 
 #endif

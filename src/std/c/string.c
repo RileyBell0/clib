@@ -3,12 +3,55 @@
 // RE-CHECKED 30/04/2021
 // MEMORY_SAFE 06/05/2021
 // NULL_STR_SAFE 06/05/2021
-#include <stdio.h>
 void string_limit(string_t *source, unsigned int new_len) {
   if (source->len >= new_len) {
     cstr(source)[new_len] = '\0';
     source->len = new_len;
   }
+}
+
+void string_replace(string_t* str, char* pattern_cstr, char* replacement) {
+  string_t contents_buffer = new_string(str->len);
+  string_t pattern = string_make(pattern_cstr);
+  
+  char* str_start = cstr(str);
+  char* write_start = str_start;
+  unsigned int write_len = 0;
+  unsigned int replacement_len = strlen(replacement);
+
+  if (pattern.len == 0) {
+    return;
+  }
+
+  for (unsigned int index = 0; index < str->len; index++) {
+    if (cstring_equals_range(&str_start[index], cstr(&pattern), pattern.len))
+    {
+      // Write from the write_start position until the start of the pattern
+      string_write_c_len(&contents_buffer, write_start, write_len);
+
+      // Write the replacement string in
+      string_write_c_len(&contents_buffer, replacement, replacement_len);
+
+      // Move past the pattern
+      index += pattern.len - 1;
+
+      // next place to start writing from will be after this pattern
+      write_len = 0;
+      write_start = &str_start[index + 1];
+    }
+    else{
+      write_len += 1;
+    }
+  }
+
+  // Write whatever is leftover in the string to the buffer
+  string_write_c_len(&contents_buffer, write_start, write_len);
+
+  string_clear(str);
+  string_write(str, &contents_buffer);
+
+  string_destroy(&pattern);
+  string_destroy(&contents_buffer);
 }
 
 // RE-CHECKED 30/04/2021

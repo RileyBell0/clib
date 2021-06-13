@@ -1,0 +1,1 @@
+./.build/prog/projectMakeScript.sh

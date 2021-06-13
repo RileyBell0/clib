@@ -1,3 +1,3 @@
-./make.sh
 ./scan.sh
+./generateMake.sh
 make -s

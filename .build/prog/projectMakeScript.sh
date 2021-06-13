@@ -28,5 +28,8 @@ echo
 
 $EXECUTABLE $CONFIG
 
-# # Wait for keypress
-# read -p "Press any key to continue..." -n1 -s
+if [ "$PROGNAME_END" = "WINDOWS" ]; then
+  # Wait for keypress
+  read -p "Press any key to continue..." -n1 -s
+  echo
+fi

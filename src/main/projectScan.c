@@ -4,6 +4,7 @@
 
 #include "../std/configLoader.h"
 #include "../std/dir/directory.h"
+#include "../std/system.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -73,8 +74,24 @@ int main(int argc, char **argv) {
   string_t main_out = string_new_concat_multi(var_config_dir->data, &path_sep,
                                               var_main_out->data, NULL);
 
+  // Fix path seperators if on windows
+  if (OS_TYPE == OS_TYPE_WINDOWS) {
+    string_replace(&main_out, "/", PATH_SEPERATOR);
+    string_replace(&component_out, "/", PATH_SEPERATOR);
+    for (unsigned int i = 0; i < var_main_dirs->len; i++) {
+      string_replace(&var_main_dirs->data[i], "/", PATH_SEPERATOR);
+    }
+    for (unsigned int i = 0; i < var_src_dirs->len; i++) {
+      string_replace(&var_src_dirs->data[i], "/", PATH_SEPERATOR);
+    }
+    for (unsigned int i = 0; i < var_config_dir->len; i++) {
+      string_replace(&var_config_dir->data[i], "/", PATH_SEPERATOR);
+    }
+  }
+  
   // Finding and recording all program files
   FILE *main_out_file = fileio_open_safe(cstr(&main_out), FALSE);
+
 
   for (unsigned int i = 0; i < var_main_dirs->len; i++) {
     string_t dir_path = var_main_dirs->data[i];

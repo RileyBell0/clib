@@ -51,8 +51,12 @@ void print_string_alist(alist_t *list);
 // Write your code here
 
 int code(int argc, char **argv) {
+  string_t stress = string_make("Awesome");
+  string_t* str = &stress;
+  printf("\t- \"%s\"\n", cstr(str));
+  string_replace(str, "e", " e ");
+  printf("\t- \"%s\"\n", cstr(str));
 
-  
   return 0;
 }
 
