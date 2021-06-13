@@ -63,10 +63,10 @@
 
 #include "array.h"
 #include <stdarg.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #define CSTR_EQUAL 0
 #define SPACE_FOR_NULL 1
@@ -82,12 +82,12 @@ typedef struct string_t {
   unsigned int len;
   unsigned int max_len; // number of characaters able to be stored - 1 (does not
                         // count left for null char)
-  // boolean value
-  char local;
+  bool local;
+
   char small[SHORT_STR_BUF];
 } string_t;
 
-void string_replace(string_t* str, char* pattern, char* replacement);
+void string_replace(string_t *str, char *pattern, char *replacement);
 
 void string_set_max_len(string_t *str, unsigned int max_len);
 
@@ -169,9 +169,9 @@ void string_lengthen(string_t *str, unsigned int len);
  *
  * If you want to compare the strings just use strcmp
  */
-int cstring_equals_range(char *str1, char *str2, int compare_range);
-int cstring_equals(char *str1, char *str2);
-int string_equals(string_t *str1, string_t *str2);
+bool cstring_equals_range(char *str1, char *str2, int compare_range);
+bool cstring_equals(char *str1, char *str2);
+bool string_equals(string_t *str1, string_t *str2);
 
 // Null terminates the string
 void string_null_terminate(string_t *str);
@@ -266,6 +266,5 @@ void string_destroy(string_t *str);
  * Primarily, this just quietens compiler warnings
  */
 void void_string_destroy(void *str);
-
 
 #endif

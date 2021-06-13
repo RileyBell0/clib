@@ -86,9 +86,7 @@ void fileio_close(FILE *file) {
   }
 }
 
-void fileio_fix_path(string_t* path) {
-  
-}
+void fileio_fix_path(string_t *path) {}
 
 // MEMORY_SAFE 05/05/2021
 int fileio_next_line(FILE *file, string_t *buffer) {

@@ -10,12 +10,12 @@ void string_limit(string_t *source, unsigned int new_len) {
   }
 }
 
-void string_replace(string_t* str, char* pattern_cstr, char* replacement) {
+void string_replace(string_t *str, char *pattern_cstr, char *replacement) {
   string_t contents_buffer = new_string(str->len);
   string_t pattern = string_make(pattern_cstr);
-  
-  char* str_start = cstr(str);
-  char* write_start = str_start;
+
+  char *str_start = cstr(str);
+  char *write_start = str_start;
   unsigned int write_len = 0;
   unsigned int replacement_len = strlen(replacement);
 
@@ -24,8 +24,7 @@ void string_replace(string_t* str, char* pattern_cstr, char* replacement) {
   }
 
   for (unsigned int index = 0; index < str->len; index++) {
-    if (cstring_equals_range(&str_start[index], cstr(&pattern), pattern.len))
-    {
+    if (cstring_equals_range(&str_start[index], cstr(&pattern), pattern.len)) {
       // Write from the write_start position until the start of the pattern
       string_write_c_len(&contents_buffer, write_start, write_len);
 
@@ -38,8 +37,7 @@ void string_replace(string_t* str, char* pattern_cstr, char* replacement) {
       // next place to start writing from will be after this pattern
       write_len = 0;
       write_start = &str_start[index + 1];
-    }
-    else{
+    } else {
       write_len += 1;
     }
   }

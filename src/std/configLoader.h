@@ -64,7 +64,7 @@ typedef struct config_var_t {
 } config_var_t;
 
 typedef struct config_t {
-  int modified;
+  bool modified;
   unsigned int len;
   config_var_t *vars;
   char *configLocation;
@@ -78,8 +78,8 @@ config_var_t new_config_var(string_t *var_name);
  *
  * complexField will be set to true if the field read was enclosed by quotes
  */
-int extract_field(string_t *str, unsigned int *pos, string_t *dest,
-                  int *complexField);
+bool extract_field(string_t *str, unsigned int *pos, string_t *dest,
+                  bool *complexField);
 
 /*
  * Loads all variables in a suitable config file into
@@ -100,7 +100,7 @@ config_var_t *config_get_var(config_t *config, char *name);
  */
 void config_destroy(config_t config);
 
-int config_save(config_t config);
+bool config_save(config_t config);
 void config_encode(string_t *dest, string_t *toEncode);
 
 /*

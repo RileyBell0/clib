@@ -4,9 +4,9 @@
 #include "array.h"
 #include "string.h"
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdbool.h>
 
 #define ALIST_REALLOC_MULTIPLIER 2 // TODO currently unused
 #define ALIST_NULL INT32_MIN
@@ -100,7 +100,7 @@ void alist_remove_node(alist_t *list, alist_node_t *node, unsigned int curr);
 /*
  * Removes the first element in the alist matching the provided element
  */
-int alist_remove(alist_t *list, void *element);
+bool alist_remove(alist_t *list, void *element);
 
 /*
  * Ensures the given list has at least the capacity 'new_len', if not

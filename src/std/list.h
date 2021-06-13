@@ -23,9 +23,9 @@
 #include "array.h"
 #include "error.h"
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdbool.h>
 
 #define ERROR -1
 #define LIST_ELEMENT 1
@@ -63,9 +63,6 @@ typedef struct list_iterator_t {
   void *(*first)(struct list_iterator_t *iterator);
 } list_iterator_t;
 
-
-
-
 //////////////////////////////
 // Initialisation
 //////////////////////////////
@@ -75,7 +72,7 @@ typedef struct list_iterator_t {
  */
 list_t new_list(size_t element_size);
 
-list_iterator_t new_list_iterator(list_t* list, bool from_start);
+list_iterator_t new_list_iterator(list_t *list, bool from_start);
 
 //////////////////////////////
 // Basic Operations
@@ -130,7 +127,7 @@ bool list_remove_at(list_t *list, unsigned int index);
  */
 bool list_remove(list_t *list, void *elem);
 
-void list_clear(list_t* list);
+void list_clear(list_t *list);
 
 //////////////////////////////
 // High-level functions
@@ -146,9 +143,6 @@ list_t *list_combine(list_t *base, list_t *extension);
  * Converts the given list into an array
  */
 array_t list_to_array(list_t *list);
-
-
-
 
 //////////////////////////////
 // Cleanup

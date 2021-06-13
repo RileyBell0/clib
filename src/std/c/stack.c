@@ -20,5 +20,5 @@ void *stacklist_top(stacklist_t *stack) {
     return NULL;
   }
 
-  return list_get((list_t*)stack, -1);
+  return list_get((list_t *)stack, -1);
 }

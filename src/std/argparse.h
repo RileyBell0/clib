@@ -19,7 +19,7 @@
 
 typedef struct argparser_t {
   int num_args;
-  int have_args_been_parsed;
+  bool have_args_been_parsed;
   alist_t args;
   alist_t arg_names;
   alist_t arg_help;

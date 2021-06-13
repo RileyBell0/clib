@@ -71,13 +71,13 @@ alist_t dir_all_entries_alist(string_t *path);
  */
 alist_t dir_all_files_recur(string_t *path,
                             int (*key)(string_t *file_name, void *extra),
-                            void *extra, int include_base_path);
+                            void *extra, bool include_base_path);
 
 /*
  * Returns TRUE if the given d_name string is either "." or ".."
  * returns FALSE otherwise
  */
-int is_relative_dir_entry(string_t *dirName);
+bool is_relative_dir_entry(string_t *dirName);
 
 alist_t dir_all_entries_alist(string_t *path);
 

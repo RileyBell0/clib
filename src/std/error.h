@@ -4,6 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void exit_error(char* message, char* file, char* function);
+void exit_error(char *message, char *file, char *function);
 
 #endif

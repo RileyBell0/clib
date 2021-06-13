@@ -11,8 +11,8 @@
 /*
  * Returns a bool if or not the given index is within the bounds
  * of the provided list
-*/
-bool list_is_valid_index(list_t* list, unsigned int index);
+ */
+bool list_is_valid_index(list_t *list, unsigned int index);
 
 /*
  * Returns a pointer to a new list Node with the relevant data attached
@@ -36,28 +36,28 @@ unsigned int list_convert_index(list_t *list, unsigned int index);
 
 /*
  * List iterator functions
-*/
+ */
 /*
  * Move the iterator to the next position in the list based on the direction
  * defined by it.from_start
- * 
+ *
  * Returns a pointer to the element
-*/
-void* list_iterator_next(list_iterator_t* it);
+ */
+void *list_iterator_next(list_iterator_t *it);
 
 /*
  * Move the iterator to the start position in the list based on the direction
  * defined by it.from_start
- * 
+ *
  * Returns a pointer to the first element
-*/
-void* list_iterator_first(list_iterator_t* it);
+ */
+void *list_iterator_first(list_iterator_t *it);
 
 /*
  * If there is a node after this current one bvased on the list direction,
  * returns true, false otherwise
-*/
-bool list_iterator_done(list_iterator_t* it);
+ */
+bool list_iterator_done(list_iterator_t *it);
 
 //////////////////////////////
 // Initialisation
@@ -90,7 +90,7 @@ list_node_t *list_new_node(void *element, size_t element_size) {
   return node;
 }
 
-list_iterator_t new_list_iterator(list_t* list, bool from_start) {
+list_iterator_t new_list_iterator(list_t *list, bool from_start) {
   list_iterator_t it;
 
   it.list = list;
@@ -98,11 +98,10 @@ list_iterator_t new_list_iterator(list_t* list, bool from_start) {
   it.index = NO_INDEX;
   it.curr_node = NULL;
   it.element = NULL;
-  
+
   if (from_start) {
     it.next_node = it.list->first_node;
-  }
-  else {
+  } else {
     it.next_node = it.list->last_node;
   }
 
@@ -113,13 +112,12 @@ list_iterator_t new_list_iterator(list_t* list, bool from_start) {
   return it;
 }
 
-void* list_iterator_first(list_iterator_t* it) {
+void *list_iterator_first(list_iterator_t *it) {
   if (it->from_start) {
     it->curr_node = it->list->first_node;
     it->index = 0;
     it->next_node = it->curr_node->next;
-  }
-  else {
+  } else {
     it->curr_node = it->list->last_node;
     it->index = it->list->size - 1;
     it->next_node = it->curr_node->prev;
@@ -129,15 +127,14 @@ void* list_iterator_first(list_iterator_t* it) {
   return it->element;
 }
 
-void* list_iterator_next(list_iterator_t* it) {
+void *list_iterator_next(list_iterator_t *it) {
   it->curr_node = it->next_node;
 
   // Update index and next node based on direction
   if (it->from_start) {
     it->next_node = it->curr_node->next;
     it->index += 1;
-  }
-  else{
+  } else {
     it->next_node = it->curr_node->prev;
     it->index -= 1;
   }
@@ -147,7 +144,7 @@ void* list_iterator_next(list_iterator_t* it) {
   return it->element;
 }
 
-bool list_iterator_done(list_iterator_t* it) {
+bool list_iterator_done(list_iterator_t *it) {
   if (it->next_node == NULL) {
     return true;
   }
@@ -174,7 +171,7 @@ void *list_get(list_t *list, unsigned int index) {
 
   // Return the element at the given index within the list
   list_iterator_t it = new_list_iterator(list, from_start);
-  for (void* elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
+  for (void *elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
     if (it.index == index) {
       return it.element;
     }
@@ -182,7 +179,7 @@ void *list_get(list_t *list, unsigned int index) {
 
   exit_error("List structure invalid - requested index not present",
              "std/c/list.c", "list_get");
-  
+
   // Won't get run, to stop compiler from complaining
   return NULL;
 }
@@ -237,7 +234,7 @@ void *list_pop(list_t *list, unsigned int index) {
 
   // Find the node at the index requested and remove it
   list_iterator_t it = new_list_iterator(list, from_start);
-  for (void* elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
+  for (void *elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
     if (index == it.index) {
       return list_remove_node(list, it.curr_node, true);
     }
@@ -261,10 +258,10 @@ bool list_remove_at(list_t *list, unsigned int index) {
   if (index > list->size / 2) {
     from_start = false;
   }
-  
+
   // Find the node at the index requested and remove it
   list_iterator_t it = new_list_iterator(list, from_start);
-  for (void* elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
+  for (void *elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
     if (index == it.index) {
       return list_remove_node(list, it.curr_node, false);
     }
@@ -298,7 +295,7 @@ bool list_remove(list_t *list, void *elem) {
 // Utility
 //////////////////////////////
 
-bool list_is_valid_index(list_t* list, unsigned int index) {
+bool list_is_valid_index(list_t *list, unsigned int index) {
   if (index < 0 || index >= list->size) {
     return false;
   }
@@ -385,7 +382,7 @@ list_t *list_combine(list_t *base, list_t *extension) {
   return base;
 }
 
-array_t list_to_array(list_t* list) {
+array_t list_to_array(list_t *list) {
   array_t converted = new_array(list->size, list->element_size);
 
   unsigned int element = 0;
@@ -399,7 +396,7 @@ array_t list_to_array(list_t* list) {
   return converted;
 }
 
-void list_clear(list_t* list) {
+void list_clear(list_t *list) {
   size_t element_size = list->element_size;
   void (*delete_data)(void *data) = list->delete_data;
   int (*compare)(const void *first, const void *second) = list->compare;

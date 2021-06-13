@@ -21,8 +21,8 @@
 
 /* Attempts to open a file in the given mode
  * Quits the program on failure */
-FILE *fileio_open_safe_advanced(char *filePath, char *mode);
-FILE *fileio_open_safe(char *filePath, int isReading);
+FILE *fileio_open_safe_advanced(char *path, char *mode);
+FILE *fileio_open_safe(char *path, bool reading);
 
 /*
  * Returns a pointer to the start of the file extension
@@ -37,8 +37,8 @@ char *get_file_extension_start(char *file_name);
  *
  * Returns NULL on failure
  */
-FILE *fileio_open_advanced(char *filePath, char *mode);
-FILE *fileio_open(char *filePath, int isReading);
+FILE *fileio_open_advanced(char *path, char *mode);
+FILE *fileio_open(char *path, bool reading);
 
 /* If the given FILE pointer is not-null, the file is closed */
 void fileio_close(FILE *file);
@@ -47,19 +47,19 @@ void fileio_close(FILE *file);
  * If the given string is too small for the new line it will be extended
  * to fit the whole line
  * returns TRUE (1) on success or FALSE (0) on failure */
-int fileio_next_line(FILE *file, string_t *buffer);
+bool fileio_next_line(FILE *file, string_t *buffer);
 
 /*
  * Given a file name and a required extension, returns TRUE
  * if the given filename has the extension 'extension'
  */
-int fileio_has_extension(string_t *file_name, string_t *extension);
+bool fileio_has_extension(string_t *file_name, string_t *extension);
 
 /*
  * Wrapper for fileio_has_extension to ignore compiler warnings
  * TODO is there a better way to do this?
  */
-int fileio_has_extension_key(string_t *file_name, void *extension);
+bool fileio_has_extension_key(string_t *file_name, void *extension);
 
 /*
  * When given a string containing the path to a file,

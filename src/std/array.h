@@ -7,9 +7,9 @@
 #define CLIB_STD_ARRAY_H
 
 #include "memory.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdbool.h>
 
 /*
  * Ammount to extend a dynamic array whenever an element
@@ -77,8 +77,9 @@ void *array_get_element(void *array, unsigned int element, size_t element_size);
 
 /*
  * Resizes the array to the given length. Must be larger than the current length
+ * Returns true on success, false on failure
  */
-int array_resize(array_t *array, unsigned int newLength);
+bool array_resize(array_t *array, unsigned int newLength);
 
 // ----------- Dynamic Array -------------
 /*
@@ -91,7 +92,7 @@ dynamic_array_t new_dynamic_array(size_t element_size);
  * array. Returns TRUE on success, FALSE on failure (if base or element were
  * NULL)
  */
-int dynamic_array_append(dynamic_array_t *base, void *element);
+bool dynamic_array_append(dynamic_array_t *base, void *element);
 
 /*
  * If neccesary, extends the array to be exactly the given length
@@ -99,7 +100,7 @@ int dynamic_array_append(dynamic_array_t *base, void *element);
  * Does nothing if the maximum length is greater than the required
  * new length
  */
-int dynamic_array_safe_resize(dynamic_array_t *array, unsigned int newLen);
+bool dynamic_array_safe_resize(dynamic_array_t *array, unsigned int newLen);
 
 /*
  * Sets the value of the element in the array at the given index
