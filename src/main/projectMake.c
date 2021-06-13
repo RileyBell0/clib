@@ -4,12 +4,12 @@
  */
 
 #include "../std/alist.h"
-#include "../std/bool.h"
 #include "../std/configLoader.h"
 #include "../std/fileIO.h"
 #include "../std/filePath.h"
 #include "../std/string.h"
 #include <stdio.h>
+#include <stdbool.h>
 
 #define REQUIRED_ARGS 1
 #define ARG_CONFIG_LOC 1
@@ -83,7 +83,7 @@ config_var_t *safe_cfg_get_var(config_t *config, char *name) {
 void write_make_all_call(FILE *out_file, alist_t *prog_names) {
   fprintf(out_file, "all:");
 
-  alist_iterator_t it = new_alist_iterator(prog_names, TRUE);
+  alist_iterator_t it = new_alist_iterator(prog_names, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     fprintf(out_file, " %s", cstr(element));
@@ -116,7 +116,7 @@ void write_make_flags(FILE *out_file, config_var_t *var_flags) {
 void write_make_all_components(FILE *out_file, alist_t *component_names) {
   // Add calls for the compilation of all components
   // comp1.o comp2.o ... compn.o
-  alist_iterator_t it = new_alist_iterator(component_names, TRUE);
+  alist_iterator_t it = new_alist_iterator(component_names, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     fprintf(out_file, " %s", cstr(element));
@@ -282,7 +282,7 @@ int main(int argc, char **argv) {
 
   // Write all obj names to a string, as need to use this multiple times
   string_t all_obj_names = new_string(DEFAULT_BUFFER_LEN);
-  it = new_alist_iterator(&obj_names, TRUE);
+  it = new_alist_iterator(&obj_names, true);
   string_t whitespace = string_make(" ");
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
 
   // Write all object paths to a string, as need to use this multiple times
   string_t all_obj_paths = new_string(DEFAULT_BUFFER_LEN);
-  it = new_alist_iterator(&obj_names, TRUE);
+  it = new_alist_iterator(&obj_names, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     string_write_multi(&all_obj_paths, obj_out, &path_sep, element,
@@ -338,14 +338,14 @@ int main(int argc, char **argv) {
                debug_flags.len - 1); // Remove the trailing whitespace
 
   // Create the makefile's file
-  FILE *out_file = fileio_open_safe(cstr(var_makeName->data), FALSE);
+  FILE *out_file = fileio_open_safe(cstr(var_makeName->data), false);
 
   // Write the all call
   write_make_all_call(out_file, &prog_names); // all: prog_1 prog_2 ... prog_n
   fprintf(out_file, "\n");
 
   // Writing the make instructions for the programs
-  it = new_alist_iterator(&prog_names, TRUE);
+  it = new_alist_iterator(&prog_names, true);
   for (string_t *prog_name = it.first(&it); !it.done(&it);
        prog_name = it.next(&it)) {
     fprintf(out_file, "%s: %s%s%s %s\n", cstr(prog_name), cstr(prog_name),
@@ -358,8 +358,8 @@ int main(int argc, char **argv) {
   }
 
   // Writing the make instructions for the program object files
-  it = new_alist_iterator(&prog_names, TRUE);
-  it_2 = new_alist_iterator(&prog_file_paths, TRUE);
+  it = new_alist_iterator(&prog_names, true);
+  it_2 = new_alist_iterator(&prog_file_paths, true);
   it_2.first(&it_2);
   for (string_t *prog_name = it.first(&it); !it.done(&it);
        prog_name = it.next(&it)) {
@@ -377,8 +377,8 @@ int main(int argc, char **argv) {
   }
 
   // Writing the make instructions for the component obj files
-  it = new_alist_iterator(&obj_names, TRUE);
-  it_2 = new_alist_iterator(&obj_file_paths, TRUE);
+  it = new_alist_iterator(&obj_names, true);
+  it_2 = new_alist_iterator(&obj_file_paths, true);
   it_2.first(&it_2);
   for (string_t *obj_name = it.first(&it); !it.done(&it);
        obj_name = it.next(&it)) {

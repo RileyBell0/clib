@@ -16,11 +16,11 @@ int main(int argc, char **argv) {
     string_write_c(&output_name, DEFAULT_OUT_FILENAME);
   }
 
-  alist_t all_files = dir_all_files_recur(&path, NULL, NULL, FALSE);
+  alist_t all_files = dir_all_files_recur(&path, NULL, NULL, false);
 
-  FILE *outfile = fileio_open_safe(cstr(&output_name), FALSE);
+  FILE *outfile = fileio_open_safe(cstr(&output_name), false);
 
-  alist_iterator_t it = new_alist_iterator(&all_files, TRUE);
+  alist_iterator_t it = new_alist_iterator(&all_files, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     fprintf(outfile, "%s\n", cstr(element));

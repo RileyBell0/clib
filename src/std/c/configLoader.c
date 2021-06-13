@@ -3,16 +3,16 @@
 /*
  * returns the position in the string the function exited at
  *
- * complexString is set to TRUE iff the returned string was surrounded by quotes
+ * complexString is set to true iff the returned string was surrounded by quotes
  */// TODO this function is way too long
 int extract_field(string_t *str, unsigned int *pos, string_t *dest,
                   int *complex_field) {
   string_clear(dest);
 
   // Why am i even stealing complex field?? if im just chanigng it to false
-  *complex_field = FALSE;
+  *complex_field = false;
   if (str->len <= *pos) {
-    return FALSE;
+    return false;
   }
 
   /*
@@ -35,7 +35,7 @@ int extract_field(string_t *str, unsigned int *pos, string_t *dest,
     string_write_char(dest, str_start[*pos]);
     string_null_terminate(dest);
     *pos += 1;
-    return TRUE;
+    return true;
   }
 
   /*
@@ -45,7 +45,7 @@ int extract_field(string_t *str, unsigned int *pos, string_t *dest,
     string_write_char(dest, str_start[*pos]);
     string_null_terminate(dest);
     *pos += 1;
-    return TRUE;
+    return true;
   }
 
   /*
@@ -56,17 +56,17 @@ int extract_field(string_t *str, unsigned int *pos, string_t *dest,
     string_write_char(dest, str_start[*pos]);
     string_null_terminate(dest);
     *pos += 1;
-    return TRUE;
+    return true;
   }
 
   /*
    * If the current field is within quotes
    */
-  int inQuotes = FALSE;
+  int inQuotes = false;
   if (str_start[*pos] == CONFIG_STRING_ENCLOSE_CHAR) {
-    *complex_field = TRUE;
+    *complex_field = true;
     *pos += 1;
-    inQuotes = TRUE;
+    inQuotes = true;
   }
 
   if (inQuotes) {
@@ -117,7 +117,7 @@ int extract_field(string_t *str, unsigned int *pos, string_t *dest,
 
   // Return the position in the string of the next unread char
   *pos = i;
-  return TRUE;
+  return true;
 }
 
 // RE-CHECKED 01/05/2021
@@ -155,15 +155,15 @@ config_t read_config_file(char *filePath) {
   /*
    * Read every line in the file
    */
-  int within_array_declaration = FALSE;
+  int within_array_declaration = false;
   int curr_field_type = CONFIG_FIELD_NAME;
-  int within_quotes = FALSE;
-  int current_var_finalised = TRUE;
+  int within_quotes = false;
+  int current_var_finalised = true;
   /*
    * Has the current var thats being loaded in got at least one
    * value loaded in from the file
    */
-  int var_has_value = FALSE;
+  int var_has_value = false;
 
   // Read in and process the whole config file
   while (fileio_next_line(configFile, &buffer)) {
@@ -190,11 +190,11 @@ config_t read_config_file(char *filePath) {
           curr_field_type = CONFIG_FIELD_DECLARATION;
           continue;
         case CONFIG_ARRAY_START_CHAR:
-          within_array_declaration = TRUE;
+          within_array_declaration = true;
           continue;
         case CONFIG_ARRAY_END_CHAR:
           curr_field_type = CONFIG_FIELD_NAME;
-          within_array_declaration = FALSE;
+          within_array_declaration = false;
           continue;
         }
       }
@@ -203,11 +203,11 @@ config_t read_config_file(char *filePath) {
       case CONFIG_FIELD_NAME:
         // TODO had if(!has_var_been_named) around whole section, is this
         // needed? Reached a new config_var
-        current_var_finalised = FALSE;
+        current_var_finalised = false;
 
         // Name the new variable
         var = new_config_var(&field);
-        var_has_value = FALSE;
+        var_has_value = false;
 
         // Reset the array for storing the new data
         fields.len = 0;
@@ -239,7 +239,7 @@ config_t read_config_file(char *filePath) {
         dynamic_array_append(&results, &var);
 
         // Saved
-        current_var_finalised = TRUE;
+        current_var_finalised = true;
       }
 
       // Ready for the next field
@@ -273,7 +273,7 @@ config_t read_config_file(char *filePath) {
 
   config.len = sorted_vars.len;
   config.vars = sorted_vars.data;
-  config.modified = FALSE;
+  config.modified = false;
   config.configLocation = filePath;
 
   // Cleanup
@@ -303,16 +303,16 @@ void config_encode(string_t *dest, string_t *toEncode) {
 /*
  * If any variables in the config have been modified, saves the config file.
  * If you have modified any variables directly, ensure to set the modified flag
- * to TRUE (1) or the config file will not save
+ * to true (1) or the config file will not save
  *
- * returns TRUE if successful, FALSE if file failed to open
+ * returns true if successful, false if file failed to open
  */
 int config_save(config_t config) {
   /*
    * Nothing to save...
    */
   if (!config.modified) {
-    return TRUE;
+    return true;
   }
 
   string_t processed = new_string(DEFAULT_BUFFER_LEN);
@@ -320,7 +320,7 @@ int config_save(config_t config) {
   FILE *cfgOut = fopen(config.configLocation, MODE_WRITE);
 
   if (!cfgOut) {
-    return FALSE;
+    return false;
   }
 
   /*
@@ -348,7 +348,7 @@ int config_save(config_t config) {
   string_destroy(&processed);
   fclose(cfgOut);
 
-  return TRUE;
+  return true;
 }
 
 config_var_t *config_get_var(config_t *config, char *name) {

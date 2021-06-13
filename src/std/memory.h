@@ -6,7 +6,6 @@
 #ifndef CLIB_STD_MEMORY_H
 #define CLIB_STD_MEMORY_H
 
-#include "bool.h"
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>

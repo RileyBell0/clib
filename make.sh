@@ -13,7 +13,7 @@ case "$OSTYPE" in
   *)        echo "unknown os type: $OSTYPE" ;;
 esac
 
-make -f"$MAKEFILE_BASE$CURRENT_OS"
+make -f"$MAKEFILE_BASE$CURRENT_OS" -s
 
 if [ "$CURRENT_OS" = "WINDOWS" ]; then
   read -p "Press any key to continue..." -n1 -s

@@ -74,11 +74,11 @@ string_t new_string(unsigned int len) {
   if (len <= SHORT_STR_LEN) {
     str.max_len = SHORT_STR_LEN;
     str._str = str.small;
-    str.local = TRUE;
+    str.local = true;
   } else {
     str.max_len = len;
     str._str = safe_malloc(len * sizeof(char) + SPACE_FOR_NULL);
-    str.local = FALSE;
+    str.local = false;
   }
 
   str._str[0] = '\0';
@@ -93,7 +93,7 @@ string_t cstring_wrap(char *src) {
   string_t str;
 
   str._str = src;
-  str.local = FALSE;
+  str.local = false;
 
   if (src) {
     str.len = strlen(src);
@@ -138,12 +138,12 @@ int string_compare(string_t *str1, string_t *str2) {
 //
 // not yet verified as either string could have a null
 // component
-// so if they're both null then TRUE
-// or if either one of them is null then FALSE
+// so if they're both null then true
+// or if either one of them is null then false
 
 int string_equals(string_t *str1, string_t *str2) {
   if (str1->len != str2->len) {
-    return FALSE;
+    return false;
   }
 
   char *string_1 = cstr(str1);
@@ -151,9 +151,9 @@ int string_equals(string_t *str1, string_t *str2) {
 
   // Do a null string comparison
   if (string_1 == NULL && string_2 == NULL) {
-    return TRUE;
+    return true;
   } else if (string_1 == NULL || string_2 == NULL) {
-    return FALSE;
+    return false;
   }
 
   return strcmp(string_1, string_2) == 0;
@@ -172,11 +172,11 @@ int cstring_equals_range(char *str_1, char *str_2, int compare_range) {
   // Compare the strings within the given range.
   for (int index = 0; index < compare_range; index++) {
     if (str_1[index] != str_2[index] || str_1[index] == '\0') {
-      return FALSE;
+      return false;
     }
   }
 
-  return TRUE;
+  return true;
 }
 
 // RE-CHECKED 29/04/2021
@@ -343,7 +343,7 @@ void string_set_max_len(string_t *str, unsigned int max_len) {
     // If the current string is a short string
     if (str->local && max_len > SHORT_STR_LEN) {
       // String can no longer be local
-      str->local = FALSE;
+      str->local = false;
 
       // Allocate space to store the string from now on
       str->_str = safe_malloc((max_len + SPACE_FOR_NULL) * sizeof(char));

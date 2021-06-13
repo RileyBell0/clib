@@ -4,7 +4,7 @@ argparser_t new_argparser(int argc, char **argv) {
   argparser_t parser;
 
   parser.num_args = argc - 1;
-  parser.have_args_been_parsed = FALSE;
+  parser.have_args_been_parsed = false;
 
   // Load in arguments
   parser.args = new_alist(sizeof(char *));
@@ -37,26 +37,26 @@ void argparse_parse_args(argparser_t *parser) {
     unsigned int starting_arg = parser->num_args;
 
     fprintf(stderr, "Error - Not enough input arguments.\n");
-    fprintf(stderr, "\tSource: std/argparse.c: argparse_parse_args\n");
+    fprintf(stderr, "\tSource: std/c/argparse.c: argparse_parse_args\n");
     exit(EXIT_FAILURE);
   }
-  parser->have_args_been_parsed = TRUE;
+  parser->have_args_been_parsed = true;
 }
 
 char *argparse_get_arg(argparser_t *parser, char *name) {
   // Ensure arguments have been parsed
   if (!parser->have_args_been_parsed) {
     fprintf(stderr, "Error - Input arguments not parsed.\n");
-    fprintf(stderr, "\tSource: std/argparse.c: argparse_get_arg\n");
+    fprintf(stderr, "\tSource: std/c/argparse.c: argparse_get_arg\n");
     exit(EXIT_FAILURE);
   }
 
   // Find an argument with the matching name to 'name'
-  int found_arg = FALSE;
-  alist_iterator_t it = new_alist_iterator(&parser->arg_names, TRUE);
+  int found_arg = false;
+  alist_iterator_t it = new_alist_iterator(&parser->arg_names, true);
   for (char *arg_name = it.first(&it); !it.done(&it); arg_name = it.next(&it)) {
     if (strcmp(arg_name, name) == CSTR_EQUAL) {
-      found_arg = TRUE;
+      found_arg = true;
       break;
     }
   }
@@ -66,7 +66,7 @@ char *argparse_get_arg(argparser_t *parser, char *name) {
     return (char *)alist_get_element(&parser->args, it.index);
   } else {
     fprintf(stderr, "Error - Could not find provided argument.\n");
-    fprintf(stderr, "\tSource: std/argparse.c: argparse_get_arg\n");
+    fprintf(stderr, "Source: std/c/argparse.c: argparse_get_arg\n");
     exit(EXIT_FAILURE);
   }
 }

@@ -5,6 +5,7 @@
 #include "../std/configLoader.h"
 #include "../std/dir/directory.h"
 #include "../std/system.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,10 +39,10 @@ config_var_t *safe_cfg_get_var(config_t *config, char *name) {
 void add_src_files_from_dir(FILE *out_file, string_t *base_path,
                             string_t *path_sep, string_t *extension) {
   alist_t files =
-      dir_all_files_recur(base_path, fileio_has_extension_key, extension, TRUE);
+      dir_all_files_recur(base_path, fileio_has_extension_key, extension, true);
 
   // Print all files in the subdirectory
-  alist_iterator_t it = new_alist_iterator(&files, TRUE);
+  alist_iterator_t it = new_alist_iterator(&files, true);
   for (string_t *node = it.first(&it); !it.done(&it); node = it.next(&it)) {
     fprintf(out_file, "%s\n", cstr(node));
   }
@@ -90,7 +91,7 @@ int main(int argc, char **argv) {
   }
   
   // Finding and recording all program files
-  FILE *main_out_file = fileio_open_safe(cstr(&main_out), FALSE);
+  FILE *main_out_file = fileio_open_safe(cstr(&main_out), false);
 
 
   for (unsigned int i = 0; i < var_main_dirs->len; i++) {
@@ -100,7 +101,7 @@ int main(int argc, char **argv) {
   fclose(main_out_file);
 
   // Finding and recording all component files
-  FILE *componentOut = fileio_open_safe(cstr(&component_out), FALSE);
+  FILE *componentOut = fileio_open_safe(cstr(&component_out), false);
   for (unsigned int i = 0; i < var_src_dirs->len; i++) {
     string_t componentDirPath = var_src_dirs->data[i];
     add_src_files_from_dir(componentOut, &componentDirPath, &path_sep,

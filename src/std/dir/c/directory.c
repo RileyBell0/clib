@@ -67,7 +67,7 @@ alist_t dir_all_files_recur(string_t *path,
   string_t entry_path = new_string(base_path.len);
   string_write(&entry_path, &base_path);
 
-  alist_iterator_t it = new_alist_iterator(&entries, TRUE);
+  alist_iterator_t it = new_alist_iterator(&entries, true);
   for (struct dirent *entry = it.first(&it); !it.done(&it);
        entry = it.next(&it)) {
     // Generate the string for the entry-name
@@ -86,7 +86,7 @@ alist_t dir_all_files_recur(string_t *path,
         // on the key functiono
         alist_t sub_dir_files =
             dir_all_files_recur(&entry_path, key, extra, include_base_path);
-        sub_dir_files.destroy_on_remove = FALSE;
+        sub_dir_files.destroy_on_remove = false;
         closedir(d);
 
         // Add the files to the alist
@@ -94,13 +94,13 @@ alist_t dir_all_files_recur(string_t *path,
         alist_destroy(&sub_dir_files);
 
       } else {
-        int append = TRUE;
+        int append = true;
         if (key && !key(&file_name, extra)) {
-          append = FALSE;
+          append = false;
         }
 
         if (append) {
-          if (include_base_path == TRUE) {
+          if (include_base_path == true) {
             string_t name = string_copy(&entry_path);
             alist_append(&valid_files, &name);
           } else {
@@ -125,12 +125,12 @@ alist_t dir_all_files_recur(string_t *path,
 int is_relative_dir_entry(string_t *path) {
   if (path->len == 1) {
     if (cstring_equals(cstr(path), ".")) {
-      return TRUE;
+      return true;
     }
   } else if (path->len == 2) {
     if (cstring_equals(cstr(path), "..")) {
-      return TRUE;
+      return true;
     }
   }
-  return FALSE;
+  return false;
 }

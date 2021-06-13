@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define ALIST_REALLOC_MULTIPLIER 2 // TODO currently unused
 #define ALIST_NULL INT32_MIN
@@ -32,7 +33,7 @@ typedef struct alist_node_t {
  */
 typedef struct alist_t {
   void *list_start;
-  char destroy_on_remove;
+  bool destroy_on_remove;
   unsigned int first;
   unsigned int last;
   unsigned int size;
@@ -45,19 +46,19 @@ typedef struct alist_t {
 
 typedef struct alist_iterator_t {
   alist_t *list;
-  char from_start;
+  bool from_start;
   int next_node_pos;  // Next node's position in the array
   int curr_node_pos;  // Current node's position in the array
   unsigned int index; // current node's index in the list
   alist_node_t *curr_node;
   void *element;
   void *(*next)(struct alist_iterator_t *iterator);
-  char (*done)(struct alist_iterator_t *iterator);
+  bool (*done)(struct alist_iterator_t *iterator);
   void *(*first)(struct alist_iterator_t *iterator);
 } alist_iterator_t;
 
 // Creates a list iterator for the alist
-alist_iterator_t new_alist_iterator(alist_t *list, char from_start);
+alist_iterator_t new_alist_iterator(alist_t *list, bool from_start);
 
 /*
  * Converts an alist into an array and returns it

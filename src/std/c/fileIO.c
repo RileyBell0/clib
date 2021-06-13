@@ -109,11 +109,11 @@ int fileio_next_line(FILE *file, string_t *buffer) {
 
   // Failed to read anything
   if (c == EOF && chars_written == 0) {
-    return FALSE;
+    return false;
   }
 
   // Read something from the file
-  return TRUE;
+  return true;
 }
 
 int fileio_has_extension_key(string_t *file_name, void *extension) {
@@ -121,13 +121,13 @@ int fileio_has_extension_key(string_t *file_name, void *extension) {
 }
 
 int fileio_has_extension(string_t *file_name, string_t *extension) {
-  int has_extension = FALSE;
+  int has_extension = false;
 
   // Add the current file if it has the required extension
   string_t file_extension = get_file_extension(file_name);
 
-  if (string_equals(&file_extension, extension) == TRUE) {
-    has_extension = TRUE;
+  if (string_equals(&file_extension, extension) == true) {
+    has_extension = true;
   }
 
   string_destroy(&file_extension);
@@ -187,7 +187,7 @@ string_t *remove_file_extension(string_t *file_name) {
 // MEMORY_SAFE 05/05/2021
 void remove_file_extensions(alist_t *files) {
   // Removing the extension from the program names
-  alist_iterator_t it = new_alist_iterator(files, TRUE);
+  alist_iterator_t it = new_alist_iterator(files, true);
 
   for (string_t *file = it.first(&it); !it.done(&it); file = it.next(&it)) {
     remove_file_extension(file);
@@ -221,7 +221,7 @@ alist_t get_file_names_from_paths(alist_t *files) {
   alist_t file_names = new_alist(sizeof(string_t));
   file_names.destroy = void_string_destroy;
 
-  alist_iterator_t it = new_alist_iterator(files, TRUE);
+  alist_iterator_t it = new_alist_iterator(files, true);
   for (string_t *file = it.first(&it); !it.done(&it); file = it.next(&it)) {
     // Extract the file names from the file paths
     string_t file_name = get_file_name_from_path(file);

@@ -3,7 +3,7 @@
 // NOTE - for fixing code
 // alist_relative_ptr = int dest - int src
 
-char alist_iterator_done(alist_iterator_t *iterator);
+bool alist_iterator_done(alist_iterator_t *iterator);
 void *alist_iterator_first_node(alist_iterator_t *iterator);
 void *alist_iterator_next_node(alist_iterator_t *iterator);
 void *alist_iterator_prev_node(alist_iterator_t *iterator);
@@ -13,7 +13,7 @@ alist_t new_alist(size_t element_size) {
   alist_t list;
 
   list.list_start = NULL;
-  list.destroy_on_remove = TRUE;
+  list.destroy_on_remove = true;
   list.first = ALIST_NULL;
   list.last = ALIST_NULL;
   list.size = 0;
@@ -26,7 +26,7 @@ alist_t new_alist(size_t element_size) {
   return list;
 }
 
-alist_iterator_t new_alist_iterator(alist_t *list, char from_start) {
+alist_iterator_t new_alist_iterator(alist_t *list, bool from_start) {
   alist_iterator_t iterator;
   iterator.index = ALIST_NULL;
   iterator.list = list;
@@ -46,7 +46,7 @@ alist_iterator_t new_alist_iterator(alist_t *list, char from_start) {
   return iterator;
 }
 
-char alist_iterator_done(alist_iterator_t *iterator) {
+bool alist_iterator_done(alist_iterator_t *iterator) {
   return iterator->curr_node_pos < 0;
 }
 
@@ -120,9 +120,9 @@ void *alist_index(alist_t *list, int index) {
   // Create the iterator
   alist_iterator_t it;
   if (index <= list->size / 2) {
-    it = new_alist_iterator(list, TRUE);
+    it = new_alist_iterator(list, true);
   } else {
-    it = new_alist_iterator(list, FALSE);
+    it = new_alist_iterator(list, false);
   }
 
   // return a pointer to the element at the given index
@@ -182,9 +182,9 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
     alist_set_length(list1, combined_size);
   }
 
-  char has_last = TRUE;
+  bool has_last = true;
   if (list1->last == ALIST_NULL) {
-    has_last = FALSE;
+    has_last = false;
   }
 
   alist_node_t *list1_end =
@@ -282,7 +282,7 @@ array_t alist_to_array(alist_t *list) {
   array_t array = new_array(list->size, list->element_size);
 
   // Populate the array
-  alist_iterator_t it = new_alist_iterator(list, TRUE);
+  alist_iterator_t it = new_alist_iterator(list, true);
   for (it.first(&it); !it.done(&it); it.next(&it)) {
     array_set_index(&array, it.index, it.element);
   }
@@ -397,21 +397,21 @@ void alist_remove_node(alist_t *list, alist_node_t *node, unsigned int curr) {
 
 int alist_remove(alist_t *list, void *element) {
   if (list->size == 0) {
-    return FALSE;
+    return false;
   }
 
   // Find the first occurance of the given element in the list and remove it
-  alist_iterator_t iterator = new_alist_iterator(list, TRUE);
+  alist_iterator_t iterator = new_alist_iterator(list, true);
   for (void *node_data = iterator.first(&iterator); !iterator.done(&iterator);
        node_data = iterator.next(&iterator)) {
     if (list->compare(element, node_data) == 0) {
       alist_remove_node(list, iterator.curr_node,
                         iterator.next_node_pos - iterator.curr_node->next);
-      return TRUE;
+      return true;
     }
   }
 
-  return FALSE;
+  return false;
 }
 
 void *alist_get_element(alist_t *list, unsigned int element) {

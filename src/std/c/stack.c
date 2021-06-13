@@ -12,12 +12,13 @@ void *stack_pop(stacklist_t *stack) {
   if (stack == NULL || stack->size == 0) {
     return NULL;
   }
-  return list_remove_last((list_t *)stack);
+  return list_pop((list_t *)stack, -1);
 }
 
 void *stacklist_top(stacklist_t *stack) {
   if (stack == NULL || stack->last_node == NULL) {
     return NULL;
   }
-  return stack->last_node->data;
+
+  return list_get((list_t*)stack, -1);
 }

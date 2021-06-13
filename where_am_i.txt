@@ -1,0 +1,8 @@
+Working on list.c, adding list iterator
+literally nothing else works there yet
+
+implementing the same method for storing data as alist where
+we make ourselves a custom type array thing in the node where
+we allocate enough memory for node_size + element_size and just index to 
+the element instead of the old way we were doing it where we allocated memory
+twice

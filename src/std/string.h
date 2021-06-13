@@ -66,6 +66,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define CSTR_EQUAL 0
 #define SPACE_FOR_NULL 1

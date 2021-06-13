@@ -15,7 +15,7 @@
 #define END_SUCCESS 0
 #define MULTIPLE 1
 #define APPENDTEST 50000
-#define TESTING_C_TIME_PROGRAM TRUE
+#define TESTING_C_TIME_PROGRAM true
 
 #define EXIT '0'
 #define APPEND '1'
@@ -99,14 +99,14 @@ int main(int argc, char **argv) {
   bar("Program Start");
   clock_t start_t, end_t;
 
-  if (TESTING_C_TIME_PROGRAM == TRUE) {
+  if (TESTING_C_TIME_PROGRAM == true) {
     start_t = clock();
   }
 
   int errorCode = code(argc, argv);
 
   // Print time taken
-  if (TESTING_C_TIME_PROGRAM == TRUE) {
+  if (TESTING_C_TIME_PROGRAM == true) {
     bar("Runtime Info");
     end_t = clock();
     printf("Clock Cycles: %ld\n", end_t - start_t);
