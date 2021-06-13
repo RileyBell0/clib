@@ -133,15 +133,11 @@ int fileio_has_extension(string_t *file_name, string_t *extension) {
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 05/05/2021
 string_t get_file_name_from_path(string_t *path) {
-  string_t file_name;
   char *path_str = cstr(path);
 
   for (int i = path->len; i >= 0; i--) {
     // The string is part of a path,
     if (path_str[i] == PATH_SEPERATOR_CHAR) {
-
-      // Allocate enough space for the file_name
-      file_name = new_string(path->len - i);
 
       // The file name starts at the next character
       return string_make(&path_str[i + 1]);

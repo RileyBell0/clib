@@ -156,7 +156,6 @@ config_t read_config_file(char *filePath) {
    * Read every line in the file
    */
   int within_array_declaration = FALSE;
-  int has_var_been_named = FALSE;
   int curr_field_type = CONFIG_FIELD_NAME;
   int within_quotes = FALSE;
   int current_var_finalised = TRUE;
@@ -208,7 +207,6 @@ config_t read_config_file(char *filePath) {
 
         // Name the new variable
         var = new_config_var(&field);
-        has_var_been_named = TRUE;
         var_has_value = FALSE;
 
         // Reset the array for storing the new data
@@ -246,7 +244,6 @@ config_t read_config_file(char *filePath) {
 
       // Ready for the next field
       curr_field_type = CONFIG_FIELD_NAME;
-      has_var_been_named = FALSE;
     }
   }
 

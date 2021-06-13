@@ -72,7 +72,7 @@
 #define EXTENSION_ASSURANCE 1
 #define SPACE_FOR_LOCAL_BOOL 1
 #define SHORT_STR_BUF                                                          \
-  __WORDSIZE - sizeof(void *) - (2 * sizeof(int)) - SPACE_FOR_LOCAL_BOOL
+  sizeof(size_t) * 8 - sizeof(void *) - (2 * sizeof(int)) - SPACE_FOR_LOCAL_BOOL
 #define SHORT_STR_LEN SHORT_STR_BUF - SPACE_FOR_NULL
 /*
  * Dealing with strings, do the same thing youd normally do, pass a pointer
