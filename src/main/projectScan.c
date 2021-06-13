@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
 
   // Finding and recording all program files
   FILE *main_out_file = fileio_open_safe(cstr(&main_out), FALSE);
+
   for (unsigned int i = 0; i < var_main_dirs->len; i++) {
     string_t dir_path = var_main_dirs->data[i];
     add_src_files_from_dir(main_out_file, &dir_path, &path_sep, &extension);

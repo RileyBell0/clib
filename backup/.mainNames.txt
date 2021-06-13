@@ -1,3 +1,0 @@
-glassCompile
-testing
-glassSetup
