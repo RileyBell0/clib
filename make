@@ -1,1 +1,0 @@
-./build/projectMake .build/config/project_cfg_linux.cfg 0
