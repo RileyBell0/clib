@@ -395,7 +395,7 @@ void alist_remove_node(alist_t *list, alist_node_t *node, unsigned int curr) {
   list->size -= 1;
 }
 
-int alist_remove(alist_t *list, void *element) {
+bool alist_remove(alist_t *list, void *element) {
   if (list->size == 0) {
     return false;
   }

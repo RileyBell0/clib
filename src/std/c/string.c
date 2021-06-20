@@ -139,7 +139,7 @@ int string_compare(string_t *str1, string_t *str2) {
 // so if they're both null then true
 // or if either one of them is null then false
 
-int string_equals(string_t *str1, string_t *str2) {
+bool string_equals(string_t *str1, string_t *str2) {
   if (str1->len != str2->len) {
     return false;
   }
@@ -160,13 +160,13 @@ int string_equals(string_t *str1, string_t *str2) {
 // TODO this should be a compare method not an equals method
 // RE-CHECKED 30/04/2021
 // VERIFIED
-int cstring_equals(char *str1, char *str2) { return strcmp(str1, str2) == 0; }
+bool cstring_equals(char *str1, char *str2) { return strcmp(str1, str2) == 0; }
 
 // TODO this should be a compare method not an equals method
 // make it cstring_compare_range instead
 // RE-CHECKED 30/04/2021
 // VERIFIED
-int cstring_equals_range(char *str_1, char *str_2, int compare_range) {
+bool cstring_equals_range(char *str_1, char *str_2, int compare_range) {
   // Compare the strings within the given range.
   for (int index = 0; index < compare_range; index++) {
     if (str_1[index] != str_2[index] || str_1[index] == '\0') {

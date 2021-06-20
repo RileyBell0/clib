@@ -39,7 +39,7 @@ array_t array_wrap(void *array, size_t element_size, unsigned int len) {
   return wrapped;
 }
 
-int array_resize(array_t *array, unsigned int new_length) {
+bool array_resize(array_t *array, unsigned int new_length) {
   // cannot resize to be smaller
   if (array == NULL || array->len >= new_length) {
     return false;
@@ -63,7 +63,7 @@ dynamic_array_t new_dynamic_array(size_t element_size) {
   return array;
 }
 
-int dynamic_array_append(dynamic_array_t *array, void *element) {
+bool dynamic_array_append(dynamic_array_t *array, void *element) {
   // Extending the array if needed
   if (array->capacity == array->len) {
     dynamic_array_extend(array);
@@ -101,8 +101,11 @@ static int dynamic_array_extend(dynamic_array_t *array) {
 
   return true;
 }
-
-int dynamic_array_safe_resize(dynamic_array_t *array, unsigned int new_len) {
+/*
+ * TODO whats the difference between dynamic_array_resize and
+ * dynamic_array_safe_resize
+*/
+bool dynamic_array_safe_resize(dynamic_array_t *array, unsigned int new_len) {
   // If less than the current array length - FAIL
   if (new_len <= array->len) {
     return false;

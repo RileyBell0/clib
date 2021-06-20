@@ -5,8 +5,8 @@
  *
  * complexString is set to true iff the returned string was surrounded by quotes
  */// TODO this function is way too long
-int extract_field(string_t *str, unsigned int *pos, string_t *dest,
-                  int *complex_field) {
+bool extract_field(string_t *str, unsigned int *pos, string_t *dest,
+                  bool *complex_field) {
   string_clear(dest);
 
   // Why am i even stealing complex field?? if im just chanigng it to false
@@ -62,7 +62,7 @@ int extract_field(string_t *str, unsigned int *pos, string_t *dest,
   /*
    * If the current field is within quotes
    */
-  int inQuotes = false;
+  bool inQuotes = false;
   if (str_start[*pos] == CONFIG_STRING_ENCLOSE_CHAR) {
     *complex_field = true;
     *pos += 1;
@@ -155,15 +155,15 @@ config_t read_config_file(char *filePath) {
   /*
    * Read every line in the file
    */
-  int within_array_declaration = false;
+  bool within_array_declaration = false;
   int curr_field_type = CONFIG_FIELD_NAME;
-  int within_quotes = false;
-  int current_var_finalised = true;
+  bool within_quotes = false;
+  bool current_var_finalised = true;
   /*
    * Has the current var thats being loaded in got at least one
    * value loaded in from the file
    */
-  int var_has_value = false;
+  bool var_has_value = false;
 
   // Read in and process the whole config file
   while (fileio_next_line(configFile, &buffer)) {
@@ -307,7 +307,7 @@ void config_encode(string_t *dest, string_t *toEncode) {
  *
  * returns true if successful, false if file failed to open
  */
-int config_save(config_t config) {
+bool config_save(config_t config) {
   /*
    * Nothing to save...
    */

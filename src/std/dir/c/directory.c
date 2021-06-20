@@ -49,7 +49,7 @@ alist_t dir_all_entries_alist(string_t *path) {
 
 alist_t dir_all_files_recur(string_t *path,
                             int (*key)(string_t *file_name, void *extra),
-                            void *extra, int include_base_path) {
+                            void *extra, bool include_base_path) {
   // The return type is a list containing the paths to all matching files
   alist_t valid_files = new_alist(sizeof(string_t));
   valid_files.destroy = void_string_destroy;
@@ -94,7 +94,7 @@ alist_t dir_all_files_recur(string_t *path,
         alist_destroy(&sub_dir_files);
 
       } else {
-        int append = true;
+        bool append = true;
         if (key && !key(&file_name, extra)) {
           append = false;
         }
@@ -122,7 +122,7 @@ alist_t dir_all_files_recur(string_t *path,
 
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 04/05/2021
-int is_relative_dir_entry(string_t *path) {
+bool is_relative_dir_entry(string_t *path) {
   if (path->len == 1) {
     if (cstring_equals(cstr(path), ".")) {
       return true;

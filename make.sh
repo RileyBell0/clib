@@ -2,8 +2,6 @@
 CURRENT_OS="Unknown"
 MAKEFILE_BASE="Makefile_"
 
-echo "Cool"
-
 case "$OSTYPE" in
   solaris*) CURRENT_OS="SOLARIS" ;;
   darwin*)  CURRENT_OS="OSX" ;; 

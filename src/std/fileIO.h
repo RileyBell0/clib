@@ -59,7 +59,7 @@ bool fileio_has_extension(string_t *file_name, string_t *extension);
  * Wrapper for fileio_has_extension to ignore compiler warnings
  * TODO is there a better way to do this?
  */
-bool fileio_has_extension_key(string_t *file_name, void *extension);
+int fileio_has_extension_key(string_t *file_name, void *extension);
 
 /*
  * When given a string containing the path to a file,

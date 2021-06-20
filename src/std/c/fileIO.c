@@ -40,7 +40,7 @@ FILE *fileio_open_safe_advanced(char *file_path, char *mode) {
 
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 04/05/2021
-FILE *fileio_open_safe(char *file_path, int is_reading) {
+FILE *fileio_open_safe(char *file_path, bool is_reading) {
   FILE *file = NULL;
 
   if (is_reading) {
@@ -56,7 +56,7 @@ FILE *fileio_open_safe(char *file_path, int is_reading) {
 
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 04/05/2021
-FILE *fileio_open(char *file_path, int is_reading) {
+FILE *fileio_open(char *file_path, bool is_reading) {
   FILE *new_file = NULL;
 
   if (is_reading) {
@@ -89,7 +89,7 @@ void fileio_close(FILE *file) {
 void fileio_fix_path(string_t *path) {}
 
 // MEMORY_SAFE 05/05/2021
-int fileio_next_line(FILE *file, string_t *buffer) {
+bool fileio_next_line(FILE *file, string_t *buffer) {
   char c;
   char *buffer_str = cstr(buffer);
   unsigned int chars_written = 0;
@@ -118,8 +118,8 @@ int fileio_has_extension_key(string_t *file_name, void *extension) {
   return fileio_has_extension(file_name, (string_t *)extension);
 }
 
-int fileio_has_extension(string_t *file_name, string_t *extension) {
-  int has_extension = false;
+bool fileio_has_extension(string_t *file_name, string_t *extension) {
+  bool has_extension = false;
 
   // Add the current file if it has the required extension
   string_t file_extension = get_file_extension(file_name);

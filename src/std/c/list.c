@@ -3,16 +3,20 @@
 // TODO
 // array_set_element should return a pointer to the start of the modified
 // memory, the start of the 'set' element
+// TODO we cant index (unsigned int) elements with an (int) so we should
+// make the size of the list an int aswell
 
 //////////////////////////////
 // Function Declarations
 //////////////////////////////
 
+void* list_node_get_data(void* node);
+
 /*
  * Returns a bool if or not the given index is within the bounds
  * of the provided list
  */
-bool list_is_valid_index(list_t *list, unsigned int index);
+bool list_is_valid_index(list_t *list, int index);
 
 /*
  * Returns a pointer to a new list Node with the relevant data attached
@@ -32,7 +36,7 @@ void *list_remove_node(list_t *list, list_node_t *node, bool return_elem);
  * If within the bounds of the list, returns the index
  * else, exit's with code EXIT_FAILURE
  */
-unsigned int list_convert_index(list_t *list, unsigned int index);
+int list_convert_index(list_t *list, int index);
 
 /*
  * List iterator functions
@@ -155,14 +159,14 @@ bool list_iterator_done(list_iterator_t *it) {
 // Basic Operations
 //////////////////////////////
 
-void *list_get(list_t *list, unsigned int index) {
+void *list_get(list_t *list, int index) {
   // Convert negative index into a positive index
   index = list_convert_index(list, index);
 
   if (!list_is_valid_index(list, index)) {
     exit_error("Invalid List index", "std/c/list.c", "list_get");
   }
-
+  
   // Determine which end of the list is closer to the index
   bool from_start = true;
   if (index > list->size / 2) {
@@ -218,7 +222,7 @@ list_t *list_append_multi(list_t *list, void *toAppend, ...) {
   return list;
 }
 
-void *list_pop(list_t *list, unsigned int index) {
+void *list_pop(list_t *list, int index) {
   index = list_convert_index(list, index);
 
   if (!list_is_valid_index(list, index)) {
@@ -245,7 +249,7 @@ void *list_pop(list_t *list, unsigned int index) {
   return NULL; // Will never run, exit_error exits program
 }
 
-bool list_remove_at(list_t *list, unsigned int index) {
+bool list_remove_at(list_t *list, int index) {
   index = list_convert_index(list, index);
 
   if (!list_is_valid_index(list, index)) {
@@ -295,7 +299,11 @@ bool list_remove(list_t *list, void *elem) {
 // Utility
 //////////////////////////////
 
-bool list_is_valid_index(list_t *list, unsigned int index) {
+void* list_node_get_data(void* node) {
+  return (void*)&((list_node_t*)node)[LIST_ELEMENT];
+}
+
+bool list_is_valid_index(list_t *list, int index) {
   if (index < 0 || index >= list->size) {
     return false;
   }
@@ -303,7 +311,7 @@ bool list_is_valid_index(list_t *list, unsigned int index) {
   return true;
 }
 
-unsigned int list_convert_index(list_t *list, unsigned int index) {
+int list_convert_index(list_t *list, int index) {
   if (index < 0) {
     index = list->size + index;
   }
@@ -385,18 +393,16 @@ list_t *list_combine(list_t *base, list_t *extension) {
 array_t list_to_array(list_t *list) {
   array_t converted = new_array(list->size, list->element_size);
 
-  unsigned int element = 0;
-  list_node_t *node = list->first_node;
-  while (node) {
-    array_set_element(&converted, &node[LIST_ELEMENT], element++,
-                      list->element_size);
-    node = node->next;
+  list_iterator_t it = new_list_iterator(list, true);
+  for (void *elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
+    void *data = list_node_get_data(elem);
+    array_set_element(&converted, data, it.index, list->element_size);
   }
 
   return converted;
 }
 
-void list_clear(list_t *list) {
+void list_clear(list_t *list) {  
   size_t element_size = list->element_size;
   void (*delete_data)(void *data) = list->delete_data;
   int (*compare)(const void *first, const void *second) = list->compare;
@@ -422,19 +428,17 @@ void list_destroy(list_t *list) {
     return;
   }
 
-  list_node_t *current_node = list->first_node;
-  list_node_t *next_node = NULL;
-
-  while (current_node != NULL) {
-    next_node = current_node->next;
-
-    // Freeing the dynamically allocated node structure
-    if (list->delete_data) {
-      list->delete_data(&current_node[LIST_ELEMENT]);
+  list_iterator_t it = new_list_iterator(list, true);
+  if (list->delete_data) {
+    for (void* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
+      void* data = list_node_get_data(node);
+      list->delete_data(data);
     }
-    free(current_node);
+  }
 
-    current_node = next_node;
+  // Free the entire node
+  for (void* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
+    free(node);
   }
 
   list->size = 0;

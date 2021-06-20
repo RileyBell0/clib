@@ -45,8 +45,13 @@ typedef struct list_node_t {
 typedef struct list_t {
   list_node_t *first_node;
   list_node_t *last_node;
-  unsigned int size;
+  int size;
   size_t element_size;
+
+  /*
+   * Do not try and free the recieved 'data' pointer, this is
+   * allocated within list_t and will be destroyed under list_destroy
+  */
   void (*delete_data)(void *data);
   int (*compare)(const void *first, const void *second);
 } list_t;
@@ -54,7 +59,7 @@ typedef struct list_t {
 typedef struct list_iterator_t {
   list_t *list;
   bool from_start;
-  unsigned int index; // current node's index in the list
+  int index; // current node's index in the list
   list_node_t *curr_node;
   void *element;
   void *next_node;
@@ -85,7 +90,7 @@ list_iterator_t new_list_iterator(list_t *list, bool from_start);
  *
  * Supports negative indexing
  */
-void *list_get(list_t *list, unsigned int index);
+void *list_get(list_t *list, int index);
 
 /*
  * Adds the data to the end of the list
@@ -107,7 +112,7 @@ list_t *list_append_multi(list_t *list, void *toAppend, ...);
  *
  * Supports negative indicies
  */
-void *list_pop(list_t *list, unsigned int index);
+void *list_pop(list_t *list, int index);
 
 /*
  * Removes the element at the given index from the list.
@@ -117,7 +122,7 @@ void *list_pop(list_t *list, unsigned int index);
  *
  * Supports negative indicies
  */
-bool list_remove_at(list_t *list, unsigned int index);
+bool list_remove_at(list_t *list, int index);
 
 /*
  * Compares the bytes of length list->element_size between 'to_remove' and
