@@ -22,6 +22,7 @@
 
 #include "array.h"
 #include "error.h"
+#include "index.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -118,11 +119,9 @@ void *list_pop(list_t *list, int index);
  * Removes the element at the given index from the list.
  * If the index is invalid, exits with code EXIT_FAILURE
  *
- * Returns true if an element was removed, false otherwise
- *
  * Supports negative indicies
  */
-bool list_remove_at(list_t *list, int index);
+void list_remove_at(list_t *list, int index);
 
 /*
  * Compares the bytes of length list->element_size between 'to_remove' and
@@ -132,6 +131,7 @@ bool list_remove_at(list_t *list, int index);
  */
 bool list_remove(list_t *list, void *elem);
 
+// TODO implement, write help info
 void list_clear(list_t *list);
 
 //////////////////////////////

@@ -34,7 +34,7 @@ void argparse_add_arg(argparser_t *parser, char *arg_name, char *arg_help) {
 void argparse_parse_args(argparser_t *parser) {
   // Ensure enough valid arguments have been received
   if (parser->required_args < parser->num_args) {
-    unsigned int starting_arg = parser->num_args;
+    // unsigned int starting_arg = parser->num_args;
 
     fprintf(stderr, "Error - Not enough input arguments.\n");
     fprintf(stderr, "\tSource: std/c/argparse.c: argparse_parse_args\n");
@@ -63,7 +63,7 @@ char *argparse_get_arg(argparser_t *parser, char *name) {
 
   // Return the argument if found
   if (found_arg) {
-    return (char *)alist_get_element(&parser->args, it.index);
+    return (char *)alist_get(&parser->args, it.index);
   } else {
     fprintf(stderr, "Error - Could not find provided argument.\n");
     fprintf(stderr, "Source: std/c/argparse.c: argparse_get_arg\n");

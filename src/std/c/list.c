@@ -10,13 +10,7 @@
 // Function Declarations
 //////////////////////////////
 
-void* list_node_get_data(void* node);
-
-/*
- * Returns a bool if or not the given index is within the bounds
- * of the provided list
- */
-bool list_is_valid_index(list_t *list, int index);
+void *list_node_get_data(void *node);
 
 /*
  * Returns a pointer to a new list Node with the relevant data attached
@@ -28,15 +22,6 @@ list_node_t *list_new_node(void *element, size_t element_size);
  * accordingly
  */
 void *list_remove_node(list_t *list, list_node_t *node, bool return_elem);
-
-/*
- * Given an index, converts a negative index into a positive index,
- * checks if the index is within the bounds of the list.
- *
- * If within the bounds of the list, returns the index
- * else, exit's with code EXIT_FAILURE
- */
-int list_convert_index(list_t *list, int index);
 
 /*
  * List iterator functions
@@ -161,17 +146,14 @@ bool list_iterator_done(list_iterator_t *it) {
 
 void *list_get(list_t *list, int index) {
   // Convert negative index into a positive index
-  index = list_convert_index(list, index);
+  index = index_convert_negative_safe(list->size, index);
 
-  if (!list_is_valid_index(list, index)) {
+  if (!index_is_valid(list->size, index)) {
     exit_error("Invalid List index", "std/c/list.c", "list_get");
   }
-  
+
   // Determine which end of the list is closer to the index
-  bool from_start = true;
-  if (index > list->size / 2) {
-    from_start = false;
-  }
+  bool from_start = index_closer_to_start(list->size, index);
 
   // Return the element at the given index within the list
   list_iterator_t it = new_list_iterator(list, from_start);
@@ -223,18 +205,15 @@ list_t *list_append_multi(list_t *list, void *toAppend, ...) {
 }
 
 void *list_pop(list_t *list, int index) {
-  index = list_convert_index(list, index);
+  index = index_convert_negative_safe(list->size, index);
 
-  if (!list_is_valid_index(list, index)) {
+  if (!index_is_valid(list->size, index)) {
     exit_error("Attempting to remove index out of list bounds", "std/c/list.c",
                "list_pop");
   }
 
   // Determine which end of the list is closer to the index
-  bool from_start = true;
-  if (index > list->size / 2) {
-    from_start = false;
-  }
+  bool from_start = index_closer_to_start(list->size, index);
 
   // Find the node at the index requested and remove it
   list_iterator_t it = new_list_iterator(list, from_start);
@@ -249,31 +228,28 @@ void *list_pop(list_t *list, int index) {
   return NULL; // Will never run, exit_error exits program
 }
 
-bool list_remove_at(list_t *list, int index) {
-  index = list_convert_index(list, index);
+void list_remove_at(list_t *list, int index) {
+  index = index_convert_negative_safe(list->size, index);
 
-  if (!list_is_valid_index(list, index)) {
+  if (!index_is_valid(list->size, index)) {
     exit_error("Attempting to remove index out of list bounds", "std/c/list.c",
                "list_remove_at");
   }
 
   // Determine which end of the list is closer to the index
-  bool from_start = true;
-  if (index > list->size / 2) {
-    from_start = false;
-  }
+  bool from_start = index_closer_to_start(list->size, index);
 
   // Find the node at the index requested and remove it
   list_iterator_t it = new_list_iterator(list, from_start);
   for (void *elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
     if (index == it.index) {
-      return list_remove_node(list, it.curr_node, false);
+      list_remove_node(list, it.curr_node, false);
+      return;
     }
   }
 
   exit_error("List structure invalid - requested index not present",
              "std/c/list.c", "list_remove_at");
-  return NULL; // Will never run, exit_error exits program
 }
 
 bool list_remove(list_t *list, void *elem) {
@@ -299,28 +275,8 @@ bool list_remove(list_t *list, void *elem) {
 // Utility
 //////////////////////////////
 
-void* list_node_get_data(void* node) {
-  return (void*)&((list_node_t*)node)[LIST_ELEMENT];
-}
-
-bool list_is_valid_index(list_t *list, int index) {
-  if (index < 0 || index >= list->size) {
-    return false;
-  }
-
-  return true;
-}
-
-int list_convert_index(list_t *list, int index) {
-  if (index < 0) {
-    index = list->size + index;
-  }
-  if (!list_is_valid_index(list, index)) {
-    exit_error("Invalid list index detected", "std/c/list.c",
-               "list_convert_index");
-  }
-
-  return index;
+void *list_node_get_data(void *node) {
+  return (void *)&((list_node_t *)node)[LIST_ELEMENT];
 }
 
 /*
@@ -402,7 +358,7 @@ array_t list_to_array(list_t *list) {
   return converted;
 }
 
-void list_clear(list_t *list) {  
+void list_clear(list_t *list) {
   size_t element_size = list->element_size;
   void (*delete_data)(void *data) = list->delete_data;
   int (*compare)(const void *first, const void *second) = list->compare;
@@ -430,14 +386,14 @@ void list_destroy(list_t *list) {
 
   list_iterator_t it = new_list_iterator(list, true);
   if (list->delete_data) {
-    for (void* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
-      void* data = list_node_get_data(node);
+    for (void *node = it.first(&it); !it.done(&it); node = it.next(&it)) {
+      void *data = list_node_get_data(node);
       list->delete_data(data);
     }
   }
 
   // Free the entire node
-  for (void* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
+  for (void *node = it.first(&it); !it.done(&it); node = it.next(&it)) {
     free(node);
   }
 
