@@ -8,3 +8,24 @@ ALIST:
     to iterate through the first 500 elements
 
 For windows test commit
+
+
+0 prev -2147483648 next 2
+9 prev 7 next -2147483648
+2 prev -2 next 1
+3 prev -1 next 1
+4 prev -1 next 1
+5 prev -1 next 1
+6 prev -1 next 1
+7 prev -1 next 1
+8 prev -1 next -7
+
+
+0 prev -2147483648 next 2
+9 prev 2 next -2147483648
+2 prev -2 next 2
+3 prev 4 next -2
+8 prev -2 next 1
+5 prev -1 next 1
+6 prev -1 next 1
+7 prev -1 next -4

@@ -4,13 +4,15 @@
 #include "array.h"
 #include "string.h"
 #include "index.h"
+#include "pointer.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <limits.h>
 
 #define ALIST_REALLOC_MULTIPLIER 2 // TODO currently unused
-#define ALIST_NULL INT32_MIN
+#define ALIST_NULL INT_MIN
 #define ALIST_SAFE_DESTROY
 #define ALIST_ELEMENT 1
 
@@ -56,9 +58,8 @@ typedef struct alist_t {
 typedef struct alist_iterator_t {
   alist_t *list;
   bool from_start;
-  int next_node_pos;  // Next node's position in the array
-  int curr_node_pos;  // Current node's position in the array
   int index; // current node's index in the list
+  int curr_node_pos;
   alist_node_t *curr_node;
   void *element;
   void *(*next)(struct alist_iterator_t *iterator);
@@ -161,6 +162,10 @@ alist_t alist_copy(alist_t *list);
 //////////////////////////////
 // Utility
 //////////////////////////////
+
+// TODO write function comment
+alist_node_t *alist_get_prev_node(alist_t *list, alist_node_t *node);
+alist_node_t *alist_get_next_node(alist_t *list, alist_node_t *node);
 
 /*
  * Ensures the given list has at least the capacity 'new_len', if not

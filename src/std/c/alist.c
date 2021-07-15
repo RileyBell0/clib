@@ -14,6 +14,9 @@
  * alist_get(list, index) which gets and returns new memory containing the element
  * in the given position
 */
+void* alist_copy_elem_from_node(alist_t* list, alist_node_t* node);
+
+alist_node_t* alist_get_node_at_pos(alist_t* list, int pos);
 
 /*
  * Iterator Functions
@@ -21,7 +24,6 @@
 bool alist_iterator_done(alist_iterator_t *iterator);
 void *alist_iterator_first_node(alist_iterator_t *iterator);
 void *alist_iterator_next_node(alist_iterator_t *iterator);
-void *alist_iterator_prev_node(alist_iterator_t *iterator);
 
 int alist_relative_distance(int source, int dest);
 void alist_join_nodes(alist_t* list, int left_node, int right_node);
@@ -33,12 +35,16 @@ void alist_extend(alist_t *list);
 /*
  * Given a node in an alist, removes it
  */
-void alist_remove_node(alist_t *list, alist_node_t *node, int curr);
+void alist_remove_node(alist_t *list, alist_node_t *node, int pos);
 
 /*
  * Returns a pointer to the node at the given index in the alist
  */
-alist_node_t *alist_get_node(alist_t *list, int element);
+alist_node_t *alist_get_node(alist_t *list, int index);
+
+int alist_next_ext_len(alist_t* list);
+void alist_set_len(alist_t* list, int len);
+void alist_make_space(alist_t* list, int req_nodes);
 
 //////////////////////////////
 // Initialisation
@@ -62,23 +68,19 @@ alist_t new_alist(size_t element_size) {
 }
 
 alist_iterator_t new_alist_iterator(alist_t *list, bool from_start) {
-  alist_iterator_t iterator;
-  iterator.index = ALIST_NULL;
-  iterator.list = list;
-  iterator.from_start = from_start;
+  alist_iterator_t it;
+
+  it.list = list;
+  it.from_start = from_start;
+  it.index = ALIST_NULL;
+  it.curr_node_pos = ALIST_NULL;
 
   // Set direction dependent information
-  if (from_start) {
-    iterator.next_node_pos = list->first;
-    iterator.next = alist_iterator_next_node;
-  } else {
-    iterator.next_node_pos = list->last;
-    iterator.next = alist_iterator_prev_node;
-  }
-  iterator.done = alist_iterator_done;
-  iterator.first = alist_iterator_first_node;
+  it.next = alist_iterator_next_node;
+  it.done = alist_iterator_done;
+  it.first = alist_iterator_first_node;
 
-  return iterator;
+  return it;
 }
 
 //////////////////////////////
@@ -86,60 +88,54 @@ alist_iterator_t new_alist_iterator(alist_t *list, bool from_start) {
 //////////////////////////////
 
 bool alist_iterator_done(alist_iterator_t *it) {
-  return it->curr_node_pos < 0;
+  return it->curr_node == NULL;
 }
 
 void *alist_iterator_first_node(alist_iterator_t *it) {
   // Get the index of the starting node
-  if (it->from_start) {
-    it->next_node_pos = it->list->first;
-  } else {
-    it->next_node_pos = it->list->last;
-  }
-
-  // Get the first element
-  void *element = it->next(it);
-
-  // Get the index of the starting node
+  int start_node;
   if (it->from_start) {
     it->index = 0;
+    start_node = it->list->first;
   } else {
     it->index = it->list->size - 1;
+    start_node = it->list->last;
+  }
+  it->curr_node_pos = start_node;
+
+  // Attach the starting node to the iterator
+  if (start_node == ALIST_NULL) {
+    it->curr_node = NULL;
+    it->element = NULL;
+    it->index = ALIST_NULL;
+  }
+  else {
+    it->curr_node = alist_get_node_at_pos(it->list, start_node);
+    it->element = (void *)&it->curr_node[ALIST_ELEMENT];
   }
 
-  return element;
-}
-
-void *alist_iterator_next_node(alist_iterator_t *it) {
-  // Moving to the next element
-  it->curr_node_pos = it->next_node_pos;
-
-  if (it->next_node_pos < 0) {
-    return NULL;
-  }
-
-  it->curr_node = alist_get_node(it->list, it->next_node_pos);
-  it->next_node_pos += it->curr_node->next;
-  it->element = (void *)&it->curr_node[ALIST_ELEMENT];
-
-  it->index += 1;
-  // Returns non-null if not done
   return it->element;
 }
 
-void *alist_iterator_prev_node(alist_iterator_t *it) {
-  // Moving to the next element
-  it->curr_node_pos = it->next_node_pos;
+void *alist_iterator_next_node(alist_iterator_t *it) {
+  // Update the current node pos
+  if (it->from_start) {
+    it->curr_node_pos = it->curr_node_pos + it->curr_node->next;
+    it->curr_node = alist_get_next_node(it->list, it->curr_node);
+    it->index += 1;
+  }
+  else {
+    it->curr_node_pos = it->curr_node_pos + it->curr_node->prev;
+    it->curr_node = alist_get_prev_node(it->list, it->curr_node);
+    it->index -= 1;
+  }
 
-  if (it->next_node_pos < 0) {
+  if (it->curr_node == NULL) {
     return NULL;
   }
 
-  it->curr_node = alist_get_node(it->list, it->next_node_pos);
-  it->next_node_pos += it->curr_node->prev;
   it->element = (void *)&it->curr_node[ALIST_ELEMENT];
 
-  it->index -= 1;
   // Returns non-null if not done
   return it->element;
 }
@@ -147,6 +143,14 @@ void *alist_iterator_prev_node(alist_iterator_t *it) {
 //////////////////////////////
 // Basic Operations
 //////////////////////////////
+
+void* alist_copy_elem_from_node(alist_t* list, alist_node_t* node) {
+  // Copy the element into new memory
+  void* elem_copy = safe_malloc(list->element_size);
+  assert(memcpy(elem_copy, (void *)&node[ALIST_ELEMENT], list->element_size));
+
+  return elem_copy;
+}
 
 void* alist_copy_element(alist_t *list, int index) {
   void* elem = alist_get(list, index);
@@ -156,16 +160,6 @@ void* alist_copy_element(alist_t *list, int index) {
   assert(memcpy(elem_copy, elem, list->element_size));
 
   return elem_copy;
-}
-
-int alist_relative_distance(int source, int dest) {
-  return dest - source;
-}
-
-void alist_join_nodes(alist_t* list, int left_node, int right_node) {
-  int distance = alist_relative_distance(left_node, right_node);
-  alist_get_node(list, left_node)->next = distance;
-  alist_get_node(list, right_node)->prev = -distance;
 }
 
 void *alist_get(alist_t *list, int index) {
@@ -190,26 +184,74 @@ void *alist_get(alist_t *list, int index) {
   return NULL; // Will not run, exit_error calls exit(EXIT_FAILURE)
 }
 
-void alist_append(alist_t *list, void *data) {
-  if (list->capacity <= list->size) {
-    alist_extend(list);
-  }
-
-  alist_node_t *node = alist_get_node(list, list->size);
-  if (list->size != 0) {
-    alist_join_nodes(list, list->last, list->size);
-  } else {
-    node->prev = ALIST_NULL;
-    list->first = 0;
-  }
-
-  list->last = list->size;
-  node->next = ALIST_NULL;
-
-  // Copy the data in and Ensure the copy succeeds
+void alist_insert_at(alist_t* list, void* data, int index) {
+  index = index_convert_negative_safe(list->size + 1, index);
+  alist_make_space(list, list->size + 1);
+  bool inserted = false;
+  
+  // Copy the data into a new node
+  alist_node_t *node = alist_get_node_at_pos(list, list->size);
   assert(memcpy(&node[ALIST_ELEMENT], data, list->element_size));
 
+  if (index == list->size) {
+    // Appending
+    node->next = ALIST_NULL;
+
+    if (list->size) {
+      alist_join_nodes(list, list->last, list->size);
+    }
+    else {
+      node->prev = ALIST_NULL;
+      list->first = list->size;
+    }
+    list->last = list->size;
+    
+    inserted = true;
+  }
+  else if (index == 0) {
+    // Prepending
+    node->prev = ALIST_NULL;
+    
+    if (list->size) {
+      alist_join_nodes(list, list->size, list->first);
+    }
+    else {
+      node->next = ALIST_NULL;
+      list->last = list->size;
+    }
+    list->first = list->size;
+
+    inserted = true;
+  }
+  else {
+    // Within a list
+    bool from_start = index_closer_to_start(list->size, index);
+    alist_iterator_t it = new_alist_iterator(list, from_start);
+    for (it.first(&it); !it.done(&it); it.next(&it)) {
+      if (it.index == index) {
+        // There will be a node before this and after this
+        alist_node_t* right_node = it.curr_node;
+        
+        int right_node_pos = it.curr_node_pos;
+        int left_node_pos = right_node_pos + right_node->prev;
+
+        alist_join_nodes(list, left_node_pos, list->size);
+        alist_join_nodes(list, list->size, right_node_pos);
+
+        inserted = true;
+      }
+    }
+  }
+
+  if (!inserted) {
+    exit_error("Index not within alist", "std/c/alist.c", "alist_insert_at");
+  }
+
   list->size += 1;
+}
+
+void alist_append(alist_t *list, void *data) {
+  alist_insert_at(list, data, list->size);
 }
 
 void alist_append_multi(alist_t *list, void *data, ...) {
@@ -229,46 +271,57 @@ void alist_append_multi(alist_t *list, void *data, ...) {
 void *alist_pop(alist_t *list, int index) {
   index = index_convert_negative_safe(list->size, index);
 
-  alist_node_t* node = alist_get_node(list, index);
-
-  // Copy the data to new memory
-  void* data = safe_malloc(list->element_size);
-  assert(memcpy(data, &node[ALIST_ELEMENT], list->element_size));
-
-  // Remove the node from the array
-  alist_remove_node(list, node, index);
-
-  return data;
-}
-
-void alist_remove_at(alist_t *list, int index) {
-  index = index_convert_negative_safe(list->size, index);
-
+  // Get the node and its pos
   bool from_start = index_closer_to_start(list->size, index);
   alist_iterator_t it = new_alist_iterator(list, from_start);
-
   for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (it.index == index) {
-      alist_remove_node(list, it.curr_node, it.curr_node_pos);
-      return;
+      break;
     }
   }
 
-  exit_error("Invalid alist structure detected", "std/c/alist.c",
-             "alist_remove_at");
+  // Copy the data from the node out
+  void* elem = alist_copy_elem_from_node(list, it.curr_node);
+
+  // Remove the node from the array
+  alist_remove_node(list, it.curr_node, it.curr_node_pos);
+
+  return elem;
+}
+
+void alist_remove_at(alist_t *list, int index) {
+  // TODO remove
+  #include <stdio.h>
+  printf("Gonna try and remove...\n");
+  index = index_convert_negative_safe(list->size, index);
+
+  // Get the node and its pos
+  bool from_start = index_closer_to_start(list->size, index);
+  alist_iterator_t it = new_alist_iterator(list, from_start);
+  for (it.first(&it); !it.done(&it); it.next(&it)) {
+    if (it.index == index) {
+      break;
+    }
+  }
+
+  alist_remove_node(list, it.curr_node, it.curr_node_pos);
 }
 
 bool alist_remove(alist_t *list, void *element) {
   // Find the first occurance of the given element in the list and remove it
   alist_iterator_t it = new_alist_iterator(list, true);
-  for (it.first(&it); !it.done(&it); it.next(&it)) {
-    if (list->compare) {
+  if (list->compare) {
+    // if a compare method is provided, use to compare elements
+    for (it.first(&it); !it.done(&it); it.next(&it)) {
       if (list->compare(element, it.element) == 0) {
         alist_remove_node(list, it.curr_node, it.curr_node_pos);
         return true;
       }
     }
-    else {
+  }
+  else {
+    // If no compare method, compare the memory of each element
+    for (it.first(&it); !it.done(&it); it.next(&it)) {
       if (memcmp(element, it.element, list->element_size) == 0) {
         alist_remove_node(list, it.curr_node, it.curr_node_pos);
         return true;
@@ -320,7 +373,7 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
 
   // Allocate enough space to store the combined lists
   if (size > list1->capacity) {
-    alist_set_length(list1, size);
+    alist_make_space(list1, size);
   }
 
   ///////////////////////////////////////////////////////////////////////
@@ -328,7 +381,7 @@ alist_t *alist_combine(alist_t *list1, alist_t *list2) {
   ///////////////////////////////////////////////////////////////////////
   
   // Copy data from list 2 to the end of list 1
-  alist_node_t *list1_end = alist_get_node(list1, list1->size);
+  alist_node_t *list1_end = alist_get_node_at_pos(list1, list1->size);
   assert(memcpy(list1_end, list2->list_start, list2->block_size * list2->size));
 
   // Patch references between list 1 and the copied data from list 2
@@ -376,21 +429,36 @@ array_t alist_to_array(alist_t *list) {
 // Utility Functions
 //////////////////////////////
 
-void alist_set_length(alist_t *list, int new_len) {
-  // Can only increase the list's length
-  if (new_len <= list->capacity) {
-    return;
+alist_node_t *alist_get_next_node(alist_t *list, alist_node_t *node) {
+  if (node->next != ALIST_NULL) {
+    return pointer_offset(node, node->next, list->block_size);
   }
-
-  // Convert new_len from num elements into num bytes
-  size_t new_capacity = list->block_size * new_len;
-
-  // Extend the list's memory and update its capacity
-  list->list_start = safe_realloc(list->list_start, new_capacity);
-  list->capacity = new_len;
+  else {
+    return NULL;
+  }
 }
 
-void alist_extend(alist_t *list) {
+alist_node_t *alist_get_prev_node(alist_t *list, alist_node_t *node) {
+  if (node->prev != ALIST_NULL) {
+    return pointer_offset(node, node->prev, list->block_size);
+  }
+  else {
+    return NULL;
+  }
+}
+
+void alist_join_nodes(alist_t* list, int left_node, int right_node) {
+  int distance = alist_relative_distance(left_node, right_node);
+  alist_get_node_at_pos(list, left_node)->next = distance;
+  alist_get_node_at_pos(list, right_node)->prev = -distance;
+}
+
+int alist_relative_distance(int source, int dest) {
+  return dest - source;
+}
+
+// TODO move to relevant space
+int alist_next_ext_len(alist_t* list) {
   // Calculate the new length, realloc factor set to be 1.5x
   int new_len = list->capacity + (list->capacity / 2);
 
@@ -399,108 +467,142 @@ void alist_extend(alist_t *list) {
     ++new_len;
   }
 
-  // Convert new_len from num elements into num bytes
-  size_t new_capacity = (sizeof(alist_node_t) + list->element_size) * new_len;
-
-  // Extend the list's memory and update its capacity
-  list->list_start = safe_realloc(list->list_start, new_capacity);
-  list->capacity = new_len;
+  return new_len;
 }
 
-void alist_remove_node(alist_t *list, alist_node_t *node, int curr) {
+// TODO move to relevanat space
+void alist_set_len(alist_t* list, int len) {
+  size_t req_size = len * list->block_size;
+
+  // Allocate new space and update the capacity
+  list->list_start = safe_realloc(list->list_start, req_size);
+  list->capacity = len;
+}
+
+// TODO move to relevant space
+void alist_make_space(alist_t* list, int req_nodes) {
+  if (list->capacity - list->size < req_nodes) {
+    int new_len = alist_next_ext_len(list);
+
+    if (new_len - list->capacity < req_nodes) {
+      // Extend the tree to fit specifically the new nodes
+      alist_set_len(list, list->size + req_nodes);
+    }
+    else {
+      // Extend the tree by the extension factor in atree_next_ext_len
+      alist_set_len(list, new_len);
+    }
+  }
+}
+
+alist_node_t* alist_get_node_at_pos(alist_t* list, int pos) {
+  return (alist_node_t *)array_get_element(list->list_start, pos,
+                                           list->block_size);
+}
+
+void alist_remove_node(alist_t *list, alist_node_t *node, int pos) {
+  void* elem_start = (void*)&node[ALIST_ELEMENT];
+
+  bool node_before = false;
+  bool node_after = false;
+
   // Delete the data from the node being removed
-  alist_node_t *moved_node = alist_get_node(list, curr);
   if (list->destroy_on_remove && list->destroy) {
-    list->destroy(&moved_node[ALIST_ELEMENT]);
+    list->destroy(elem_start);
   }
   
-  // Calculate the positions of the surrounding nodes
-  int list_final = list->size - 1;
-  int next = curr + node->next;
-  int prev = curr + node->prev;
-
-  if (next <= -list->size) {
-    next = ALIST_NULL; 
+  // Determine whether there are nodes before and/or after the removed node
+  if (node->next != ALIST_NULL) {
+    node_after = true;
   }
-  if (prev <= -list->size) {
-    prev = ALIST_NULL;
+  if (node->prev != ALIST_NULL) {
+    node_before = true;
   }
 
-  // Join the nodes surrounding the removed node together
-  if (prev != ALIST_NULL && next != ALIST_NULL) {
-    alist_join_nodes(list, prev, next);
+  // Remove the node from the array
+  if (node_before && node_after) {
+    alist_join_nodes(list, pos + node->prev, pos + node->next);
   }
-  else if (prev != ALIST_NULL) {
-    alist_get_node(list, prev)->next = ALIST_NULL;
+  else if (node_before) {
+    alist_get_prev_node(list, node)->next = ALIST_NULL;
+    list->last = pos + node->prev;
   }
-  else if (next != ALIST_NULL) {
-    alist_get_node(list, next)->prev = ALIST_NULL;
+  else if (node_after) {
+    alist_get_next_node(list, node)->prev = ALIST_NULL;
+    list->first = pos + node->next;
   }
   else {
+    // This was the last node in the list and it has been removeds
     list->first = ALIST_NULL;
     list->last = ALIST_NULL;
-    list->size = 0;
-    return;
   }
 
-  // Fix overall list references
-  if (list->first == curr) {
-    list->first = next;
-  }
-  if (list->last == curr) {
-    list->last = prev;
-  }
+  // If the removed node was not the last one in the array
+  int last_node_pos = list->size - 1;
+  if (pos != last_node_pos) {
+    // Move the last node in the array to fill the spot of the removed node
+    int prev_node_pos = ALIST_NULL;
+    int next_node_pos = ALIST_NULL;
+    alist_node_t* last_node = alist_get_node_at_pos(list, last_node_pos);
 
-  // If the current node wasn't the in the last filled position in the array,
-  // move the last node in the array to fill its place
-  if (curr != list_final) {
-
-    // Get the last (array[-1]) element in the array
-    alist_node_t *base_node = alist_get_node(list, list_final);
-
-    int base_next_exact = list_final + base_node->next;
-    int base_prev_exact = list_final + base_node->prev;
-    if (base_next_exact <= -list->size) {
-      base_next_exact = ALIST_NULL;
+    // Determine whether nodes are before and/or after this node
+    if (last_node->prev == ALIST_NULL) {
+      node_before = false;
     }
-    if (base_prev_exact <= -list->size) {
-      base_prev_exact = ALIST_NULL;
+    else {
+      node_before = true;
+      prev_node_pos = last_node_pos + last_node->prev;
     }
-
-    // Fill new empty spot in the array with the node "base_node"
-    array_set_element(list->list_start, base_node, curr, list->block_size);
-
-    // Update the pointers of the moved node to match its new position
-    if (base_next_exact != ALIST_NULL) {
-      moved_node->next = alist_relative_distance(curr, base_next_exact);
+    if (last_node->next == ALIST_NULL) {
+      node_after = false;
     }
-    if (base_prev_exact != ALIST_NULL) {
-      moved_node->prev = alist_relative_distance(curr, base_prev_exact);
+    else {
+      node_after = true;
+      next_node_pos = last_node_pos + last_node->next;
     }
 
-    // Fix the surrounding node pointers
-    if (base_prev_exact != ALIST_NULL) {
-      alist_join_nodes(list, base_prev_exact, curr);
+    // Move the node and update pointers to its new location
+    assert(memcpy(elem_start, (void *)&last_node[ALIST_ELEMENT],
+                  list->element_size));
+    if (node_before && node_after) {
+      alist_join_nodes(list, prev_node_pos, pos);
+      alist_join_nodes(list, pos, next_node_pos);
     }
-    if (base_next_exact != ALIST_NULL) {
-      alist_join_nodes(list, curr, base_next_exact);
+    else if (node_before){
+      alist_join_nodes(list, prev_node_pos, pos);
+      node->next = ALIST_NULL;
+      list->last = pos;
     }
-  }
-
-  // Patch the overall list first/last references to match the new list info
-  if (list_final == list->last) {
-    list->last = curr;
-  }
-  if (list_final == list->first) {
-    list->first = curr;
+    else if (node_after) {
+      alist_join_nodes(list, pos, next_node_pos);
+      node->prev = ALIST_NULL;
+      list->first = pos;
+    }
+    else {
+      list->first = pos;
+      list->last = pos;
+      node->next = ALIST_NULL;
+      node->prev = ALIST_NULL;
+    }
   }
 
   list->size -= 1;
 }
 
-alist_node_t *alist_get_node(alist_t *list, int element) {
-  return (alist_node_t *)array_get_element(list->list_start, element,
-                                           list->block_size);
+alist_node_t *alist_get_node(alist_t *list, int index) {
+  index = index_convert_negative_safe(list->size, index);
+
+  bool from_start = index_closer_to_start(list->size, index);
+  alist_iterator_t it = new_alist_iterator(list, from_start);
+  for (it.first(&it); !it.done(&it); it.next(&it)) {
+    if (it.index == index) {
+      return (alist_node_t*)it.curr_node;
+    }
+  }
+
+  exit_error("Invalid alist structure - index not in alist", "std/c/alist.c",
+             "alist_get_node");
+  return NULL;
 }
 
 //////////////////////////////

@@ -9,6 +9,7 @@ src/std/c/array.c
 src/std/c/stack.c
 src/std/c/filePath.c
 src/std/c/string.c
+src/std/c/pointer.c
 src/std/c/configLoader.c
 src/std/c/index.c
 src/std/c/error.c

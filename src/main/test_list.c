@@ -28,6 +28,28 @@ int main(int argc, char **argv) {
   alist_t list = new_alist(sizeof(string_t));
   list.destroy = void_string_destroy;
   list.compare = string_void_compare;
+  string_t str;
+
+  str = string_make("0");
+  alist_append(&list, &str);
+  str = string_make("1");
+  alist_append(&list, &str);
+  str = string_make("2");
+  alist_append(&list, &str);
+  str = string_make("3");
+  alist_append(&list, &str);
+  str = string_make("4");
+  alist_append(&list, &str);
+  str = string_make("5");
+  alist_append(&list, &str);
+  str = string_make("6");
+  alist_append(&list, &str);
+  str = string_make("7");
+  alist_append(&list, &str);
+  str = string_make("8");
+  alist_append(&list, &str);
+  str = string_make("9");
+  alist_append(&list, &str);
   alist_t list2 = new_alist(sizeof(string_t));
   list2.destroy = void_string_destroy;
   list2.compare = string_void_compare;
@@ -41,9 +63,7 @@ int main(int argc, char **argv) {
   while (true) {
     print_options();
     printf("Enter your selection: ");
-    if (fileio_next_line(stdin, buff)) {
-
-    } else {
+    if (!fileio_next_line(stdin, buff)) {
       printf("Error - You must choose something..\n");
       continue;
     }
@@ -147,28 +167,27 @@ void print_options() {
 }
 
 void print_alist(alist_t* list) {
-  alist_iterator_t it = new_alist_iterator(list, true);
-  printf("List:\n");
-  for (it.first(&it); !it.done(&it); it.next(&it)) {
-    
-    char* elem = cstr((string_t*)it.element);
-    printf("%d)  \"%s\" prev %d  next %d\n", it.index, elem, it.curr_node->prev, it.curr_node->next);
-  }
-  printf("\n");
+  // alist_iterator_t it = new_alist_iterator(list, true);
+  // printf("List:\n");
+  // for (it.first(&it); !it.done(&it); it.next(&it)) {
+  //   char* elem = cstr((string_t*)it.element);
+  //   printf("%d)  \"%s\" prev %d  next %d\n", it.index, elem, it.curr_node->prev, it.curr_node->next);
+  // }
+  // printf("\n");
 
-  it = new_alist_iterator(list, false);
-  printf("List:\n");
-  for (it.first(&it); !it.done(&it); it.next(&it)) {
+  // it = new_alist_iterator(list, false);
+  // printf("List:\n");
+  // for (it.first(&it); !it.done(&it); it.next(&it)) {
     
-    char* elem = cstr((string_t*)it.element);
-    printf("%d)  \"%s\" prev %d  next %d\n", it.index, elem, it.curr_node->prev, it.curr_node->next);
-  }
+  //   char* elem = cstr((string_t*)it.element);
+  //   printf("%d)  \"%s\" prev %d  next %d\n", it.index, elem, it.curr_node->prev, it.curr_node->next);
+  // }
   printf("\n");
 
   for (int i = 0; i < list->size; i++) {
     alist_node_t* node = array_get_element(list->list_start, i, list->block_size);
 
-    char* str = cstr(&node[ALIST_ELEMENT]);
+    char* str = cstr((string_t*)&node[ALIST_ELEMENT]);
     printf("%d) %s prev %d next %d\n", i, str, node->prev, node->next);
   }
 }

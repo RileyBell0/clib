@@ -1,19 +1,19 @@
 all: test_list projectMake projectScan testing list_files_in_dir
 
-test_list: test_list.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o index.o error.o argparse.o alist.o int.o
-	clang -arch arm64 -Wall -o build/test_list objects/test_list.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
+test_list: test_list.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o pointer.o configLoader.o index.o error.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -o build/test_list objects/test_list.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/pointer.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
 
-projectMake: projectMake.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o index.o error.o argparse.o alist.o int.o
-	clang -arch arm64 -Wall -o build/projectMake objects/projectMake.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
+projectMake: projectMake.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o pointer.o configLoader.o index.o error.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -o build/projectMake objects/projectMake.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/pointer.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
 
-projectScan: projectScan.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o index.o error.o argparse.o alist.o int.o
-	clang -arch arm64 -Wall -o build/projectScan objects/projectScan.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
+projectScan: projectScan.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o pointer.o configLoader.o index.o error.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -o build/projectScan objects/projectScan.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/pointer.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
 
-testing: testing.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o index.o error.o argparse.o alist.o int.o
-	clang -arch arm64 -Wall -o build/testing objects/testing.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
+testing: testing.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o pointer.o configLoader.o index.o error.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -o build/testing objects/testing.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/pointer.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
 
-list_files_in_dir: list_files_in_dir.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o configLoader.o index.o error.o argparse.o alist.o int.o
-	clang -arch arm64 -Wall -o build/list_files_in_dir objects/list_files_in_dir.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
+list_files_in_dir: list_files_in_dir.o console.o directory.o avlBinTree.o sorting.o list.o memory.o fileIO.o array.o stack.o filePath.o string.o pointer.o configLoader.o index.o error.o argparse.o alist.o int.o
+	clang -arch arm64 -Wall -o build/list_files_in_dir objects/list_files_in_dir.o objects/console.o objects/directory.o objects/avlBinTree.o objects/sorting.o objects/list.o objects/memory.o objects/fileIO.o objects/array.o objects/stack.o objects/filePath.o objects/string.o objects/pointer.o objects/configLoader.o objects/index.o objects/error.o objects/argparse.o objects/alist.o objects/int.o -g
 
 test_list.o: src/main/test_list.c
 	clang -arch arm64 -Wall -c -o objects/test_list.o src/main/test_list.c -g
@@ -62,6 +62,9 @@ filePath.o: src/std/c/filePath.c
 
 string.o: src/std/c/string.c
 	clang -arch arm64 -Wall -c -o objects/string.o src/std/c/string.c -g
+
+pointer.o: src/std/c/pointer.c
+	clang -arch arm64 -Wall -c -o objects/pointer.o src/std/c/pointer.c -g
 
 configLoader.o: src/std/c/configLoader.c
 	clang -arch arm64 -Wall -c -o objects/configLoader.o src/std/c/configLoader.c -g
