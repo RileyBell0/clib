@@ -11,7 +11,7 @@
  * dir_all_files_recur(path, int (*key)(string_t* filename))
  * where only filenames that return true when put into the key function
  * will be added to the resultant list
- * TODO
+ * TODOs
  * * * * * * * * * * * * * * * * * * * * * * * * *
  */
 
@@ -21,11 +21,7 @@
  * Verified to (probably) work with Linux file systems
  * I mean, i havent really done extensive testing on this
  * code but it's worked with what ive needed it for
- *
- * im reworking all of this
  */
-
-// TODO might benefit from propper input buffering
 
 // TODO -> theres a functoin that gets the extension
 // it checks if the first char is . and if it is it ignores it
@@ -45,6 +41,8 @@
 #include "../fileIO.h"
 #include "../string.h"
 #include <dirent.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 /*
  * Returns an alist of type (struct dirent) of all entries within the
@@ -73,11 +71,28 @@ alist_t dir_all_files_recur(string_t *path,
                             int (*key)(string_t *file_name, void *extra),
                             void *extra, bool include_base_path);
 
+alist_t dir_all_file_names(string_t *path,
+                           int (*key)(string_t *file_name, void *extra),
+                           void *extra);
+
+alist_t dir_all_entry_names(string_t *path,
+                      int (*key)(string_t *entry_name, void *extra),
+                      void *extra);
+
 /*
  * Returns TRUE if the given d_name string is either "." or ".."
  * returns FALSE otherwise
  */
 bool is_relative_dir_entry(string_t *dirName);
+
+alist_t dir_all_entry_names(string_t *path,
+                            int (*key)(string_t *entry_name, void *extra),
+                            void *extra);
+
+
+
+DIR* dir_open_safe_c(char* path);
+DIR* dir_open_safe(string_t* path);
 
 alist_t dir_all_entries_alist(string_t *path);
 
