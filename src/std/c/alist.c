@@ -290,9 +290,6 @@ void *alist_pop(alist_t *list, int index) {
 }
 
 void alist_remove_at(alist_t *list, int index) {
-  // TODO remove
-  #include <stdio.h>
-  printf("Gonna try and remove...\n");
   index = index_convert_negative_safe(list->size, index);
 
   // Get the node and its pos

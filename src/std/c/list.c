@@ -157,7 +157,7 @@ void *list_get(list_t *list, int index) {
 
   // Return the element at the given index within the list
   list_iterator_t it = new_list_iterator(list, from_start);
-  for (void *elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
+  for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (it.index == index) {
       return it.element;
     }
@@ -217,7 +217,7 @@ void *list_pop(list_t *list, int index) {
 
   // Find the node at the index requested and remove it
   list_iterator_t it = new_list_iterator(list, from_start);
-  for (void *elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
+  for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (index == it.index) {
       return list_remove_node(list, it.curr_node, true);
     }
@@ -241,7 +241,7 @@ void list_remove_at(list_t *list, int index) {
 
   // Find the node at the index requested and remove it
   list_iterator_t it = new_list_iterator(list, from_start);
-  for (void *elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
+  for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (index == it.index) {
       list_remove_node(list, it.curr_node, false);
       return;

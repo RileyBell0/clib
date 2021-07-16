@@ -1,4 +1,9 @@
 
+echo "Running Makefile for Project..."
+echo "---------------------------------"
+echo "Only warnings will be shown"
+echo ""
+
 CURRENT_OS="Unknown"
 MAKEFILE_BASE="Makefile_"
 
@@ -12,6 +17,9 @@ case "$OSTYPE" in
 esac
 
 make -f"$MAKEFILE_BASE$CURRENT_OS" -s
+
+echo ""
+echo "Finished running makefile!"
 
 if [ "$CURRENT_OS" = "WINDOWS" ]; then
   read -p "Press any key to continue..." -n1 -s

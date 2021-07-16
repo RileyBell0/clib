@@ -1,5 +1,5 @@
-src/main/test_list.c
-src/main/projectMake.c
-src/main/projectScan.c
-src/main/testing.c
-src/main/list_files_in_dir.c
+src\main\list_files_in_dir.c
+src\main\projectMake.c
+src\main\projectScan.c
+src\main\testing.c
+src\main\test_list.c
