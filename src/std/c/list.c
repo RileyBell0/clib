@@ -1,10 +1,6 @@
 #include "../list.h"
 
-// TODO
-// array_set_element should return a pointer to the start of the modified
-// memory, the start of the 'set' element
-// TODO we cant index (unsigned int) elements with an (int) so we should
-// make the size of the list an int aswell
+// TODO as of 15/07/2021, need tyo look over this entire file to make sure nothing is broken here
 
 //////////////////////////////
 // Function Declarations
@@ -148,10 +144,6 @@ void *list_get(list_t *list, int index) {
   // Convert negative index into a positive index
   index = index_convert_negative_safe(list->size, index);
 
-  if (!index_is_valid(list->size, index)) {
-    exit_error("Invalid List index", "std/c/list.c", "list_get");
-  }
-
   // Determine which end of the list is closer to the index
   bool from_start = index_closer_to_start(list->size, index);
 
@@ -164,9 +156,7 @@ void *list_get(list_t *list, int index) {
   }
 
   exit_error("List structure invalid - requested index not present",
-             "std/c/list.c", "list_get");
-
-  // Won't get run, to stop compiler from complaining
+             "std/c/list.c", "list_get");\
   return NULL;
 }
 
@@ -207,11 +197,6 @@ list_t *list_append_multi(list_t *list, void *toAppend, ...) {
 void *list_pop(list_t *list, int index) {
   index = index_convert_negative_safe(list->size, index);
 
-  if (!index_is_valid(list->size, index)) {
-    exit_error("Attempting to remove index out of list bounds", "std/c/list.c",
-               "list_pop");
-  }
-
   // Determine which end of the list is closer to the index
   bool from_start = index_closer_to_start(list->size, index);
 
@@ -230,11 +215,6 @@ void *list_pop(list_t *list, int index) {
 
 void list_remove_at(list_t *list, int index) {
   index = index_convert_negative_safe(list->size, index);
-
-  if (!index_is_valid(list->size, index)) {
-    exit_error("Attempting to remove index out of list bounds", "std/c/list.c",
-               "list_remove_at");
-  }
 
   // Determine which end of the list is closer to the index
   bool from_start = index_closer_to_start(list->size, index);
