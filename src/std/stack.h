@@ -1,33 +1,16 @@
-/*
- * Author:          Riley Bell
- * Creation Date:   29/10/2020
- */
+#ifndef CLIB_STD_DYNAMICSTACK_H
+#define CLIB_STD_DYNAMICSTACK_H
 
-#ifndef CLIB_STD_STACK_H
-#define CLIB_STD_STACK_H
+#include "dynamic_array.h"
 
-#include "list.h"
+typedef dynamic_array_t stackk_t;
 
-typedef struct list_t stacklist_t;
+stackk_t stack_new(size_t elem_size);
 
-/*
- * Creates and returns a new empty stacklist_t
- */
-stacklist_t new_stack(unsigned int elementSize);
+void stack_push(stackk_t *stack, void *data);
 
-/*
- * Adds the given data to the top of the given stack
- */
-void stack_push(stacklist_t *stack, void *data);
+void stack_pop(stackk_t *stack, void *dest);
 
-/*
- * Removes and returns a pointer to the top element in the stack
- */
-void *stack_pop(stacklist_t *stack);
-
-/*
- * Returns a pointer to the top element in the stack
- */
-void *stacklist_top(stacklist_t *stack);
+void *stack_top(stackk_t *stack);
 
 #endif

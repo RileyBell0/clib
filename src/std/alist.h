@@ -7,7 +7,7 @@
 #include "pointer.h"
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdint.h>
+#include <stdint.h> // TODO is this even used? i think limits.h provides all functionality
 #include <stdio.h>
 #include <limits.h>
 
@@ -72,12 +72,12 @@ typedef struct alist_iterator_t {
 //////////////////////////////
 
 // Creates a list iterator for the alist
-alist_iterator_t new_alist_iterator(alist_t *list, bool from_start);
+alist_iterator_t alist_iterator_new(alist_t *list, bool from_start);
 
 /*
  * Returns an empty alist - no memory allocated
  */
-alist_t new_alist(size_t element_size);
+alist_t alist_new(size_t element_size);
 
 //////////////////////////////
 // Basic Operations

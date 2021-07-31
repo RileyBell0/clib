@@ -6,129 +6,99 @@
 #ifndef CLIB_STD_ARRAY_H
 #define CLIB_STD_ARRAY_H
 
+#include "error.h"
 #include "memory.h"
+#include "index.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-
-/*
- * Ammount to extend a dynamic array whenever an element
- * is appended to a full array
- */
-#define EXTENSION_FACTOR 1.5f
 
 /*
  * Array struct which knows its length
  * data-type stored must be maintained and known by the user
  */
 typedef struct array_t {
+  bool allocated;
   void *data;
-  unsigned int len;
+  int len;
+  bool destroy_on_remove;
+  void (*destroy)(void *data);
   size_t element_size;
 } array_t;
 
-/*
- * Same as an array, but with append function with
- * automatic resizing. Setting elements in this array
- * is easier and doesnt require a cast since the array knows
- * the size of its stored elements
- */
-typedef struct dynamic_array_t {
-  void *data;
-  unsigned int len;
-  unsigned int capacity;
-  size_t element_size;
-} dynamic_array_t;
 
-// ----------- Array -------------
+
+//////////////////////////////
+// Initialisation
+//////////////////////////////
+
 /*
  * returns a new array with the length set to 'elements'
  */
-array_t new_array(unsigned int elements, size_t element_size);
+array_t array_new(int elements, size_t element_size);
 
 /*
  * Given a pointer to an existing array, wraps it into an array_t
+ * If the memory was dynamically allocated and should be managed here, 
+ * input true for was_allocated, false otherwise
  */
-array_t array_wrap(void *array, size_t element_size, unsigned int len);
+array_t array_wrap(void *array, int len, size_t element_size,
+                   bool was_allocated);
+
+//////////////////////////////
+// Basic Operations
+//////////////////////////////
 
 /*
  * Gets a pointer to the element at the given index in
  * the array provided
+ * Negative Indexes are Supported
  */
-void *array_index(array_t *array, unsigned int index);
+void *array_get(array_t *array, int index);
 
 /*
  * Sets the given index in the array to the data provided
+ * Negative Indexes are Supported
  */
-void array_set_index(array_t *array, unsigned int index, void *data);
+void array_set(array_t *array, int index, void *data);
+
+//////////////////////////////
+// High Level functions
+//////////////////////////////
+
+/*
+ * Resizes the array to the given length, destroying removed elements if
+ * enabled.
+ */
+void array_resize(array_t *array, int new_len, void* template);
+
+//////////////////////////////
+// Generic Arrays
+//////////////////////////////
 
 /*
  * Method to set a given element from an array of an unknown type
  * Intended for use with array structures that know their element size
  */
-void array_set_element(void *array, void *data, unsigned int element,
-                       size_t element_size);
+void array_generic_set(void *array, void *data, unsigned int element,
+                               size_t element_size);
 
 /*
  * Method to get a given element from an array of an unknown type
  * Intended for use with array structures that know their element size
  */
-void *array_get_element(void *array, unsigned int element, size_t element_size);
+void *array_generic_get(void *array, unsigned int element,
+                                size_t element_size);
 
-/*
- * Resizes the array to the given length. Must be larger than the current length
- * Returns true on success, false on failure
- */
-bool array_resize(array_t *array, unsigned int newLength);
-
-// ----------- Dynamic Array -------------
-/*
- * Returns a new empty dynamic array
- */
-dynamic_array_t new_dynamic_array(size_t element_size);
-
-/*
- * Attempts to add the data pointed to by 'element' to the given dynamic
- * array. Returns TRUE on success, FALSE on failure (if base or element were
- * NULL)
- */
-bool dynamic_array_append(dynamic_array_t *base, void *element);
-
-/*
- * If neccesary, extends the array to be exactly the given length
- * Returns FALSE if the new length is less than the current length
- * Does nothing if the maximum length is greater than the required
- * new length
- */
-bool dynamic_array_safe_resize(dynamic_array_t *array, unsigned int newLen);
-
-/*
- * Sets the value of the element in the array at the given index
- */
-void dynamic_array_set_element(dynamic_array_t *array, unsigned int element,
-                               void *data);
-
-/*
- * Gets a pointer to the element at the given index in the array
- */
-void *dynamic_array_get_element(dynamic_array_t *array, unsigned int element);
-
-/*
- * Copies the contents of a dynamic array into a new array_t
- * with just enough space for all elements
- */
-array_t dynamic_array_to_array(dynamic_array_t *array);
+//////////////////////////////
+// Cleanup
+//////////////////////////////
 
 /*
  * Destroys the data within the given array which was dynamically allocated by
  * other functions in this file
  */
-void array_destroy(array_t toDestroy);
+void array_destroy(array_t *array);
 
-/*
- * Destroys the data within the given dynamic array which was dynamically
- * allocated by other functions in this file
- */
-void dynamic_array_destroy(dynamic_array_t toDestroy);
 
 #endif

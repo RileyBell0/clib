@@ -10,11 +10,6 @@
  * the node at which the collision occurs.
  */
 
-/*
-// TODO
-maybe like get rid of collision support in the tree
-*/
-
 #ifndef CLIB_STD_TREE_H
 #define CLIB_STD_TREE_H
 
@@ -42,7 +37,7 @@ typedef struct avl_bin_tree_t {
 } avl_bin_tree_t;
 
 // returns a new tree struct with its values initialized to 0
-avl_bin_tree_t new_avl_bin_tree(unsigned int elementSize,
+avl_bin_tree_t avl_bin_tree_new(unsigned int elementSize,
                                 int (*compareFunc)(const void *first,
                                                    const void *second));
 

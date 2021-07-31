@@ -126,7 +126,7 @@ string_t cstring_wrap(char *src);
  * May allocate memory
  * Remember to destroy with string_destroy or void_string_destroy
  */
-string_t new_string(unsigned int len);
+string_t string_new(unsigned int len);
 
 /*
  * strcmp() called on both cstring components of the strings given

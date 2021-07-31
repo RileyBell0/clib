@@ -50,7 +50,7 @@ void alist_make_space(alist_t* list, int req_nodes);
 // Initialisation
 //////////////////////////////
 
-alist_t new_alist(size_t element_size) {
+alist_t alist_new(size_t element_size) {
   alist_t list;
 
   list.list_start = NULL;
@@ -67,7 +67,7 @@ alist_t new_alist(size_t element_size) {
   return list;
 }
 
-alist_iterator_t new_alist_iterator(alist_t *list, bool from_start) {
+alist_iterator_t alist_iterator_new(alist_t *list, bool from_start) {
   alist_iterator_t it;
 
   it.list = list;
@@ -168,9 +168,9 @@ void *alist_get(alist_t *list, int index) {
   // Create the iterator
   alist_iterator_t it;
   if (index <= list->size / 2) {
-    it = new_alist_iterator(list, true);
+    it = alist_iterator_new(list, true);
   } else {
-    it = new_alist_iterator(list, false);
+    it = alist_iterator_new(list, false);
   }
 
   // return a pointer to the element at the given index
@@ -226,7 +226,7 @@ void alist_insert_at(alist_t* list, void* data, int index) {
   else {
     // Within a list
     bool from_start = index_closer_to_start(list->size, index);
-    alist_iterator_t it = new_alist_iterator(list, from_start);
+    alist_iterator_t it = alist_iterator_new(list, from_start);
     for (it.first(&it); !it.done(&it); it.next(&it)) {
       if (it.index == index) {
         // There will be a node before this and after this
@@ -273,7 +273,7 @@ void *alist_pop(alist_t *list, int index) {
 
   // Get the node and its pos
   bool from_start = index_closer_to_start(list->size, index);
-  alist_iterator_t it = new_alist_iterator(list, from_start);
+  alist_iterator_t it = alist_iterator_new(list, from_start);
   for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (it.index == index) {
       break;
@@ -294,7 +294,7 @@ void alist_remove_at(alist_t *list, int index) {
 
   // Get the node and its pos
   bool from_start = index_closer_to_start(list->size, index);
-  alist_iterator_t it = new_alist_iterator(list, from_start);
+  alist_iterator_t it = alist_iterator_new(list, from_start);
   for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (it.index == index) {
       break;
@@ -306,7 +306,7 @@ void alist_remove_at(alist_t *list, int index) {
 
 bool alist_remove(alist_t *list, void *element) {
   // Find the first occurance of the given element in the list and remove it
-  alist_iterator_t it = new_alist_iterator(list, true);
+  alist_iterator_t it = alist_iterator_new(list, true);
   if (list->compare) {
     // if a compare method is provided, use to compare elements
     for (it.first(&it); !it.done(&it); it.next(&it)) {
@@ -332,7 +332,7 @@ bool alist_remove(alist_t *list, void *element) {
 
 void alist_clear(alist_t *list) {
   if (list->destroy && list->destroy_on_remove) {
-    alist_iterator_t it = new_alist_iterator(list, true);
+    alist_iterator_t it = alist_iterator_new(list, true);
     for (it.first(&it); !it.done(&it); it.next(&it)) {
       list->destroy(it.element);
     }
@@ -395,7 +395,7 @@ alist_t alist_copy(alist_t *list) {
   // The list being copied is empty, so return an empty list of the same
   // element size
   if (list->size == 0) {
-    alist_t empty_list = new_alist(list->element_size);
+    alist_t empty_list = alist_new(list->element_size);
     return empty_list;
   }
 
@@ -411,12 +411,12 @@ alist_t alist_copy(alist_t *list) {
 }
 
 array_t alist_to_array(alist_t *list) {
-  array_t array = new_array(list->size, list->element_size);
+  array_t array = array_new(list->size, list->element_size);
 
   // Populate the array
-  alist_iterator_t it = new_alist_iterator(list, true);
+  alist_iterator_t it = alist_iterator_new(list, true);
   for (it.first(&it); !it.done(&it); it.next(&it)) {
-    array_set_index(&array, it.index, it.element);
+    array_set(&array, it.index, it.element);
   }
 
   return array;
@@ -493,7 +493,7 @@ void alist_make_space(alist_t* list, int req_nodes) {
 }
 
 alist_node_t* alist_get_node_at_pos(alist_t* list, int pos) {
-  return (alist_node_t *)array_get_element(list->list_start, pos,
+  return (alist_node_t *)array_generic_get(list->list_start, pos,
                                            list->block_size);
 }
 
@@ -590,7 +590,7 @@ alist_node_t *alist_get_node(alist_t *list, int index) {
   index = index_convert_negative_safe(list->size, index);
 
   bool from_start = index_closer_to_start(list->size, index);
-  alist_iterator_t it = new_alist_iterator(list, from_start);
+  alist_iterator_t it = alist_iterator_new(list, from_start);
   for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (it.index == index) {
       return (alist_node_t*)it.curr_node;
@@ -620,16 +620,14 @@ void alist_destroy(alist_t *list) {
 
       // Get a reference to and destroy the current element in the list
       alist_node_t *node =
-          array_get_element(list->list_start, i, list->block_size);
+          array_generic_get(list->list_start, i, list->block_size);
       list->destroy(&node[ALIST_ELEMENT]);
     }
   }
 
   destroy(list->list_start);
-
-  // Reset the list, meaning if someone tries to use it again
-  // it doesnt break anything
   list->capacity = 0;
+  list->size = 0;
   list->first = ALIST_NULL;
   list->last = ALIST_NULL;
   list->list_start = NULL;

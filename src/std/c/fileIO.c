@@ -185,7 +185,7 @@ string_t *remove_file_extension(string_t *file_name) {
 // MEMORY_SAFE 05/05/2021
 void remove_file_extensions(alist_t *files) {
   // Removing the extension from the program names
-  alist_iterator_t it = new_alist_iterator(files, true);
+  alist_iterator_t it = alist_iterator_new(files, true);
 
   for (string_t *file = it.first(&it); !it.done(&it); file = it.next(&it)) {
     remove_file_extension(file);
@@ -204,22 +204,22 @@ string_t get_file_extension(string_t *file_name) {
     if (file_str[i] == EXTENSION_SEPERATING_CHAR) {
 
       // Return a pointer to the char after the extension seperating char
-      string_t extension = new_string(file_name->len - i);
+      string_t extension = string_new(file_name->len - i);
       string_write_c_len(&extension, &file_str[i + 1], file_name->len - i - 1);
       return extension;
     }
   }
 
-  return new_string(0);
+  return string_new(0);
 }
 
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 05/05/2021
 alist_t get_file_names_from_paths(alist_t *files) {
-  alist_t file_names = new_alist(sizeof(string_t));
+  alist_t file_names = alist_new(sizeof(string_t));
   file_names.destroy = void_string_destroy;
 
-  alist_iterator_t it = new_alist_iterator(files, true);
+  alist_iterator_t it = alist_iterator_new(files, true);
   for (string_t *file = it.first(&it); !it.done(&it); file = it.next(&it)) {
     // Extract the file names from the file paths
     string_t file_name = get_file_name_from_path(file);
@@ -232,7 +232,7 @@ alist_t get_file_names_from_paths(alist_t *files) {
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 05/05/2021
 alist_t fileio_read_all_lines_alist(char *file_name) {
-  alist_t lines = new_alist(sizeof(string_t));
+  alist_t lines = alist_new(sizeof(string_t));
   lines.destroy = void_string_destroy;
 
   // Open the given file
@@ -244,7 +244,7 @@ alist_t fileio_read_all_lines_alist(char *file_name) {
      * Creating the buffer, will be resized automatically to fit lines if
      * not large enough
      */
-    string_t buffer = new_string(DEFAULT_BUFFER_LEN);
+    string_t buffer = string_new(DEFAULT_BUFFER_LEN);
 
     /*
      * Reads all the lines of the file and appends them to the given list

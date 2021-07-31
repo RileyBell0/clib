@@ -1,4 +1,20 @@
-#include "../configLoader.h"
+#include "../config.h"
+
+//////////////////////////////
+// Initialisation
+//////////////////////////////
+
+// RE-CHECKED 01/05/2021
+config_var_t config_var_new(string_t *var_name) {
+
+  config_var_t var;
+
+  var.values = array_new(0, sizeof(string_t));
+  var.var_name = string_copy(var_name);
+
+  return var;
+}
+
 
 /*
  * returns the position in the string the function exited at
@@ -121,36 +137,24 @@ bool extract_field(string_t *str, unsigned int *pos, string_t *dest,
 }
 
 // RE-CHECKED 01/05/2021
-config_var_t new_config_var(string_t *var_name) {
-
-  config_var_t var;
-
-  var.data = NULL;
-  var.len = 0;
-  var.var_name = string_copy(var_name);
-
-  return var;
-}
-
-// RE-CHECKED 01/05/2021
-config_t read_config_file(char *filePath) {
+config_t read_config_file(char *file_path) {
   // Storing the processed data
-  dynamic_array_t results = new_dynamic_array(sizeof(config_var_t));
+  dynamic_array_t results = dynamic_array_new(sizeof(config_var_t));
 
   // Stores the fields associated with the current variable
-  dynamic_array_t fields = new_dynamic_array(sizeof(string_t));
+  dynamic_array_t fields = dynamic_array_new(sizeof(string_t));
   config_var_t var;
   config_t config;
 
   // Open the config file
-  FILE *configFile = fopen(filePath, MODE_READ);
+  FILE *config_file = fopen(file_path, MODE_READ);
 
   // Stores lines read in from the config file
-  string_t buffer = new_string(DEFAULT_BUFFER_LEN);
+  string_t buffer = string_new(DEFAULT_BUFFER_LEN);
 
   // Storing a processed and formatted field string ready to be converted into a
   // var
-  string_t field = new_string(DEFAULT_BUFFER_LEN);
+  string_t field = string_new(DEFAULT_BUFFER_LEN);
 
   /*
    * Read every line in the file
@@ -166,7 +170,7 @@ config_t read_config_file(char *filePath) {
   bool var_has_value = false;
 
   // Read in and process the whole config file
-  while (fileio_next_line(configFile, &buffer)) {
+  while (fileio_next_line(config_file, &buffer)) {
     // Read in a line from the file
 
     unsigned int pos = 0;
@@ -206,7 +210,7 @@ config_t read_config_file(char *filePath) {
         current_var_finalised = false;
 
         // Name the new variable
-        var = new_config_var(&field);
+        var = config_var_new(&field);
         var_has_value = false;
 
         // Reset the array for storing the new data
@@ -229,11 +233,7 @@ config_t read_config_file(char *filePath) {
       if (!current_var_finalised) {
 
         // Convert to an array
-        array_t convertedFields = dynamic_array_to_array(&fields);
-
-        // Save the array into the var
-        var.data = convertedFields.data;
-        var.len = convertedFields.len;
+        var.values = dynamic_array_to_array(&fields);
 
         // Save the current variable to the given array
         dynamic_array_append(&results, &var);
@@ -248,17 +248,14 @@ config_t read_config_file(char *filePath) {
   }
 
   // Whole file has been loaded in now
-  fclose(configFile);
+  fclose(config_file);
 
   // This should only be called when within an array declaration
   // at the end of the file, save what data we can anyway
   if (!current_var_finalised) {
     // Convert to an array
-    array_t convertedFields = dynamic_array_to_array(&fields);
-
     // Load the array into the var
-    var.data = convertedFields.data;
-    var.len = convertedFields.len;
+    var.values = dynamic_array_to_array(&fields);
 
     // Save the current var to the given array
     dynamic_array_append(&results, &var);
@@ -266,21 +263,20 @@ config_t read_config_file(char *filePath) {
 
   // Sort the vars (ready for log(n) var retrieval time)
   array_t unsorted_vars = dynamic_array_to_array(&results);
-  array_t sorted_vars =
+  config.variables =
       tree_sort(unsorted_vars, sizeof(config_var_t), config_var_compare);
+  array_destroy(&unsorted_vars);
 
-  array_destroy(unsorted_vars);
-
-  config.len = sorted_vars.len;
-  config.vars = sorted_vars.data;
   config.modified = false;
-  config.configLocation = filePath;
+  config.path_to_cfg = string_new(0);
+  string_clear(&config.path_to_cfg);
+  string_write_c(&config.path_to_cfg, file_path);
 
   // Cleanup
   string_destroy(&buffer);
   string_destroy(&field);
-  dynamic_array_destroy(results);
-  dynamic_array_destroy(fields);
+  dynamic_array_destroy(&results);
+  dynamic_array_destroy(&fields);
 
   return config;
 }
@@ -315,9 +311,9 @@ bool config_save(config_t config) {
     return true;
   }
 
-  string_t processed = new_string(DEFAULT_BUFFER_LEN);
+  string_t processed = string_new(DEFAULT_BUFFER_LEN);
 
-  FILE *cfgOut = fopen(config.configLocation, MODE_WRITE);
+  FILE *cfgOut = fopen(cstr(&config.path_to_cfg), MODE_WRITE);
 
   if (!cfgOut) {
     return false;
@@ -327,16 +323,18 @@ bool config_save(config_t config) {
    * Write the standard config header comment
    */
   fprintf(cfgOut, CONFIG_STANDARD_DESCRIPTION);
-  for (int i = 0; i < config.len; i++) {
-    config_encode(&processed, &config.vars[i].var_name);
+  for (int i = 0; i < config.variables.len; i++) {
+    config_var_t* var = (config_var_t*)array_get(&config.variables, i);
+    config_encode(&processed, &var->var_name);
 
     fprintf(cfgOut, "\"%s\" = [\n", cstr(&processed));
 
-    if (config.vars[i].len == 0) {
+    if (var->values.len == 0) {
       fprintf(cfgOut, "\t%s\n", CONFIG_NO_ENTRY);
     } else {
-      for (int j = 0; j < config.vars[i].len; j++) {
-        config_encode(&processed, &config.vars[i].data[j]);
+      for (int j = 0; j < var->values.len; j++) {
+        string_t* str = (string_t*)array_get(&var->values, j);
+        config_encode(&processed, str);
 
         fprintf(cfgOut, "\t\"%s\"\n", cstr(&processed));
       }
@@ -359,15 +357,16 @@ config_var_t *config_get_var(config_t *config, char *name) {
 
   // TODO what does this comment even mean??
   // len is 1 because a config_var_t can store multiple values
-  key.len = 1;
+  key.values.len = 1;
 
   key.var_name = cstring_wrap(name);
 
   /*
    * Search the sorted config list for the requested var
    */
-  config_var_t *var = bsearch(&key, config->vars, config->len,
-                              sizeof(config_var_t), config_var_compare);
+  config_var_t *var =
+      bsearch(&key, config->variables.data, config->variables.len,
+              sizeof(config_var_t), config_var_compare);
 
   return var;
 }
@@ -402,30 +401,31 @@ int config_var_compare(const void *var1, const void *var2) {
  * Free's all dynamically allocated data in a Config
  */
 void config_destroy(config_t config) {
-  for (int i = 0; i < config.len; i++) {
-    config_var_t var = config.vars[i];
+  for (int i = 0; i < config.variables.len; i++) {
+    config_var_t *var = array_get(&config.variables, i);
 
-    string_destroy(&var.var_name);
-    for (int i = 0; i < var.len; i++) {
-      string_destroy(&var.data[i]);
+    string_destroy(&var->var_name);
+    for (int y = 0; y < var->values.len; y++) {
+      string_t* str = (string_t*)array_get(&var->values, y);
+      string_destroy(str);
     }
-    destroy(var.data);
+    array_destroy(&var->values);
   }
-  destroy(config.vars);
+  array_destroy(&config.variables);
 }
 
 void config_print_vars(config_t config) {
-  printf("CONFIG Contents:\n-----------------\n");
-  for (int i = 0; i < config.len; i++) {
-    printf("%s\n", cstr(&config.vars[i].var_name));
-    if (config.vars[i].len == 0) {
-      printf("\t\"(null)\"\n");
-    } else {
-      for (int j = 0; j < config.vars[i].len; j++) {
-        printf("\t\"%s\"\n", cstr(&config.vars[i].data[j]));
-      }
-    }
-    printf("\n");
-  }
-  printf("-----------------\n");
+  // printf("CONFIG Contents:\n-----------------\n");
+  // for (int i = 0; i < config.len; i++) {
+  //   printf("%s\n", cstr(&config.vars[i].var_name));
+  //   if (config.vars[i].len == 0) {
+  //     printf("\t\"(null)\"\n");
+  //   } else {
+  //     for (int j = 0; j < config.vars[i].len; j++) {
+  //       printf("\t\"%s\"\n", cstr(&config.vars[i].data[j]));
+  //     }
+  //   }
+  //   printf("\n");
+  // }
+  // printf("-----------------\n");
 }

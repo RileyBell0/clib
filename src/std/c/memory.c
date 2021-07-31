@@ -18,9 +18,9 @@ void *safe_realloc(void *ptr, size_t size) {
   return result;
 }
 
-void destroy(void *toDestroy) {
-  if (toDestroy) {
-    free(toDestroy);
+void destroy(void *mem) {
+  if (mem) {
+    free(mem);
   }
 }
 
@@ -31,4 +31,4 @@ void ptr_destroy(void *data) {
   }
 }
 
-void *offset(void *ptr, unsigned int num) { return (((char *)ptr) + num); }
+void *offset(void *ptr, size_t num) { return (((char *)ptr) + num); }

@@ -11,7 +11,7 @@ void string_limit(string_t *source, unsigned int new_len) {
 }
 
 void string_replace(string_t *str, char *pattern_cstr, char *replacement) {
-  string_t contents_buffer = new_string(str->len);
+  string_t contents_buffer = string_new(str->len);
   string_t pattern = string_make(pattern_cstr);
 
   char *str_start = cstr(str);
@@ -58,12 +58,12 @@ void string_replace(string_t *str, char *pattern_cstr, char *replacement) {
 // Function has no real purpose other than making code slightly
 // cleaner by removing the magic 0 function argument
 // can make code using this clearer
-string_t empty_string() { return new_string(0); }
+string_t empty_string() { return string_new(0); }
 
 // RE-CHECKED 30/04/2021
 // MEMORY_SAFE 06/05/2021
 // NULL_STR_SAFE 06/05/2021
-string_t new_string(unsigned int len) {
+string_t string_new(unsigned int len) {
   string_t str;
 
   str.len = 0;
@@ -110,7 +110,7 @@ string_t string_make(char *src) {
   // No need to pre-allocate space as string_write_c will check
   // the length of the input str and allocate space in the new string
   // accordingly
-  string_t str = new_string(0);
+  string_t str = string_new(0);
 
   string_write_c(&str, src);
 
@@ -404,7 +404,7 @@ string_t string_new_concat_multi(string_t *base, string_t *extension, ...) {
 // RE-CHECKED 30/04/2021
 // VERIFIED
 string_t string_new_concat(string_t *base, string_t *extension) {
-  string_t combined = new_string(base->len + extension->len);
+  string_t combined = string_new(base->len + extension->len);
 
   string_write(&combined, base);
   string_write(&combined, extension);
@@ -436,7 +436,7 @@ void string_clear(string_t *str) {
 // RE-CHECKED 30/04/2021
 // VERIFIED
 string_t string_copy(string_t *source) {
-  string_t str = new_string(source->len);
+  string_t str = string_new(source->len);
 
   string_write(&str, source);
 

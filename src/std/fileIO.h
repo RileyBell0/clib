@@ -9,7 +9,7 @@
 #define EXTENSION_SEPERATING_CHAR '.'
 
 #include "alist.h"
-#include "filePath.h"
+#include "path.h"
 #include "string.h"
 #include <stdio.h>
 

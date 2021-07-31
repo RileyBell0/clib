@@ -5,7 +5,7 @@
 
 #include "../std/alist.h"
 #include "../std/array.h"
-#include "../std/configLoader.h"
+#include "../std/config.h"
 #include "../std/dir/directory.h"
 #include "../std/string.h"
 #include <stdio.h>

@@ -3,7 +3,7 @@
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 04/05/2021
 string_t console_bar(unsigned int len) {
-  string_t bar = new_string(len);
+  string_t bar = string_new(len);
 
   char *str = cstr(&bar);
 

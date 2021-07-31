@@ -8,8 +8,8 @@
 #define SHOULD_PRINT false
 
 int main(int argc, char **argv) {
-  string_t output_name = new_string(0);
-  string_t path = new_string(DEFAULT_BUFFER_LEN);
+  string_t output_name = string_new(0);
+  string_t path = string_new(DEFAULT_BUFFER_LEN);
 
   printf("What path: ");
   fileio_next_line(stdin, &path);
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     fprintf(stdout, "\n\n----------All Files\n");
     fprintf(stdout, "Found %d Files!\n", all_files.size);
   }
-  it = new_alist_iterator(&all_files, true);
+  it = alist_iterator_new(&all_files, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     if (SHOULD_PRINT) {
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     fprintf(stdout, "\n\n----------All Entries\n");
     fprintf(stdout, "Found %d Entries!\n", all_entries.size);
   }
-  it = new_alist_iterator(&all_entries, true);
+  it = alist_iterator_new(&all_entries, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     fprintf(outfile, "%s\n", cstr(element));
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     fprintf(stdout, "\n\n----------All Files Recur\n");
     fprintf(stdout, "Found %d Files Recursively!\n", all_files_recur.size);
   }
-  it = new_alist_iterator(&all_files_recur, true);
+  it = alist_iterator_new(&all_files_recur, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     fprintf(outfile, "%s\n", cstr(element));

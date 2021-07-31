@@ -10,7 +10,7 @@ static void avl_bin_tree_destroy_all_nodes(avl_bin_tree_node_t *treeNode,
 static avl_bin_tree_node_t *avl_rotate_left(avl_bin_tree_node_t *base);
 static avl_bin_tree_node_t *avl_rotate_right(avl_bin_tree_node_t *base);
 
-avl_bin_tree_t new_avl_bin_tree(unsigned int elementSize,
+avl_bin_tree_t avl_bin_tree_new(unsigned int elementSize,
                                 int (*compareFunc)(const void *first,
                                                    const void *second)) {
   avl_bin_tree_t newTree = {0};
@@ -189,7 +189,7 @@ void avl_bin_tree_fill_arr(array_t *arr, avl_bin_tree_node_t *node, int *pos,
   avl_bin_tree_fill_arr(arr, node->left, pos, elementSize);
 
   // Add the element in the node to the array
-  array_set_element(arr->data, node->data, *pos, elementSize);
+  array_generic_set(arr->data, node->data, *pos, elementSize);
   *pos += 1;
 
   /* then recur on right child */
@@ -197,7 +197,7 @@ void avl_bin_tree_fill_arr(array_t *arr, avl_bin_tree_node_t *node, int *pos,
 }
 
 array_t avl_bin_tree_to_array(avl_bin_tree_t tree) {
-  array_t final = new_array(tree.size, tree.elementSize);
+  array_t final = array_new(tree.size, tree.elementSize);
   int pos = 0;
 
   avl_bin_tree_fill_arr(&final, tree.root, &pos, tree.elementSize);

@@ -4,9 +4,9 @@
  */
 
 #include "../std/alist.h"
-#include "../std/configLoader.h"
+#include "../std/config.h"
 #include "../std/fileIO.h"
-#include "../std/filePath.h"
+#include "../std/path.h"
 #include "../std/string.h"
 #include <stdio.h>
 #include <stdbool.h>
@@ -83,7 +83,7 @@ config_var_t *safe_cfg_get_var(config_t *config, char *name) {
 void write_make_all_call(FILE *out_file, alist_t *prog_names) {
   fprintf(out_file, "all:");
 
-  alist_iterator_t it = new_alist_iterator(prog_names, true);
+  alist_iterator_t it = alist_iterator_new(prog_names, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     fprintf(out_file, " %s", cstr(element));
@@ -104,19 +104,19 @@ void write_make_name_with_extension(FILE *out_file, string_t *name,
 
 void write_make_compiler(FILE *out_file, config_var_t *var_compiler) {
   // Only care about the compiler in the first position in the config var
-  fprintf(out_file, "\t%s", cstr(var_compiler->data));
+  fprintf(out_file, "\t%s", cstr(var_compiler->values.data));
 }
 
 void write_make_flags(FILE *out_file, config_var_t *var_flags) {
-  for (unsigned int i = 0; i < var_flags->len; i++) {
-    fprintf(out_file, " -%s", cstr(&var_flags->data[i]));
+  for (unsigned int i = 0; i < var_flags->values.len; i++) {
+    fprintf(out_file, " -%s", cstr(&var_flags->values.data[i]));
   }
 }
 
 void write_make_all_components(FILE *out_file, alist_t *component_names) {
   // Add calls for the compilation of all components
   // comp1.o comp2.o ... compn.o
-  alist_iterator_t it = new_alist_iterator(component_names, true);
+  alist_iterator_t it = alist_iterator_new(component_names, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     fprintf(out_file, " %s", cstr(element));
@@ -153,10 +153,10 @@ int main(int argc, char **argv) {
   config_var_t *var_obj_flags = safe_cfg_get_var(&cfg, VAR_OBJ_FLAGS);
 
   config_var_t *var_obj_ext = safe_cfg_get_var(&cfg, VAR_OBJ_EXT);
-  string_t *obj_ext = var_obj_ext->data;
+  string_t *obj_ext = var_obj_ext->values.data;
 
   config_var_t *var_obj_out = safe_cfg_get_var(&cfg, VAR_OBJ_OUT);
-  string_t *obj_out = var_obj_out->data;
+  string_t *obj_out = var_obj_out->values.data;
 
   config_var_t *var_prog_out = safe_cfg_get_var(&cfg, VAR_PROG_OUT);
   config_var_t *var_compiler = safe_cfg_get_var(&cfg, VAR_COMPILER);
@@ -164,24 +164,24 @@ int main(int argc, char **argv) {
   config_var_t *var_debug = safe_cfg_get_var(&cfg, VAR_DEBUG);
   string_t ext_seperator = string_make("."); // Extension seperator
   config_var_t *var_prog_flags = safe_cfg_get_var(&cfg, VAR_PROG_FLAGS);
-  string_t extension = string_new_concat(&ext_seperator, var_obj_ext->data);
+  string_t extension = string_new_concat(&ext_seperator, var_obj_ext->values.data);
   alist_iterator_t it, it_2;
   unsigned int req_str_len;
 
   // config dir / component_files_name_storage_file
-  req_str_len =
-      var_cfg_dir->data->len + path_sep_len + var_obj_files->data->len;
+  req_str_len = ((string_t *)var_cfg_dir->values.data)->len + path_sep_len +
+                ((string_t *)var_obj_files->values.data)->len;
 
-  string_t component_files_path = new_string(req_str_len);
-  string_write_multi(&component_files_path, var_cfg_dir->data, &path_sep,
-                     var_obj_files->data, NULL);
+  string_t component_files_path = string_new(req_str_len);
+  string_write_multi(&component_files_path, var_cfg_dir->values.data, &path_sep,
+                     var_obj_files->values.data, NULL);
 
   // config dir / program_files_name_storage_file
-  req_str_len =
-      var_cfg_dir->data->len + path_sep_len + var_prog_files->data->len;
-  string_t prog_files_path = new_string(req_str_len);
-  string_write_multi(&prog_files_path, var_cfg_dir->data, &path_sep,
-                     var_prog_files->data, NULL);
+  req_str_len = ((string_t *)var_cfg_dir->values.data)->len + path_sep_len +
+                ((string_t *)var_prog_files->values.data)->len;
+  string_t prog_files_path = string_new(req_str_len);
+  string_write_multi(&prog_files_path, var_cfg_dir->values.data, &path_sep,
+                     var_prog_files->values.data, NULL);
 
   /*
    * Reading in from files
@@ -217,11 +217,11 @@ int main(int argc, char **argv) {
   remove_file_extensions(&obj_names);
 
   /*
-  alist_t prog_out_names = new_alist(sizeof(string_t));
-  it = new_alist_iterator(&prog_names, TRUE);
+  alist_t prog_out_names = alist_new(sizeof(string_t));
+  it = alist_iterator_new(&prog_names, TRUE);
   for (string_t* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
     // Make a string with enough space for the out name
-    string_t out_name = new_string(var_prog_out->data->len +
+    string_t out_name = string_new(var_prog_out->data->len +
                                    path_sep_len +
                                    node->len);
 
@@ -238,11 +238,11 @@ int main(int argc, char **argv) {
 
   // This takes all program names, such as 'projectMake' and turns it into
   // objects/projectMake.o
-  alist_t prog_obj_out = new_alist(sizeof(string_t));
-  it = new_alist_iterator(&prog_names, TRUE);
+  alist_t prog_obj_out = alist_new(sizeof(string_t));
+  it = alist_iterator_new(&prog_names, TRUE);
   for (string_t* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
     // Allocating enought space to store the new string
-    string_t out_name = new_string(var_obj_out->data->len +
+    string_t out_name = string_new(var_obj_out->data->len +
                                    path_sep_len +
                                    node->len +
                                    extension.len);
@@ -261,11 +261,11 @@ int main(int argc, char **argv) {
 
   // Turns object names from stuff like 'alist' to
   // 'objects/alist
-  alist_t obj_out_names = new_alist(sizeof(string_t));
-  it = new_alist_iterator(&obj_names, TRUE);
+  alist_t obj_out_names = alist_new(sizeof(string_t));
+  it = alist_iterator_new(&obj_names, TRUE);
   for (string_t* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
     // Allocating enough space to store the string
-    string_t out_name = new_string(var_obj_out->data->len +
+    string_t out_name = string_new(var_obj_out->data->len +
                                    path_sep_len +
                                    node->len);
 
@@ -281,8 +281,8 @@ int main(int argc, char **argv) {
   } */
 
   // Write all obj names to a string, as need to use this multiple times
-  string_t all_obj_names = new_string(DEFAULT_BUFFER_LEN);
-  it = new_alist_iterator(&obj_names, true);
+  string_t all_obj_names = string_new(DEFAULT_BUFFER_LEN);
+  it = alist_iterator_new(&obj_names, true);
   string_t whitespace = string_make(" ");
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
@@ -293,8 +293,8 @@ int main(int argc, char **argv) {
                all_obj_names.len - 1); // Remove the trailing whitespace
 
   // Write all object paths to a string, as need to use this multiple times
-  string_t all_obj_paths = new_string(DEFAULT_BUFFER_LEN);
-  it = new_alist_iterator(&obj_names, true);
+  string_t all_obj_paths = string_new(DEFAULT_BUFFER_LEN);
+  it = alist_iterator_new(&obj_names, true);
   for (string_t *element = it.first(&it); !it.done(&it);
        element = it.next(&it)) {
     string_write_multi(&all_obj_paths, obj_out, &path_sep, element,
@@ -303,63 +303,65 @@ int main(int argc, char **argv) {
   string_limit(&all_obj_paths,
                all_obj_paths.len - 1); // Remove the trailing whitespace
 
-  string_t *compiler = var_compiler->data;
+  string_t *compiler = var_compiler->values.data;
 
-  string_t global_flags = new_string(DEFAULT_BUFFER_LEN);
-  for (unsigned int i = 0; i < var_flags->len; i++) {
-    string_write_multi(&global_flags, &flag_start, &var_flags->data[i],
-                       &whitespace, NULL);
+  string_t global_flags = string_new(DEFAULT_BUFFER_LEN);
+  for (unsigned int i = 0; i < var_flags->values.len; i++) {
+    string_write_multi(&global_flags, &flag_start,
+                       &((string_t *)var_flags->values.data)[i], &whitespace,
+                       NULL);
   }
   string_limit(&global_flags,
                global_flags.len - 1); // Remove the trailing whitespace
 
-  string_t obj_flags = new_string(DEFAULT_BUFFER_LEN);
-  for (unsigned int i = 0; i < var_obj_flags->len; i++) {
-    string_write_multi(&obj_flags, &flag_start, &var_obj_flags->data[i],
+  string_t obj_flags = string_new(DEFAULT_BUFFER_LEN);
+  for (unsigned int i = 0; i < var_obj_flags->values.len; i++) {
+    string_write_multi(&obj_flags, &flag_start,
+                       &((string_t *)var_obj_flags->values.data)[i],
                        &whitespace, NULL);
   }
   string_limit(&obj_flags,
                obj_flags.len - 1); // Remove the trailing whitespace
 
-  string_t prog_flags = new_string(DEFAULT_BUFFER_LEN);
-  for (unsigned int i = 0; i < var_prog_flags->len; i++) {
-    string_write_multi(&prog_flags, &flag_start, &var_prog_flags->data[i],
+  string_t prog_flags = string_new(DEFAULT_BUFFER_LEN);
+  for (unsigned int i = 0; i < var_prog_flags->values.len; i++) {
+    string_write_multi(&prog_flags, &flag_start, &((string_t*)var_prog_flags->values.data)[i],
                        &whitespace, NULL);
   }
   string_limit(&prog_flags,
                prog_flags.len - 1); // Remove the trailing whitespace
 
-  string_t debug_flags = new_string(DEFAULT_BUFFER_LEN);
-  for (unsigned int i = 0; i < var_debug->len; i++) {
-    string_write_multi(&debug_flags, &flag_start, &var_debug->data[i],
+  string_t debug_flags = string_new(DEFAULT_BUFFER_LEN);
+  for (unsigned int i = 0; i < var_debug->values.len; i++) {
+    string_write_multi(&debug_flags, &flag_start, &((string_t*)var_debug->values.data)[i],
                        &whitespace, NULL);
   }
   string_limit(&debug_flags,
                debug_flags.len - 1); // Remove the trailing whitespace
 
   // Create the makefile's file
-  FILE *out_file = fileio_open_safe(cstr(var_makeName->data), false);
+  FILE *out_file = fileio_open_safe(cstr(var_makeName->values.data), false);
 
   // Write the all call
   write_make_all_call(out_file, &prog_names); // all: prog_1 prog_2 ... prog_n
   fprintf(out_file, "\n");
 
   // Writing the make instructions for the programs
-  it = new_alist_iterator(&prog_names, true);
+  it = alist_iterator_new(&prog_names, true);
   for (string_t *prog_name = it.first(&it); !it.done(&it);
        prog_name = it.next(&it)) {
     fprintf(out_file, "%s: %s%s%s %s\n", cstr(prog_name), cstr(prog_name),
             cstr(&ext_seperator), cstr(obj_ext), cstr(&all_obj_names));
     fprintf(out_file, "\t%s %s %s %s%s%s %s%s%s%s%s %s %s\n\n", cstr(compiler),
-            cstr(&global_flags), cstr(&prog_flags), cstr(var_prog_out->data),
+            cstr(&global_flags), cstr(&prog_flags), cstr(var_prog_out->values.data),
             cstr(&path_sep), cstr(prog_name), cstr(obj_out), cstr(&path_sep),
             cstr(prog_name), cstr(&ext_seperator), cstr(obj_ext),
             cstr(&all_obj_paths), cstr(&debug_flags));
   }
 
   // Writing the make instructions for the program object files
-  it = new_alist_iterator(&prog_names, true);
-  it_2 = new_alist_iterator(&prog_file_paths, true);
+  it = alist_iterator_new(&prog_names, true);
+  it_2 = alist_iterator_new(&prog_file_paths, true);
   it_2.first(&it_2);
   for (string_t *prog_name = it.first(&it); !it.done(&it);
        prog_name = it.next(&it)) {
@@ -377,8 +379,8 @@ int main(int argc, char **argv) {
   }
 
   // Writing the make instructions for the component obj files
-  it = new_alist_iterator(&obj_names, true);
-  it_2 = new_alist_iterator(&obj_file_paths, true);
+  it = alist_iterator_new(&obj_names, true);
+  it_2 = alist_iterator_new(&obj_file_paths, true);
   it_2.first(&it_2);
   for (string_t *obj_name = it.first(&it); !it.done(&it);
        obj_name = it.next(&it)) {
@@ -392,9 +394,9 @@ int main(int argc, char **argv) {
   }
 
   // Writing the clean instructions
-  fprintf(out_file, "clean:\n\trm %s%s*%s", cstr(var_obj_out->data),
+  fprintf(out_file, "clean:\n\trm %s%s*%s", cstr(var_obj_out->values.data),
           PATH_SEPERATOR, cstr(&extension));
-  fprintf(out_file, " %s%s*\n", cstr(var_prog_out->data), PATH_SEPERATOR);
+  fprintf(out_file, " %s%s*\n", cstr(var_prog_out->values.data), PATH_SEPERATOR);
 
   fclose(out_file);
 

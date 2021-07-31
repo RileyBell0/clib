@@ -1,5 +1,5 @@
-#ifndef CLIB_SORT_H
-#define CLIB_SORT_H
+#ifndef CLIB_SORTING_H
+#define CLIB_SORTING_H
 
 #include "avlBinTree.h"
 

@@ -1,12 +1,15 @@
-#ifndef CLIB_CONFIG_LOADER
-#define CLIB_CONFIG_LOADER
+#ifndef CLIB_STD_CONFIG_H
+#define CLIB_STD_CONFIG_H
 
 /*
  * Load everything into arrays
  * Save everything with its variable name
  */
+#include "path.h"
 #include "fileIO.h"
 #include "sorting.h"
+#include "array.h"
+#include "dynamic_array.h"
 
 #define CONFIG_COMMENT_CHAR '#'
 #define CONFIG_STRING_ENCLOSE_CHAR '"'
@@ -55,22 +58,21 @@
 #define CONFIG_FIELD_DECLARATION 1
 
 typedef struct config_var_t {
-  // Name of the variable
+  // Name associated with the variable
   string_t var_name;
 
-  // Array of values in the variable
-  string_t *data;
-  unsigned int len;
+  // Values associated with the variable
+  array_t values;
 } config_var_t;
 
 typedef struct config_t {
+  array_t variables;
+  string_t path_to_cfg;
+
   bool modified;
-  unsigned int len;
-  config_var_t *vars;
-  char *configLocation;
 } config_t;
 
-config_var_t new_config_var(string_t *var_name);
+config_var_t config_var_new(string_t *var_name);
 
 /*
  * Returns a string containing the next valid field in the string 'str'

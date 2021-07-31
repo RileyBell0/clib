@@ -1,24 +1,18 @@
 #include "../array.h"
 
-static int dynamic_array_extend(dynamic_array_t *array);
+//////////////////////////////
+// Initialisation
+//////////////////////////////
 
-void array_set_element(void *array, void *data, unsigned int element,
-                       size_t element_size) {
-  memcpy(((char *)array + (element_size * element)), data, element_size);
-}
-
-void *array_get_element(void *array, unsigned int element,
-                        size_t element_size) {
-  return (void *)((char *)array + (element * element_size));
-}
-
-void *array_index(array_t *array, unsigned int index) {
-  return array_get_element(array->data, index, array->element_size);
-}
-
-array_t new_array(unsigned int elements, size_t element_size) {
+array_t array_new(int elements, size_t element_size) {
   array_t array;
 
+  if (elements < 0) {
+    exit_error("Cannot initalise an array with a negative number of elements",
+               "std/c/array.c", "array_new");
+  }
+
+  // Allocate memory for the array
   if (elements != 0) {
     array.data = safe_malloc(elements * element_size);
   } else {
@@ -27,164 +21,144 @@ array_t new_array(unsigned int elements, size_t element_size) {
 
   array.len = elements;
   array.element_size = element_size;
+  array.allocated = true;
+  array.destroy_on_remove = true;
+  array.destroy = NULL;
 
   return array;
 }
 
-array_t array_wrap(void *array, size_t element_size, unsigned int len) {
+//////////////////////////////
+// Basic Operations
+//////////////////////////////
+
+void *array_get(array_t *array, int index) {
+  index = index_convert_negative_safe(array->len, index);
+  return array_generic_get(array->data, index, array->element_size);
+}
+
+void array_set(array_t *array, int index, void *data) {
+  index = index_convert_negative_safe(array->len, index);
+  assert(memcpy(array_get(array, index), data, array->element_size));
+}
+
+array_t array_wrap(void *array, int len, size_t element_size, 
+                   bool was_allocated) {
   array_t wrapped;
+  
+  if (len < 0) {
+    exit_error("Cannot initalise an array with a negative number of elements",
+               "std/c/array.c", "array_wrap");
+  }
+  
   wrapped.data = array;
   wrapped.len = len;
   wrapped.element_size = element_size;
+  wrapped.allocated = was_allocated;
+
   return wrapped;
 }
 
-bool array_resize(array_t *array, unsigned int new_length) {
-  // cannot resize to be smaller
-  if (array == NULL || array->len >= new_length) {
-    return false;
+//////////////////////////////
+// High Level Functions
+//////////////////////////////
+
+void array_resize(array_t *array, int new_len, void* template) {
+  if (new_len < 0) {
+    exit_error("Error - Cannot resize an array to a negative value",
+               "std/c/array.c", "array_resize");
   }
 
-  // Resize
-  array->data = realloc(array->data, array->element_size * new_length);
-  array->len = new_length;
+  if (array->len == new_len) {
+    return;
+  }
+  else if (new_len == 0) {
+    // Empty the array
+    if (array->allocated) {
+      destroy(array->data);
+    }
+    array->len = 0;
+    array->data = NULL;
 
-  // Assert the resizing worked
-  assert(array->data);
-
-  return true;
-}
-
-dynamic_array_t new_dynamic_array(size_t element_size) {
-  dynamic_array_t array = {0};
-
-  array.element_size = element_size;
-
-  return array;
-}
-
-bool dynamic_array_append(dynamic_array_t *array, void *element) {
-  // Extending the array if needed
-  if (array->capacity == array->len) {
-    dynamic_array_extend(array);
+    return;
   }
 
-  // Copies data from the address 'element' to the array
-  memcpy(&((char *)array->data)[(array->len * array->element_size)], element,
-         array->element_size);
-
-  array->len += 1;
-
-  return true;
-}
-
-// Extends an array (if it is full)
-static int dynamic_array_extend(dynamic_array_t *array) {
-  if (array == NULL || array->len < array->capacity) {
-    return false;
+  // Allocate space for the array
+  void* new_mem;
+  if (template) {
+    new_mem = safe_calloc(array->element_size * new_len);
   }
-  unsigned int new_len;
-
-  // Add one to the length if its less than 3 (after which point dividing makes
-  // sense)
-  if (array->capacity <= 3) {
-    new_len = (array->capacity + 1);
-  } else {
-    // 1.5x extension factor (capacity + capacity/2)
-    new_len = array->capacity + (array->capacity / 2);
+  else {
+    new_mem = safe_malloc(array->element_size * new_len);
   }
 
-  // Extend the array
-  array->data = safe_realloc(array->data, new_len * array->element_size);
-
-  array->capacity = new_len;
-
-  return true;
-}
-/*
- * TODO whats the difference between dynamic_array_resize and
- * dynamic_array_safe_resize
-*/
-bool dynamic_array_safe_resize(dynamic_array_t *array, unsigned int new_len) {
-  // If less than the current array length - FAIL
-  if (new_len <= array->len) {
-    return false;
+  // Determine how many elements to copy from the original list
+  int elems_to_copy = array->len;
+  if (new_len < array->len) {
+    elems_to_copy = new_len;
   }
 
-  // If greater than the current array length but less than or equal
-  // to the current maximum length of the array
-  if (new_len <= array->capacity) {
-    return true;
+  // Copy in the new data
+  if (elems_to_copy > 0) {
+    assert(memcpy(new_mem, array->data, array->element_size * new_len));
   }
 
-  // Resize the array
-  array->data = realloc(array->data, array->element_size * new_len);
-  assert(array->data);
-
-  // Update the length of the array
-  array->len = new_len;
-  array->capacity = new_len;
-
-  return true;
-}
-
-void dynamic_array_set_element(dynamic_array_t *array, unsigned int element,
-                               void *data) {
-  // Gets a pointer to the start of the required element
-  if (array->capacity < element) {
-    // If the length of the array when extended is less than
-    // the required length to place the new element at
-    if (element > array->capacity + (array->capacity / 2)) {
-      dynamic_array_safe_resize(array, element);
-    } else {
-      dynamic_array_extend(array);
+  // Write the 'template' to each new empty index
+  if (template) {
+    for (int index = array->len; index < new_len; index++) {
+      void* elem = array_generic_get(array->data, index, array->element_size);
+      assert(memcpy(elem, template, array->element_size));
     }
   }
 
-  // Update the length of the array (if the element was placed past the current
-  // length)
-  if (element > array->len) {
-    array->len = element;
+  // Destroy the old memory and point to the new memory
+  if (array->allocated) {
+    destroy(array->data);
   }
-
-  // Set the element in the array at the given position to the data recieved
-  memcpy((((char *)array->data) + (array->element_size * element)), data,
-         array->element_size);
+  array->data = new_mem;
+  array->allocated = true;
+  array->len = new_len;
 }
 
-void array_set_index(array_t *array, unsigned int index, void *data) {
-  assert(memcpy(array_index(array, index), data, array->element_size));
+// // TODO implement this like in python
+// array_t array_slice(array_t *arr, char* format) {
+// }
+
+//////////////////////////////
+// Generic Arrays
+//////////////////////////////
+
+void *array_generic_get(void *array, unsigned int element,
+                        size_t element_size) {
+  return (void *)((char *)array + (element * element_size));
 }
 
-void *dynamic_array_get_element(dynamic_array_t *array, unsigned int element) {
-  // If the required element is outside the bounds of the array
-  if (element > array->len) {
-    return NULL;
-  }
-
-  // Return a pointer to the start of the element in the array
-  // by using pointer arithmetic to shift the pointer along the array
-  return (void *)((char *)array->data + (element * array->element_size));
+void array_generic_set(void *array, void *data, unsigned int element,
+                       size_t element_size) {
+  memcpy(((char *)array + (element_size * element)), data, element_size);
 }
 
-/*
- * Copies the contents of a dynamic array into a new array_t
- * with just enough space for all elements
- */
-array_t dynamic_array_to_array(dynamic_array_t *array) {
-  array_t converted = new_array(array->len, array->element_size);
+//////////////////////////////
+// Cleanup
+//////////////////////////////
 
-  // Copy the memory across
-  memcpy(converted.data, array->data, array->len * array->element_size);
-
-  // Return the copied array
-  return converted;
-}
 
 // Wrapper function to destroy the contents of an array
-void array_destroy(array_t toDestroy) { destroy(toDestroy.data); }
+void array_destroy(array_t *arr) {
+  // Destroy elements if enabled
+  if (arr->destroy_on_remove && arr->destroy) {
+    for (int i = 0; i < arr->len; i++) {
+      void* elem = array_get(arr, i);
+      arr->destroy(elem);
+    }
+  }
+  
+  // Destroy allocated array space
+  if (arr->allocated) {
+    destroy(arr->data);
+  }
 
-// Wrapper function to destroy the contents of an array
-void dynamic_array_destroy(dynamic_array_t toDestroy) {
-  destroy(toDestroy.data);
+  arr->allocated = true;
+  arr->data = NULL;
+  arr->len = 0;
 }

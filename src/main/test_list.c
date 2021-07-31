@@ -27,15 +27,15 @@ void add_to_alist(alist_t* list, char* str) {
 }
 
 int main(int argc, char **argv) {
-  string_t buffer_str = new_string(DEFAULT_BUFFER_LEN);
-  string_t messages = new_string(DEFAULT_BUFFER_LEN);
+  string_t buffer_str = string_new(DEFAULT_BUFFER_LEN);
+  string_t messages = string_new(DEFAULT_BUFFER_LEN);
   string_t *msgs = &messages;
   string_t *buff = &buffer_str;
 
-  alist_t list = new_alist(sizeof(string_t));
+  alist_t list = alist_new(sizeof(string_t));
   list.destroy = void_string_destroy;
   list.compare = string_void_compare;
-  alist_t list2 = new_alist(sizeof(string_t));
+  alist_t list2 = alist_new(sizeof(string_t));
   list2.destroy = void_string_destroy;
   list2.compare = string_void_compare;
 
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     string_clear(msgs);
     printf("------------\nSELECTED LIST: %s\n", curr_list_val);
     printf("List Contents: ");
-    alist_iterator_t it = new_alist_iterator(curr_list, true);
+    alist_iterator_t it = alist_iterator_new(curr_list, true);
     for (it.first(&it); !it.done(&it); it.next(&it)) {
       string_t* str = (string_t*)it.element;
       printf("%s ", cstr(str));
@@ -195,7 +195,8 @@ void print_alist(alist_t* list) {
   printf("\n");
 
   for (int i = 0; i < list->size; i++) {
-    alist_node_t* node = array_get_element(list->list_start, i, list->block_size);
+    alist_node_t *node =
+        array_generic_get(list->list_start, i, list->block_size);
 
     char* str = cstr((string_t*)&node[ALIST_ELEMENT]);
     printf("%d) %s prev %d next %d\n", i, str, node->prev, node->next);

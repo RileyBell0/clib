@@ -1,6 +1,7 @@
 #include "../list.h"
 
-// TODO as of 15/07/2021, need tyo look over this entire file to make sure nothing is broken here
+// TODO as of 15/07/2021, need tyo look over this entire file to make sure
+// nothing is broken here
 
 //////////////////////////////
 // Function Declarations
@@ -17,7 +18,7 @@ list_node_t *list_new_node(void *element, size_t element_size);
  * Removes the given node from the list, updates list size and pointers
  * accordingly
  */
-void *list_remove_node(list_t *list, list_node_t *node, bool return_elem);
+void list_remove_node(list_t *list, list_node_t *node, void* dest);
 
 /*
  * List iterator functions
@@ -48,13 +49,13 @@ bool list_iterator_done(list_iterator_t *it);
 // Initialisation
 //////////////////////////////
 
-list_t new_list(size_t element_size) {
+list_t list_new(size_t element_size) {
 
-  list_t new_list = {0};
+  list_t list_new = {0};
 
-  new_list.element_size = element_size;
+  list_new.element_size = element_size;
 
-  return new_list;
+  return list_new;
 }
 
 list_node_t *list_new_node(void *element, size_t element_size) {
@@ -75,7 +76,7 @@ list_node_t *list_new_node(void *element, size_t element_size) {
   return node;
 }
 
-list_iterator_t new_list_iterator(list_t *list, bool from_start) {
+list_iterator_t list_new_iterator(list_t *list, bool from_start) {
   list_iterator_t it;
 
   it.list = list;
@@ -148,7 +149,7 @@ void *list_get(list_t *list, int index) {
   bool from_start = index_closer_to_start(list->size, index);
 
   // Return the element at the given index within the list
-  list_iterator_t it = new_list_iterator(list, from_start);
+  list_iterator_t it = list_new_iterator(list, from_start);
   for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (it.index == index) {
       return it.element;
@@ -156,7 +157,7 @@ void *list_get(list_t *list, int index) {
   }
 
   exit_error("List structure invalid - requested index not present",
-             "std/c/list.c", "list_get");\
+             "std/c/list.c", "list_get");
   return NULL;
 }
 
@@ -194,23 +195,23 @@ list_t *list_append_multi(list_t *list, void *toAppend, ...) {
   return list;
 }
 
-void *list_pop(list_t *list, int index) {
+void list_pop(list_t *list, void* dest, int index) {
   index = index_convert_negative_safe(list->size, index);
 
   // Determine which end of the list is closer to the index
   bool from_start = index_closer_to_start(list->size, index);
 
   // Find the node at the index requested and remove it
-  list_iterator_t it = new_list_iterator(list, from_start);
+  list_iterator_t it = list_new_iterator(list, from_start);
   for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (index == it.index) {
-      return list_remove_node(list, it.curr_node, true);
+      list_remove_node(list, it.curr_node, dest);
+      return;
     }
   }
 
   exit_error("List structure invalid - requested index not present",
              "std/c/list.c", "list_pop");
-  return NULL; // Will never run, exit_error exits program
 }
 
 void list_remove_at(list_t *list, int index) {
@@ -220,10 +221,10 @@ void list_remove_at(list_t *list, int index) {
   bool from_start = index_closer_to_start(list->size, index);
 
   // Find the node at the index requested and remove it
-  list_iterator_t it = new_list_iterator(list, from_start);
+  list_iterator_t it = list_new_iterator(list, from_start);
   for (it.first(&it); !it.done(&it); it.next(&it)) {
     if (index == it.index) {
-      list_remove_node(list, it.curr_node, false);
+      list_remove_node(list, it.curr_node, NULL);
       return;
     }
   }
@@ -241,7 +242,7 @@ bool list_remove(list_t *list, void *elem) {
 
   while (current_node) {
     if (memcmp(&current_node[LIST_ELEMENT], elem, list->element_size) == 0) {
-      list_remove_node(list, current_node, false);
+      list_remove_node(list, current_node, NULL);
       return true;
     }
 
@@ -264,7 +265,7 @@ void *list_node_get_data(void *node) {
  * patches surrounding references. If a delete_data function is
  * provided, the node's associated data is deleted
  */
-void *list_remove_node(list_t *list, list_node_t *node, bool return_elem) {
+void list_remove_node(list_t *list, list_node_t *node, void* dest) {
   list_node_t *prev = node->prev;
   list_node_t *next = node->next;
 
@@ -284,15 +285,11 @@ void *list_remove_node(list_t *list, list_node_t *node, bool return_elem) {
   }
 
   // Copy the data out of the node so it can be returned
-  void *data = NULL;
-  if (return_elem) {
-    void *data = safe_malloc(list->element_size);
-    assert(memcpy(data, &node[LIST_ELEMENT], list->element_size));
+  if (dest) {
+    assert(memcpy(dest, &node[LIST_ELEMENT], list->element_size));
   }
 
   free(node);
-
-  return data;
 }
 
 //////////////////////////////
@@ -327,28 +324,18 @@ list_t *list_combine(list_t *base, list_t *extension) {
 }
 
 array_t list_to_array(list_t *list) {
-  array_t converted = new_array(list->size, list->element_size);
+  array_t converted = array_new(list->size, list->element_size);
 
-  list_iterator_t it = new_list_iterator(list, true);
+  list_iterator_t it = list_new_iterator(list, true);
   for (void *elem = it.first(&it); !it.done(&it); elem = it.next(&it)) {
     void *data = list_node_get_data(elem);
-    array_set_element(&converted, data, it.index, list->element_size);
+    array_generic_set(&converted, data, it.index, list->element_size);
   }
 
   return converted;
 }
 
-void list_clear(list_t *list) {
-  size_t element_size = list->element_size;
-  void (*delete_data)(void *data) = list->delete_data;
-  int (*compare)(const void *first, const void *second) = list->compare;
-
-  list_destroy(list);
-
-  list->element_size = element_size;
-  list->compare = compare;
-  list->delete_data = delete_data;
-}
+void list_clear(list_t *list) { list_destroy(list); }
 
 //////////////////////////////
 // Cleanup
@@ -364,7 +351,7 @@ void list_destroy(list_t *list) {
     return;
   }
 
-  list_iterator_t it = new_list_iterator(list, true);
+  list_iterator_t it = list_new_iterator(list, true);
   if (list->delete_data) {
     for (void *node = it.first(&it); !it.done(&it); node = it.next(&it)) {
       void *data = list_node_get_data(node);
@@ -380,7 +367,4 @@ void list_destroy(list_t *list) {
   list->size = 0;
   list->first_node = NULL;
   list->last_node = NULL;
-  list->compare = NULL;
-  list->delete_data = NULL;
-  list->element_size = 0;
 }

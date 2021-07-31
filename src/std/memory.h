@@ -5,6 +5,7 @@
 
 #ifndef CLIB_STD_MEMORY_H
 #define CLIB_STD_MEMORY_H
+#define BITS_PER_BYTE 8
 
 #include <assert.h>
 #include <stdint.h>
@@ -48,6 +49,6 @@ void ptr_destroy(void *data);
 /*
  * Offsets the given memory address by the given value
  */
-void *offset(void *ptr, unsigned int num);
+void *offset(void *ptr, size_t num);
 
 #endif

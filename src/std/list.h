@@ -48,11 +48,6 @@ typedef struct list_t {
   list_node_t *last_node;
   int size;
   size_t element_size;
-
-  /*
-   * Do not try and free the recieved 'data' pointer, this is
-   * allocated within list_t and will be destroyed under list_destroy
-  */
   void (*delete_data)(void *data);
   int (*compare)(const void *first, const void *second);
 } list_t;
@@ -76,9 +71,9 @@ typedef struct list_iterator_t {
 /*
  * Returns a new list where the stored elements will be of size (elementSize)
  */
-list_t new_list(size_t element_size);
+list_t list_new(size_t element_size);
 
-list_iterator_t new_list_iterator(list_t *list, bool from_start);
+list_iterator_t list_iterator_new(list_t *list, bool from_start);
 
 //////////////////////////////
 // Basic Operations
@@ -113,7 +108,7 @@ list_t *list_append_multi(list_t *list, void *toAppend, ...);
  *
  * Supports negative indicies
  */
-void *list_pop(list_t *list, int index);
+void list_pop(list_t *list, void* dest, int index);
 
 /*
  * Removes the element at the given index from the list.

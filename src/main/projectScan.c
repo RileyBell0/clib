@@ -2,7 +2,8 @@
  * Gets all 'c' files that are to be compiled
  */
 
-#include "../std/configLoader.h"
+#include "../std/config.h"
+#include "../std/fileIO.h"
 #include "../std/dir/directory.h"
 #include "../std/system.h"
 #include <stdbool.h>
@@ -42,7 +43,7 @@ void add_src_files_from_dir(FILE *out_file, string_t *base_path,
       dir_all_files_recur(base_path, fileio_has_extension_key, extension, true);
 
   // Print all files in the subdirectory
-  alist_iterator_t it = new_alist_iterator(&files, true);
+  alist_iterator_t it = alist_iterator_new(&files, true);
   for (string_t *node = it.first(&it); !it.done(&it); node = it.next(&it)) {
     fprintf(out_file, "%s\n", cstr(node));
   }
@@ -68,25 +69,25 @@ int main(int argc, char **argv) {
   config_var_t *var_config_dir = safe_cfg_get_var(&cfg, VAR_CONFIG_DIR);
 
   // Making input args more usable
-  string_t extension = *var_extension->data;
+  string_t extension = *(string_t*)var_extension->values.data;
   string_t path_sep = string_make(PATH_SEPERATOR);
   string_t component_out = string_new_concat_multi(
-      var_config_dir->data, &path_sep, var_component_out->data, NULL);
-  string_t main_out = string_new_concat_multi(var_config_dir->data, &path_sep,
-                                              var_main_out->data, NULL);
+      var_config_dir->values.data, &path_sep, var_component_out->values.data, NULL);
+  string_t main_out = string_new_concat_multi(var_config_dir->values.data, &path_sep,
+                                              var_main_out->values.data, NULL);
 
   // Fix path seperators if on windows
   if (OS_TYPE == OS_TYPE_WINDOWS) {
     string_replace(&main_out, "/", PATH_SEPERATOR);
     string_replace(&component_out, "/", PATH_SEPERATOR);
-    for (unsigned int i = 0; i < var_main_dirs->len; i++) {
-      string_replace(&var_main_dirs->data[i], "/", PATH_SEPERATOR);
+    for (unsigned int i = 0; i < var_main_dirs->values.len; i++) {
+      string_replace(&((string_t*)var_main_dirs->values.data)[i], "/", PATH_SEPERATOR);
     }
-    for (unsigned int i = 0; i < var_src_dirs->len; i++) {
-      string_replace(&var_src_dirs->data[i], "/", PATH_SEPERATOR);
+    for (unsigned int i = 0; i < var_src_dirs->values.len; i++) {
+      string_replace(&((string_t*)var_src_dirs->values.data)[i], "/", PATH_SEPERATOR);
     }
-    for (unsigned int i = 0; i < var_config_dir->len; i++) {
-      string_replace(&var_config_dir->data[i], "/", PATH_SEPERATOR);
+    for (unsigned int i = 0; i < var_config_dir->values.len; i++) {
+      string_replace(&((string_t*)var_config_dir->values.data)[i], "/", PATH_SEPERATOR);
     }
   }
   
@@ -94,16 +95,16 @@ int main(int argc, char **argv) {
   FILE *main_out_file = fileio_open_safe(cstr(&main_out), false);
 
 
-  for (unsigned int i = 0; i < var_main_dirs->len; i++) {
-    string_t dir_path = var_main_dirs->data[i];
+  for (unsigned int i = 0; i < var_main_dirs->values.len; i++) {
+    string_t dir_path = ((string_t*)var_main_dirs->values.data)[i];
     add_src_files_from_dir(main_out_file, &dir_path, &path_sep, &extension);
   }
   fclose(main_out_file);
 
   // Finding and recording all component files
   FILE *componentOut = fileio_open_safe(cstr(&component_out), false);
-  for (unsigned int i = 0; i < var_src_dirs->len; i++) {
-    string_t componentDirPath = var_src_dirs->data[i];
+  for (unsigned int i = 0; i < var_src_dirs->values.len; i++) {
+    string_t componentDirPath = ((string_t*)var_src_dirs->values.data)[i];
     add_src_files_from_dir(componentOut, &componentDirPath, &path_sep,
                            &extension);
   }

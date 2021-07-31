@@ -6,7 +6,7 @@
  */
 string_t dir_path_remove_start(string_t *path) {
   if (path->len == 0) {
-    return new_string(0);
+    return string_new(0);
   }
   
   /*
@@ -22,7 +22,7 @@ string_t dir_path_remove_start(string_t *path) {
     }
   }
 
-  return new_string(0);
+  return string_new(0);
 }
 
 DIR* dir_open_safe_c(char* path) {
@@ -44,7 +44,7 @@ DIR* dir_open_safe(string_t* path) {
 // MEMORY_SAFE 04/05/2021
 alist_t dir_all_entries_alist(string_t *path) {
   struct dirent *entry;
-  alist_t entries = new_alist(sizeof(struct dirent));
+  alist_t entries = alist_new(sizeof(struct dirent));
   
   // Read all dirents into the alist entries
   DIR *d = dir_open_safe(path);
@@ -60,7 +60,7 @@ alist_t dir_all_entry_names(string_t *path,
                       int (*key)(string_t *entry_name, void *extra),
                       void *extra) {
   struct dirent *entry;
-  alist_t files = new_alist(sizeof(string_t));
+  alist_t files = alist_new(sizeof(string_t));
 
   DIR *d = dir_open_safe(path);
   while ((entry = readdir(d))) {
@@ -106,16 +106,16 @@ alist_t dir_all_file_names(string_t *path,
                            int (*key)(string_t *file_name, void *extra),
                            void *extra) {
   struct dirent *entry;
-  alist_t files = new_alist(sizeof(string_t));
+  alist_t files = alist_new(sizeof(string_t));
   
 
   string_t path_sep = string_make(PATH_SEPERATOR);
 
-  string_t base_path = new_string(path->len + path_sep.len);
+  string_t base_path = string_new(path->len + path_sep.len);
   string_write(&base_path, path);
   string_write(&base_path, &path_sep);
 
-  string_t entry_path = new_string(base_path.len);
+  string_t entry_path = string_new(base_path.len);
   string_write(&entry_path, &base_path);
 
   DIR *d = dir_open_safe(path);
@@ -140,23 +140,23 @@ alist_t dir_all_files_recur(string_t *path,
                             int (*key)(string_t *file_name, void *extra),
                             void *extra, bool include_base_path) {
   // The return type is a list containing the paths to all matching files
-  alist_t valid_files = new_alist(sizeof(string_t));
+  alist_t valid_files = alist_new(sizeof(string_t));
   valid_files.destroy = void_string_destroy;
 
   string_t path_sep = string_make(PATH_SEPERATOR);
 
-  string_t base_path = new_string(path->len + path_sep.len);
+  string_t base_path = string_new(path->len + path_sep.len);
   string_write(&base_path, path);
   string_write(&base_path, &path_sep);
 
   // Getting all the directory entries in the current directory
   alist_t entries = dir_all_entries_alist(path);
 
-  string_t file_name = new_string(0);
-  string_t entry_path = new_string(base_path.len);
+  string_t file_name = string_new(0);
+  string_t entry_path = string_new(base_path.len);
   string_write(&entry_path, &base_path);
 
-  alist_iterator_t it = new_alist_iterator(&entries, true);
+  alist_iterator_t it = alist_iterator_new(&entries, true);
   for (struct dirent *entry = it.first(&it); !it.done(&it);
        entry = it.next(&it)) {
     // Generate the string for the entry-name
