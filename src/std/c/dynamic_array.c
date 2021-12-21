@@ -48,19 +48,20 @@ dynamic_array_t dynamic_array_wrap(void *data, int len, int capacity,
 //////////////////////////////
 
 void dynamic_array_append(dynamic_array_t *array, void *data) {
-  dynamic_array_insert(array, -1, data);
+  dynamic_array_insert(array, array->len, data);
 }
 
 void dynamic_array_insert(dynamic_array_t *array, int index, void *data) {
-  index = index_convert_negative_safe(array->len + 1, index);
+  index = index_convert_negative(array->len, index);
+  index = index_constrain(array->len + 1, index);
   dynamic_array_make_space(array, array->len + 1);
 
-  void *elem = dynamic_array_get(array, index);
+  void *elem = array_generic_get(array->data, index, array->elem_size);
 
   int elems_to_move = array->len - index;
 
   if (elems_to_move != 0) {
-    void *one_up = dynamic_array_get(array, index + 1);
+    void *one_up = array_generic_get(array, index + 1, array->elem_size);
     assert(memmove(one_up, elem, elems_to_move * array->elem_size));
   }
 
@@ -131,6 +132,7 @@ void *dynamic_array_copy_elem(dynamic_array_t *array, int index) {
   return copy;
 }
 
+// TODO re-write description for function, as it does not allocate memory
 void dynamic_array_pop(dynamic_array_t *array, void* dest, int index) {
   void *elem = dynamic_array_get(array, index);
   assert(memcpy(dest, elem, array->elem_size));

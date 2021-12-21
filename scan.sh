@@ -1,1 +1,0 @@
-./.build/prog/projectScanScript.sh

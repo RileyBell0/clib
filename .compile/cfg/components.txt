@@ -1,5 +1,6 @@
 src/std/cmd/c/console.c
 src/std/dir/c/directory.c
+src/std/c/dict.c
 src/std/c/avlBinTree.c
 src/std/c/sorting.c
 src/std/c/list.c

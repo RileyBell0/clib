@@ -8,8 +8,12 @@ void stack_push(stackk_t *stack, void *data) {
   dynamic_array_append((dynamic_array_t *)stack, data);
 }
 
-void stack_pop(stackk_t *stack, void *dest) {
-  dynamic_array_pop((dynamic_array_t *)stack, dest, -1);
+bool stack_pop(stackk_t *stack, void *dest) {
+  if (stack->len > 0) {
+    dynamic_array_pop((dynamic_array_t *)stack, dest, -1);
+    return true;
+  }
+  return false;
 }
 
 void *stack_top(stackk_t *stack) {

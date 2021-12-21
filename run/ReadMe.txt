@@ -1,1 +1,0 @@
-Folder contains scripts for running embedded programs

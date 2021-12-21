@@ -3,11 +3,20 @@ echo "Setting up Project Information..."
 echo "---------------------------------"
 echo ""
 
-#MAIN_DIR="main"
-#SRC_DIR="src"
-PROGNAME_START="./.build/prog/projectScan"
+# Changeable Vars
+
+BASE_NAME=".compile"
+PROG_FOLDER="prog"
+CONFIG_FOLDER="cfg"
+PROG_NAME="projectScan"
+SCAN_CFG_FILENAME="scan.cfg"
+
+###############################################################################
+###############################################################################
+
+PROGNAME_START="./$BASE_NAME/$PROG_FOLDER/$PROG_NAME"
 PROGNAME_END="Unknown"
-SCAN_CFG_LOC=".build/config/scan.cfg"
+SCAN_CFG_LOC="$BASE_NAME/$CONFIG_FOLDER/$SCAN_CFG_FILENAME"
 EXTENSION=""
 
 case "$OSTYPE" in

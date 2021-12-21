@@ -1,0 +1,82 @@
+all: hello
+
+hello: hello.o console.o directory.o dict.o avlBinTree.o sorting.o list.o circular_array.o memory.o fileIO.o array.o stack.o stacklist.o string.o queue.o avl_tree.o pointer.o index.o error.o argparse.o path.o alist.o config.o dynamic_array.o int.o
+	clang -arch arm64 -Wall -o output/build/hello output/objects/hello.o output/objects/console.o output/objects/directory.o output/objects/dict.o output/objects/avlBinTree.o output/objects/sorting.o output/objects/list.o output/objects/circular_array.o output/objects/memory.o output/objects/fileIO.o output/objects/array.o output/objects/stack.o output/objects/stacklist.o output/objects/string.o output/objects/queue.o output/objects/avl_tree.o output/objects/pointer.o output/objects/index.o output/objects/error.o output/objects/argparse.o output/objects/path.o output/objects/alist.o output/objects/config.o output/objects/dynamic_array.o output/objects/int.o -g
+
+hello.o: src/main/hello.c
+	clang -arch arm64 -Wall -c -o output/objects/hello.o src/main/hello.c -g
+
+console.o: src/std/cmd/c/console.c
+	clang -arch arm64 -Wall -c -o output/objects/console.o src/std/cmd/c/console.c -g
+
+directory.o: src/std/dir/c/directory.c
+	clang -arch arm64 -Wall -c -o output/objects/directory.o src/std/dir/c/directory.c -g
+
+dict.o: src/std/c/dict.c
+	clang -arch arm64 -Wall -c -o output/objects/dict.o src/std/c/dict.c -g
+
+avlBinTree.o: src/std/c/avlBinTree.c
+	clang -arch arm64 -Wall -c -o output/objects/avlBinTree.o src/std/c/avlBinTree.c -g
+
+sorting.o: src/std/c/sorting.c
+	clang -arch arm64 -Wall -c -o output/objects/sorting.o src/std/c/sorting.c -g
+
+list.o: src/std/c/list.c
+	clang -arch arm64 -Wall -c -o output/objects/list.o src/std/c/list.c -g
+
+circular_array.o: src/std/c/circular_array.c
+	clang -arch arm64 -Wall -c -o output/objects/circular_array.o src/std/c/circular_array.c -g
+
+memory.o: src/std/c/memory.c
+	clang -arch arm64 -Wall -c -o output/objects/memory.o src/std/c/memory.c -g
+
+fileIO.o: src/std/c/fileIO.c
+	clang -arch arm64 -Wall -c -o output/objects/fileIO.o src/std/c/fileIO.c -g
+
+array.o: src/std/c/array.c
+	clang -arch arm64 -Wall -c -o output/objects/array.o src/std/c/array.c -g
+
+stack.o: src/std/c/stack.c
+	clang -arch arm64 -Wall -c -o output/objects/stack.o src/std/c/stack.c -g
+
+stacklist.o: src/std/c/stacklist.c
+	clang -arch arm64 -Wall -c -o output/objects/stacklist.o src/std/c/stacklist.c -g
+
+string.o: src/std/c/string.c
+	clang -arch arm64 -Wall -c -o output/objects/string.o src/std/c/string.c -g
+
+queue.o: src/std/c/queue.c
+	clang -arch arm64 -Wall -c -o output/objects/queue.o src/std/c/queue.c -g
+
+avl_tree.o: src/std/c/avl_tree.c
+	clang -arch arm64 -Wall -c -o output/objects/avl_tree.o src/std/c/avl_tree.c -g
+
+pointer.o: src/std/c/pointer.c
+	clang -arch arm64 -Wall -c -o output/objects/pointer.o src/std/c/pointer.c -g
+
+index.o: src/std/c/index.c
+	clang -arch arm64 -Wall -c -o output/objects/index.o src/std/c/index.c -g
+
+error.o: src/std/c/error.c
+	clang -arch arm64 -Wall -c -o output/objects/error.o src/std/c/error.c -g
+
+argparse.o: src/std/c/argparse.c
+	clang -arch arm64 -Wall -c -o output/objects/argparse.o src/std/c/argparse.c -g
+
+path.o: src/std/c/path.c
+	clang -arch arm64 -Wall -c -o output/objects/path.o src/std/c/path.c -g
+
+alist.o: src/std/c/alist.c
+	clang -arch arm64 -Wall -c -o output/objects/alist.o src/std/c/alist.c -g
+
+config.o: src/std/c/config.c
+	clang -arch arm64 -Wall -c -o output/objects/config.o src/std/c/config.c -g
+
+dynamic_array.o: src/std/c/dynamic_array.c
+	clang -arch arm64 -Wall -c -o output/objects/dynamic_array.o src/std/c/dynamic_array.c -g
+
+int.o: src/std/c/int.c
+	clang -arch arm64 -Wall -c -o output/objects/int.o src/std/c/int.c -g
+
+clean:
+	rm output/objects/*.o output/build/*

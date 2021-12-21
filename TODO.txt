@@ -2,6 +2,22 @@
 // TODO for all insert functions, make it so that circular->len makes it append
 // but -1 makes it insert before the last element (1, 2, 3, 4) + (5 inserted at pos -1) -> (1, 2, 3, 5, 4)
 
+make the compile program put the "components.txt" and "programs.txt" into output/scan_results
+
+make configurations loaded overwritable so you can load config1 and overload it with config2
+
+// Where i am right now
+Working on list.c, adding list iterator
+literally nothing else works there yet
+
+implementing the same method for storing data as alist where
+we make ourselves a custom type array thing in the node where
+we allocate enough memory for node_size + element_size and just index to 
+the element instead of the old way we were doing it where we allocated memory
+twice
+
+
+- Seperate default config into seperate file, then 
 
 // TODO make sure every call to offset is well defined
 // so sometimes theres
@@ -31,3 +47,9 @@
   TODO 
     should you be able to write to a null string?
     and if so, should you use the small str buffer or should it use allocated memory?
+
+TODO 
+add index_constrain calls to insert methods
+
+TODO
+make a dictionary

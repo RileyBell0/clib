@@ -4,8 +4,16 @@ echo "---------------------------------"
 echo "Only warnings will be shown"
 echo ""
 
+# Changeable Vars
+COMPILE_BASE=".compile"
+MAKE_FOLDER="make"
+MAKEFILE_NAME_BASE=""
+
+###############################################################################
+###############################################################################
+
+MAKE_PATH="$COMPILE_BASE/$MAKE_FOLDER/"
 CURRENT_OS="Unknown"
-MAKEFILE_BASE="Makefile_"
 
 case "$OSTYPE" in
   solaris*) CURRENT_OS="SOLARIS" ;;
@@ -16,7 +24,8 @@ case "$OSTYPE" in
   *)        echo "unknown os type: $OSTYPE" ;;
 esac
 
-make -f"$MAKEFILE_BASE$CURRENT_OS" -s
+echo make -f"$MAKE_PATH$MAKEFILE_NAME_BASE$CURRENT_OS" -s
+make -f"$MAKE_PATH$MAKEFILE_NAME_BASE$CURRENT_OS" -s
 
 echo ""
 echo "Finished running makefile!"

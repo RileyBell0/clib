@@ -1,303 +1,387 @@
-#include "../avl_tree.h"
+// #include "../avl_tree.h"
 
-// TODO write comments describing what each function does for each function
-// declaration below
-avl_tree_node_t avl_tree_node_new();
-static int avl_tree_insert_node(avl_tree_t *tree, int node_pos, void *data);
-static int avl_tree_left_rotate(avl_tree_t *tree, int node_pos);
-static int avl_tree_right_rotate(avl_tree_t *tree, int node_pos);
-static void *avl_tree_node_data(avl_tree_node_t *node);
-static avl_tree_node_t *avl_tree_get_node(avl_tree_t *tree, int node);
-static avl_tree_node_t *avl_tree_node_left(avl_tree_t *tree,
-                                           avl_tree_node_t *node);
-static avl_tree_node_t *avl_tree_node_right(avl_tree_t *tree,
-                                            avl_tree_node_t *node);
-static int avl_tree_balance(avl_tree_t *tree, int node_pos);
-static void avl_tree_write_new_node(avl_tree_t *tree, void *data);
-static int avl_tree_relative_distance(int source, int dest);
-static void avl_tree_extend(avl_tree_t *tree);
-static int avl_tree_height(avl_tree_t *tree, int node_pos);
+// // TODO write comments describing what each function does for each function
+// // declaration below
+// static int avl_tree_insert_node(avl_tree_t *tree, int node_pos, void *data);
+// static int avl_tree_left_rotate(avl_tree_t *tree, int node_pos);
+// static int avl_tree_right_rotate(avl_tree_t *tree, int node_pos);
+// static void *avl_tree_node_data(avl_tree_node_t *node);
+// static avl_tree_node_t *avl_tree_get_node(avl_tree_t *tree, int node);
+// static avl_tree_node_t *avl_tree_node_left(avl_tree_t *tree,
+//                                            avl_tree_node_t *node);
+// static avl_tree_node_t *avl_tree_node_right(avl_tree_t *tree,
+//                                             avl_tree_node_t *node);
+// static int avl_tree_write_new_node(avl_tree_t *tree, void *data, int parent);
+// static int avl_tree_balance(avl_tree_t *tree, int node_pos);
+// static int avl_tree_relative_distance(int source, int dest);
+// static void avl_tree_extend(avl_tree_t *tree);
+// static int avl_tree_height(avl_tree_t *tree, int node_pos);
 
-//////////////////////////////
-// Initialisation
-//////////////////////////////
+// //////////////////////////////
+// // Initialisation
+// //////////////////////////////
 
-avl_tree_t avl_tree_new(size_t elem_size,
-                        int (*compare)(const void *elem1, const void *elem2)) {
-  avl_tree_t tree;
+// avl_tree_t avl_tree_new(size_t elem_size,
+//                         int (*compare)(const void *elem1, const void *elem2)) {
+//   avl_tree_t tree;
 
-  tree.tree_start = NULL;
-  tree.root = AVL_TREE_NULL;
-  tree.size = 0;
-  tree.capacity = 0;
-  tree.elem_size = elem_size;
-  tree.block_size = elem_size + sizeof(avl_tree_node_t);
-  tree.destroy_on_remove = true;
-  tree.destroy = NULL;
-  tree.compare = compare;
+//   tree.tree_start = NULL;
+//   tree.root = AVL_TREE_NULL;
+//   tree.size = 0;
+//   tree.capacity = 0;
+//   tree.elem_size = elem_size;
+//   tree.block_size = elem_size + sizeof(avl_tree_node_t);
+//   tree.destroy_on_remove = true;
+//   tree.destroy = NULL;
+//   tree.compare = compare;
 
-  return tree;
-}
+//   return tree;
+// }
 
-avl_tree_node_t avl_tree_node_new() {
-  // TODO is this even used anywhere?
-  avl_tree_node_t node;
+// //////////////////////////////
+// // Basic Operations
+// //////////////////////////////
 
-  node.left = AVL_TREE_NULL;
-  node.right = AVL_TREE_NULL;
-  node.height = 1;
+// void avl_tree_insert(avl_tree_t *tree, void *data) {
+//   avl_tree_extend(tree);
 
-  return node;
-}
+//   // Case of insert at root
+//   if (tree->root == AVL_TREE_NULL) {
+//     return avl_tree_write_new_node(tree, data, AVL_TREE_NULL);
+//   }
 
-//////////////////////////////
-// Basic Operations
-//////////////////////////////
+//   tree->root = avl_tree_insert_node(tree, tree->root, data);
+//   tree->size += 1;
+// }
 
-void avl_tree_insert(avl_tree_t *tree, void *data) {
-  avl_tree_extend(tree);
-  tree->root = avl_tree_insert_node(tree, tree->root, data);
-  tree->size += 1;
-}
+// // TODO verify the rotations are associated correctly
+// // I kinda fumbled them together until it stopped giving me bus errors
+// static int avl_tree_insert_node(avl_tree_t *tree, int node_pos, void *data) {
+//   avl_tree_node_t *node = avl_tree_get_node(tree, node_pos);
+//   void *node_data = avl_tree_node_data(node);
 
-static int avl_tree_insert_node(avl_tree_t *tree, int node_pos, void *data) {
-  avl_tree_node_t *node = avl_tree_get_node(tree, node_pos);
-  int compare_val = tree->compare(avl_tree_node_data(node), data);
-  if (compare_val <= 0) {
-    if (node->left == AVL_TREE_NULL) {
-      avl_tree_write_new_node(tree, data);
-      node->left = avl_tree_relative_distance(node_pos, tree->size);
-    } else {
-      int sub_node_pos =
-          avl_tree_insert_node(tree, node_pos + node->left, data);
-      node->left = avl_tree_relative_distance(node_pos, sub_node_pos);
-    }
-  } else {
-    if (node->right == AVL_TREE_NULL) {
-      avl_tree_write_new_node(tree, data);
-      node->right = avl_tree_relative_distance(node_pos, tree->size);
-    } else {
-      int sub_node_pos =
-          avl_tree_insert_node(tree, node_pos + node->right, data);
-      node->right = avl_tree_relative_distance(node_pos, sub_node_pos);
-    }
-  }
+//   // Insert data into tree
+//   if (tree->compare(data, node_data) <= 0) {
+//     // Insert to the left
+//     if (node->left == AVL_TREE_NULL) {
+//       node->left = avl_tree_write_new_node(tree, data, node_pos);
+//     }
+//     else {
+//       node->left = avl_tree_insert_node(tree, node->left, data);
+//     }
+//   } else {
+//     // Insert to the right
+//     if (node->right == AVL_TREE_NULL) {
+//       node->right = avl_tree_write_new_node(tree, data, node_pos);
+//     }
+//     else {
+//       node->right = avl_tree_insert_node(tree, node->right, data);
+//     }
+//   }
 
-  int left_node = AVL_TREE_NULL;
-  int right_node = AVL_TREE_NULL;
-  void *node_left_data = NULL;
-  void *node_right_data = NULL;
-  if (node->left != AVL_TREE_NULL) {
-    left_node = node_pos + node->left;
-    node_left_data = avl_tree_node_data(avl_tree_get_node(tree, left_node));
-  }
-  if (node->right != AVL_TREE_NULL) {
-    right_node = node_pos + node->right;
-    node_right_data = avl_tree_node_data(avl_tree_get_node(tree, right_node));
-  }
+//   // Update height and balance
+//   node->height = 1 + max_int(avl_tree_height(tree, node->left),
+//                              avl_tree_height(tree, node->right));
+                             
+//   int balance = avl_tree_balance(tree, node_pos);
 
-  node->height = 1 + max_int(avl_tree_height(tree, left_node),
-                             avl_tree_height(tree, right_node));
+//   void *node_left = avl_tree_node_data(avl_tree_node_left(tree, node));
+//   void *node_right = avl_tree_node_data(avl_tree_node_right(tree, node));
 
-  int balance = avl_tree_balance(tree, node_pos);
+//   // Left Left
+//   if (balance > 1 && tree->compare(node_left, node_data) <= 0) {
+//     return avl_tree_right_rotate(tree, node_pos);
+//   }
 
-  // Left Left
-  if (balance > 1) {
-    int compare = tree->compare(avl_tree_node_data(node), node_left_data);
-    if (compare <= 0) {
-      return avl_tree_right_rotate(tree, node_pos);
-    }
-  }
+//   // Right Right
+//   if (balance < -1 && tree->compare(node_right, node_data) > 0) {
+//     return avl_tree_left_rotate(tree, node_pos);
+//   }
 
-  // Right Right
-  if (balance < -1) {
-    int compare = tree->compare(avl_tree_node_data(node), node_right_data);
-    if (compare > 0) {
-      return avl_tree_left_rotate(tree, node_pos);
-    }
-  }
+//   // Left Right
+//   if (balance > 1 && tree->compare(node_left, node_data) > 0) {
+//     node->left = avl_tree_left_rotate(tree, node->left);
+//     return avl_tree_right_rotate(tree, node_pos);
+//   }
 
-  // Left Right
-  if (balance > 1) {
-    int compare = tree->compare(avl_tree_node_data(node), node_left_data);
-    if (compare > 0) {
-      node->left = avl_tree_relative_distance(
-          node_pos, avl_tree_left_rotate(tree, left_node));
-      return avl_tree_right_rotate(tree, node_pos);
-    }
-  }
+//   // Right Left
+//   if (balance < -1 && tree->compare(node_right, node_data) <= 0) {
+//     node->right = avl_tree_right_rotate(tree, node->right);
+//     return avl_tree_left_rotate(tree, node_pos);
+//   }
 
-  // Right Left
-  if (balance < -1) {
-    int compare = tree->compare(avl_tree_node_data(node), node_right_data);
-    if (compare > 0) {
-      node->right = avl_tree_relative_distance(
-          node_pos, avl_tree_right_rotate(tree, right_node));
-      return avl_tree_left_rotate(tree, node_pos);
-    }
-  }
+//   // return the position of the current node (unchanged)
+//   return node_pos;
+// }
 
-  // return the position of the current node (unchanged)
-  return node_pos;
-}
+// //////////////////////////////
+// // Utility
+// //////////////////////////////
 
-//////////////////////////////
-// Utility
-//////////////////////////////
+// static int avl_tree_left_rotate(avl_tree_t *tree, int x_pos) {
+//   avl_tree_node_t *x = avl_tree_get_node(tree, x_pos);
+//   avl_tree_node_t *y = avl_tree_get_node(tree, x->right);
+//   avl_tree_node_t *t = avl_tree_get_node(tree, y->left);
 
-static int avl_tree_left_rotate(avl_tree_t *tree, int node_pos) {
-  avl_tree_node_t *node = avl_tree_get_node(tree, node_pos);
-  avl_tree_node_t *node_left = avl_tree_node_left(tree, node);
-  int node_left_pos = node_pos + node->left;
-  int node_left_right_pos = node_left_pos + node_left->right;
+//   int return_node = x->right;
 
-  // Perform rotation
-  node_left->right = avl_tree_relative_distance(node_left_pos, node_pos);
-  node->left = avl_tree_relative_distance(node_pos, node_left_right_pos);
+//   // Perform rotation
+//   y->parent = x->parent;
+//   x->parent = x->right;
+//   t->parent = x_pos;
+//   x->right = y->left;
+//   y->left = x_pos;
 
-  int right_node_pos = AVL_TREE_NULL;
-  if (node->right != AVL_TREE_NULL) {
-    right_node_pos = node_pos + node->right;
-  }
+//   // Update heights
+//   x->height = 1 + max_int(avl_tree_height(tree, x->left),
+//                           avl_tree_height(tree, x->right));
+//   y->height = 1 + max_int(avl_tree_height(tree, y->left),
+//                           avl_tree_height(tree, y->right));
+//   // Return new root
+//   return return_node;
+// }
 
-  int node_left_left_pos = AVL_TREE_NULL;
-  if (node_left->left != AVL_TREE_NULL) {
-    node_left_left_pos = node_left_pos + node_left->left;
-  }
+// static int avl_tree_right_rotate(avl_tree_t *tree, int y_pos) {
+//   avl_tree_node_t *y = avl_tree_get_node(tree, y_pos);
+//   avl_tree_node_t *x = avl_tree_get_node(tree, y->left);
+//   avl_tree_node_t *t = avl_tree_get_node(tree, x->right);
 
-  // Update heights
-  node->height = 1 + max_int(avl_tree_height(tree, node_left_right_pos),
-                             avl_tree_height(tree, right_node_pos));
-  node_left->height = 1 + max_int(avl_tree_height(tree, node_left_left_pos),
-                                  avl_tree_height(tree, node_pos));
+//   int return_node = y->left;
 
-  // Return new root
-  return node_left_pos;
-}
+//   // Perform Rotation
+//   x->parent = y->parent;
+//   y->parent = y->left;
+//   t->parent = y_pos;
+//   y->left = x->right;
+//   x->right = y_pos;
 
-static int avl_tree_right_rotate(avl_tree_t *tree, int node_pos) {
-  avl_tree_node_t *node = avl_tree_get_node(tree, node_pos);
-  avl_tree_node_t *node_right = avl_tree_node_right(tree, node);
-  int node_right_pos = node_pos + node->right;
-  int node_right_left_pos = node_right_pos + node_right->left;
+//   y->height = 1 + max_int(avl_tree_height(tree, y->left),
+//                           avl_tree_height(tree, y->right));
+//   x->height = 1 + max_int(avl_tree_height(tree, x->left),
+//                           avl_tree_height(tree, x->right));
 
-  // Perform rotation
-  node_right->left = avl_tree_relative_distance(node_right_pos, node_pos);
-  node->right = avl_tree_relative_distance(node_pos, node_right_left_pos);
+//   // Return new root
+//   return return_node;
+// }
 
-  int left_node = AVL_TREE_NULL;
-  if (node->left != AVL_TREE_NULL) {
-    left_node = node_pos + node->left;
-  }
+// static void *avl_tree_node_data(avl_tree_node_t *node) {
+//   return &node[AVL_TREE_ELEM];
+// }
 
-  int node_right_right_pos = AVL_TREE_NULL;
-  if (node_right->right != AVL_TREE_NULL) {
-    node_right_right_pos = node_right_pos + node_right->right;
-  }
+// static avl_tree_node_t *avl_tree_get_node(avl_tree_t *tree, int node) {
+//   return array_generic_get(tree->tree_start, node, tree->block_size);
+// }
 
-  // Update heights
-  node->height = 1 + max_int(avl_tree_height(tree, left_node),
-                             avl_tree_height(tree, node_right_left_pos));
-  node_right->height =
-      1 + max_int(avl_tree_height(tree, node_pos),
-                  avl_tree_height(tree, node_right_right_pos));
+// static avl_tree_node_t *avl_tree_node_left(avl_tree_t *tree,
+//                                            avl_tree_node_t *node) {
+//   if (node->left == AVL_TREE_NULL) {
+//     return NULL;
+//   }
+//   return avl_tree_get_node(tree, node->left);
+// }
 
-  // Return new root
-  return node_right_pos;
-}
+// static avl_tree_node_t *avl_tree_node_right(avl_tree_t *tree,
+//                                             avl_tree_node_t *node) {
+//   if (node->right == AVL_TREE_NULL) {
+//     return NULL;
+//   }
+//   return avl_tree_get_node(tree, node->right);
+// }
 
-static void *avl_tree_node_data(avl_tree_node_t *node) {
-  return &node[AVL_TREE_ELEM];
-}
+// static avl_tree_node_t *avl_tree_node_parent(avl_tree_t* tree,
+//                                              avl_tree_node_t* node) {
+//   if (node->parent == AVL_TREE_NULL) {
+//     return NULL;
+//   }
+//   return avl_tree_get_node(tree, node->parent);
+// }
 
-static avl_tree_node_t *avl_tree_get_node(avl_tree_t *tree, int node) {
-  return array_generic_get(tree->tree_start, node, tree->block_size);
-}
+// static int avl_tree_balance(avl_tree_t *tree, int node_pos) {
+//   if (node_pos == AVL_TREE_NULL) {
+//     return 0;
+//   }
 
-static avl_tree_node_t *avl_tree_node_left(avl_tree_t *tree,
-                                           avl_tree_node_t *node) {
-  if (node->left == AVL_TREE_NULL) {
-    return NULL;
-  }
+//   avl_tree_node_t *node = avl_tree_get_node(tree, node_pos);
 
-  return offset(node, tree->block_size * node->left);
-}
+//   return avl_tree_height(tree, node->left) - avl_tree_height(tree, node->right);
+// }
 
-static avl_tree_node_t *avl_tree_node_right(avl_tree_t *tree,
-                                            avl_tree_node_t *node) {
-  if (node->right == AVL_TREE_NULL) {
-    return NULL;
-  }
+// static int avl_tree_write_new_node(avl_tree_t *tree, void *data, int parent) {
+//   avl_tree_node_t *node = avl_tree_get_node(tree, tree->size);
 
-  return offset(node, tree->block_size * node->right);
-}
+//   assert(memcpy(&node[AVL_TREE_ELEM], data, tree->elem_size));
+//   node->left = AVL_TREE_NULL;
+//   node->right = AVL_TREE_NULL;
+//   node->height = 1;
+//   node->parent = parent;
 
-static int avl_tree_balance(avl_tree_t *tree, int node_pos) {
-  if (node_pos == AVL_TREE_NULL) {
-    return 0;
-  }
+//   return tree->size;
+// }
 
-  avl_tree_node_t *node =
-      array_generic_get(tree->tree_start, node_pos, tree->block_size);
-  int left_node = AVL_TREE_NULL;
-  int right_node = AVL_TREE_NULL;
-  if (node->left != AVL_TREE_NULL) {
-    left_node = node_pos + node->left;
-  }
-  if (node->right != AVL_TREE_NULL) {
-    right_node = node_pos + node->right;
-  }
+// static void avl_tree_extend(avl_tree_t *tree) {
+//   if (tree->capacity > tree->size) {
+//     return;
+//   }
 
-  return avl_tree_height(tree, left_node) - avl_tree_height(tree, right_node);
-}
+//   // Increase capacity by 1.5x
+//   tree->capacity = tree->capacity + (tree->capacity / 2);
+//   if (tree->capacity <= 1) {
+//     tree->capacity += 1;
+//   }
 
-static void avl_tree_write_new_node(avl_tree_t *tree, void *data) {
-  avl_tree_node_t *node_area = (avl_tree_node_t *)array_generic_get(
-      tree->tree_start, tree->size, tree->block_size);
+//   // Reallocate / allocate space for more nodes
+//   if (tree->tree_start) {
+//     tree->tree_start =
+//         safe_realloc(tree->tree_start, tree->block_size * tree->capacity);
+//   } else {
+//     tree->tree_start = safe_malloc(tree->capacity * tree->block_size);
+//   }
+// }
 
-  node_area->left = AVL_TREE_NULL;
-  node_area->right = AVL_TREE_NULL;
+// static int avl_tree_height(avl_tree_t *tree, int node_pos) {
+//   if (node_pos == AVL_TREE_NULL) {
+//     return 0;
+//   }
 
-  assert(memcpy(&node_area[AVL_TREE_ELEM], data, tree->elem_size));
-}
+//   avl_tree_node_t *node = avl_tree_get_node(tree, node_pos);
 
-static int avl_tree_relative_distance(int source, int dest) {
-  return dest - source;
-}
+//   return node->height;
+// }
 
-static void avl_tree_extend(avl_tree_t *tree) {
-  if (tree->capacity > tree->size) {
-    return;
-  }
+// // TODO translate into my tree format
+// int avl_tree_delete_node(avl_tree_t* tree, int node_pos, void* key) {
+//   // Find Node
+//   avl_tree_node_t* parent = NULL;
+//   avl_tree_node_t *curr = avl_tree_get_node(tree, node_pos);
+//   while (true) {
+//     int compare_val = tree->compare(&curr[AVL_TREE_ELEM], key);
+//     if (compare_val == 0) {
+//       // Found node
+//     }
+//     else if (compare_val > 0) {
+//       // TODO if something is breaking in deletion, check its going the correct way
+//       // Go right
+//       parent = curr;
+//       curr = avl_tree_node_right(tree, curr);
+//     }
+//     else {
+//       // TODO if something is breaking in deletion, check its going the correct way
+//       // Go Left
+//       parent = curr;
+//       curr = avl_tree_node_left(tree, curr);
+//     }
+    
+//     if (curr == NULL) {
+//       // Requested item not in tree
+//       break;
+//     }
+//   }
+  
+//   // STEP 1: PERFORM STANDARD BST DELETE
 
-  // Increase capacity by 1.5x
-  tree->capacity = tree->capacity + (tree->capacity / 2);
-  if (tree->capacity <= 1) {
-    tree->capacity += 1;
-  }
+//   if (node_pos == AVL_TREE_NULL)
+//     return node_pos;
 
-  // Reallocate / allocate space for more nodes
-  if (tree->tree_start) {
-    tree->tree_start =
-        safe_realloc(tree->tree_start, tree->block_size * tree->capacity);
-  } else {
-    tree->tree_start = safe_malloc(tree->capacity * tree->block_size);
-  }
-}
+//   // If the key to be deleted is smaller than the
+//   // root's key, then it lies in left subtree
+//   avl_tree_node_t *node = avl_tree_get_node(tree, node_pos);
+//   void* node_key = avl_tree_node_data(node);
+//   int compare_result = tree->compare(key, node_key);
+//   if (compare_result < 0) {
+//     node->left = avl_tree_delete_node(tree, node->left, key);
+//   }
 
-static int avl_tree_height(avl_tree_t *tree, int node_pos) {
-  if (node_pos == AVL_TREE_NULL) {
-    return 0;
-  }
+//   // If the key to be deleted is greater than the
+//   // root's key, then it lies in right subtree
+//   else if (compare_result > 0)
+//     node->right = avl_tree_delete_node(tree, node->right, key);
 
-  avl_tree_node_t *node = (avl_tree_node_t *)array_generic_get(
-      tree->tree_start, node_pos, tree->block_size);
-  return node->height;
-}
+//   // if key is same as root's key, then This is
+//   // the node to be deleted
+//   else {
+//     // node with only one child or no child
+//     if ((node->left == AVL_TREE_NULL) || (node->right == AVL_TREE_NULL)) {
+//       int temp;
+//       if (node->left != AVL_TREE_NULL) {
+//         temp = node->left;
+//       }
+//       else {
+//         temp = node->right;
+//       }
 
-// TODO add the pre-order code from https://www.geeksforgeeks.org/avl-tree-set-1-insertion/
-// See if anything is being inserted
-// Make sure the root is being updated right
-// Find a way to write the tree to the screen
-// Add removal
-// 
+//       // No child case
+//       if (temp == AVL_TREE_NULL) {
+//         // TODO What is this doing?
+//         // So we've found the node and it has no children
+//         // what this is doing is saying "set temp to your parent
+//         // then set your parent to NULL, 
+//         // The current node is to be removed, and there are no children, taht means we just need to remove the node
+//         // and we have nothing to deal with.
+//         // so when removing the node what we're saying is that we're gonna save
+//         // the poisition of our current node 'temp'
+//         /*
+//          * Heres the issue, i think i may need parent pointers
+//          cause if im moving the node that's last in the array to fill the empty
+//          spot then i need to access its parent
+//         */
+//         temp = node_pos;
+//         node_pos = AVL_TREE_NULL;
+//       } else {
+//         *root = *temp; // Copy the contents of
+//       }          // One child case
+//                        // the non-empty child
+//       free(temp);
+//     } else {
+//       // node with two children: Get the inorder
+//       // successor (smallest in the right subtree)
+//       struct Node *temp = minValueNode(root->right);
+
+//       // Copy the inorder successor's data to this node
+//       root->key = temp->key;
+
+//       // Delete the inorder successor
+//       root->right = deleteNode(root->right, temp->key);
+//     }
+//   }
+
+//   // If the tree had only one node then return
+//   if (root == NULL)
+//     return root;
+
+//   // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
+//   root->height = 1 + max(height(root->left), height(root->right));
+
+//   // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to
+//   // check whether this node became unbalanced)
+//   int balance = getBalance(root);
+
+//   // If this node becomes unbalanced, then there are 4 cases
+
+//   // Left Left Case
+//   if (balance > 1 && getBalance(root->left) >= 0)
+//     return rightRotate(root);
+
+//   // Left Right Case
+//   if (balance > 1 && getBalance(root->left) < 0) {
+//     root->left = leftRotate(root->left);
+//     return rightRotate(root);
+//   }
+
+//   // Right Right Case
+//   if (balance < -1 && getBalance(root->right) <= 0)
+//     return leftRotate(root);
+
+//   // Right Left Case
+//   if (balance < -1 && getBalance(root->right) > 0) {
+//     root->right = rightRotate(root->right);
+//     return leftRotate(root);
+//   }
+
+//   return root;
+// }
+
+// // TODO add the pre-order code from
+// // https://www.geeksforgeeks.org/avl-tree-set-1-insertion/ See if anything is
+// // being inserted Make sure the root is being updated right Find a way to write
+// // the tree to the screen Add removal
+// //

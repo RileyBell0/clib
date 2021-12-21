@@ -2,10 +2,20 @@ echo "Creating Makefile from Project Information..."
 echo "---------------------------------------------"
 echo ""
 
-PROGNAME_START="./.build/prog/projectMake"
-PROGNAME_END="Unknown"
-MAKE_CONFIG_LOC=".build/config/project_cfg_"
+# Changeable Vars
+
+BASE_NAME=".compile"
+PROG_FOLDER="prog"
+CONFIG_FOLDER="cfg"
+PROG_NAME="projectMake"
 CFG_EXT=".cfg"
+
+###############################################################################
+###############################################################################
+
+PROGNAME_START="./$BASE_NAME/$PROG_FOLDER/$PROG_NAME"
+MAKE_CONFIG_LOC="$BASE_NAME/$CONFIG_FOLDER/"
+PROGNAME_END="Unknown"
 EXTENSION=""
 
 case "$OSTYPE" in

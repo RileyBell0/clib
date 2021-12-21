@@ -1,5 +1,22 @@
 #include "../index.h"
 
+int index_constrain(int len, int index) {
+  if (index < 0) {
+    return 0;
+  }
+  else if (index >= len) {
+    return len - 1;
+  }
+  return index;
+}
+
+int index_convert_negative(int len, int index) {
+  if (index < 0) {
+    return len + index;
+  }
+  return index;
+}
+
 int index_convert_negative_safe(int len, int index) {
   if (index < 0) {
     index = len + index;

@@ -1,4 +1,9 @@
+# Changeable Vars
+COMPILE_BASE=".compile"
+COMPILE_SCRIPTS_FOLDER="scripts"
+SCAN_SCRIPT_NAME="projectScanScript.sh"
 
-# Passes the OS type
-# required argument with values "Linux" "Mac" or "Windows"
-./.build/scanScript.sh $1
+###############################################################################
+###############################################################################
+
+./$COMPILE_BASE/$COMPILE_SCRIPTS_FOLDER/$SCAN_SCRIPT_NAME
