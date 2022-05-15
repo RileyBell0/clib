@@ -1,7 +1,7 @@
 #ifndef CLIB_STD_INDEX_H
 #define CLIB_STD_INDEX_H
 
-#include "error.h"
+#include "sys/error.h"
 #include <stdbool.h>
 #include <stdlib.h>
 

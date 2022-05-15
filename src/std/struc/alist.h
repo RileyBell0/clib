@@ -1,29 +1,22 @@
-#ifndef CLIB_STD_ALIST_H
-#define CLIB_STD_ALIST_H
+#ifndef CLIB_STD_STRUC_ALIST_H
+#define CLIB_STD_STRUC_ALIST_H
 
 #include "array.h"
-#include "string.h"
-#include "index.h"
-#include "pointer.h"
+#include "../string.h"
+#include "../index.h"
+#include "../pointer.h"
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdint.h> // TODO is this even used? i think limits.h provides all functionality
+#include <stdint.h>
 #include <stdio.h>
 #include <limits.h>
 
-#define ALIST_REALLOC_MULTIPLIER 2 // TODO currently unused
+#define ALIST_DEFAULT_REALLOC_MULTIPLIER 2 // potential for a new field? TODO unused currently
 #define ALIST_NULL INT_MIN
 #define ALIST_SAFE_DESTROY
 #define ALIST_ELEMENT 1
 
-/*
- * All of these lists use -1 as a NULL value
- * but might consider changing this later
- */
-
-
 //////////////////////////////
-// TODO validate the structures
 // Structures
 //////////////////////////////
 

@@ -8,7 +8,7 @@
 
 #define EXTENSION_SEPERATING_CHAR '.'
 
-#include "alist.h"
+#include "struc/alist.h"
 #include "path.h"
 #include "string.h"
 #include <stdio.h>
@@ -30,7 +30,7 @@ FILE *fileio_open_safe(char *path, bool reading);
  * Does not modify the input string and does not allocate memory
  * Returns NULL on failure
  */
-char *get_file_extension_start(char *file_name);
+char *fileio_get_file_extension_start(char *file_name);
 
 /*
  * Attempts to open a file in the given mode
@@ -69,7 +69,7 @@ int fileio_has_extension_key(string_t *file_name, void *extension);
  * MEMORY may be allocated, ensure you destroy the returned string when
  * done with it using string_destroy
  */
-string_t get_file_name_from_path(string_t *path);
+string_t fileio_get_file_name_from_path(string_t *path);
 
 /*
  * returns a string containing the file extension, or an empty
@@ -77,7 +77,7 @@ string_t get_file_name_from_path(string_t *path);
  * MEMORY may be allocated, ensure you destroy the returned string with
  * string_destroy when done with it
  */
-string_t get_file_extension(string_t *file_name);
+string_t fileio_get_file_extension(string_t *file_name);
 
 /*
  * Modifies the given cstring, removing the file
@@ -87,13 +87,13 @@ string_t get_file_extension(string_t *file_name);
  * char* pointer, allowing nesting in function
  * calls
  */
-string_t *remove_file_extension(string_t *file_name);
+string_t *fileio_remove_file_extension(string_t *file_name);
 
 /*
  * Given a c-string, removes the file extension, modifying the original
  * c-string passed to the function
  */
-char *remove_file_extension_c(char *file_name, unsigned int name_len);
+char *fileio_remove_file_extension_c(char *file_name, unsigned int name_len);
 
 /*
  * Given a list of files, the paths to the files are removed
@@ -101,14 +101,14 @@ char *remove_file_extension_c(char *file_name, unsigned int name_len);
  * destroy with alist_destroy when done with the returned alist
  * /User/Desktop/myFile.txt -> myFile.txt
  */
-alist_t get_file_names_from_paths(alist_t *files);
+alist_t fileio_get_file_names_from_paths(alist_t *files);
 
 /*
  * Given a list of files, removes the file extensions from
  * each file
  * /Folder/myFile.txt -> /Folder/myFile
  */
-void remove_file_extensions(alist_t *files);
+void fileio_remove_file_extensions(alist_t *files);
 
 /*
  * Reads all lines in the given file into a list

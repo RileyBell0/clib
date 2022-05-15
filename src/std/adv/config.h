@@ -5,11 +5,11 @@
  * Load everything into arrays
  * Save everything with its variable name
  */
-#include "path.h"
-#include "fileIO.h"
+#include "../path.h"
+#include "../fileIO.h"
 #include "sorting.h"
-#include "array.h"
-#include "dynamic_array.h"
+#include "../struc/array.h"
+#include "../struc/vector.h"
 
 #define CONFIG_COMMENT_CHAR '#'
 #define CONFIG_STRING_ENCLOSE_CHAR '"'

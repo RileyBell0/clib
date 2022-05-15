@@ -3,12 +3,12 @@
  * Creation Date:   16/10/2020
  */
 
-#ifndef CLIB_STD_ARRAY_H
-#define CLIB_STD_ARRAY_H
+#ifndef CLIB_STD_STRUC_ARRAY_H
+#define CLIB_STD_STRUC_ARRAY_H
 
-#include "error.h"
-#include "memory.h"
-#include "index.h"
+#include "../sys/error.h"
+#include "../memory.h"
+#include "../index.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>

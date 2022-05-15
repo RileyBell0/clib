@@ -37,7 +37,7 @@
 
 #ifdef CLIB_STD_DIRECTORY_H_DIRENT_H_INCLUDED
 
-#include "../alist.h"
+#include "../struc/alist.h"
 #include "../path.h"
 #include "../string.h"
 #include <dirent.h>

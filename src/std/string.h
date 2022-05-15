@@ -61,7 +61,7 @@
 #ifndef CLIB_STD_STRING_H
 #define CLIB_STD_STRING_H
 
-#include "array.h"
+#include "struc/array.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>

@@ -185,7 +185,15 @@ void *alist_get(alist_t *list, int index) {
 }
 
 void alist_insert_at(alist_t* list, void* data, int index) {
-  index = index_convert_negative_safe(list->size, index);
+  // For inserting at the end of the list
+  if (index == -1) {
+    index = list->size;
+  }
+
+  if (index != list->size) {
+    index = index_convert_negative_safe(list->size, index);
+  }
+
   alist_make_space(list, list->size + 1);
   bool inserted = false;
   

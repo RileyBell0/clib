@@ -1,1 +1,1 @@
-src/main/hello.c
+src/main/alist_test.c

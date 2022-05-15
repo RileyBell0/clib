@@ -10,11 +10,11 @@
  * the node at which the collision occurs.
  */
 
-#ifndef CLIB_STD_TREE_H
-#define CLIB_STD_TREE_H
+#ifndef CLIB_STD_STRUC_AVLBINTREE_H
+#define CLIB_STD_STRUC_AVLBINTREE_H
 
 #include "array.h"
-#include "int.h"
+#include "../int.h"
 
 #define RIGHT 1
 #define LEFT -1

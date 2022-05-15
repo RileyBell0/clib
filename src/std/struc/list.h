@@ -17,12 +17,12 @@
  * and throw an error
  */
 
-#ifndef CLIB_STD_LIST_H
-#define CLIB_STD_LIST_H
+#ifndef CLIB_STD_STRUC_LIST_H
+#define CLIB_STD_STRUC_LIST_H
 
 #include "array.h"
-#include "error.h"
-#include "index.h"
+#include "../sys/error.h"
+#include "../index.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>

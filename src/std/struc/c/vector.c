@@ -1,21 +1,21 @@
-#include "../dynamic_array.h"
+#include "../vector.h"
 
 /*
  * Makes space for the given number of elements (if required)
  */
-static void dynamic_array_make_space(dynamic_array_t *array, int req_len);
+static void vector_make_space(vector_t *array, int req_len);
 
 /*
  * Extends an array (if it is full)
  */
-static void dynamic_array_extend(dynamic_array_t *array);
+static void vector_extend(vector_t *array);
 
 //////////////////////////////
 // Initialisation
 //////////////////////////////
 
-dynamic_array_t dynamic_array_new(size_t elem_size) {
-  dynamic_array_t array;
+vector_t vector_new(size_t elem_size) {
+  vector_t array;
 
   array.elem_size = elem_size;
   array.data = NULL;
@@ -28,9 +28,9 @@ dynamic_array_t dynamic_array_new(size_t elem_size) {
   return array;
 }
 
-dynamic_array_t dynamic_array_wrap(void *data, int len, int capacity,
+vector_t vector_wrap(void *data, int len, int capacity,
                                    size_t elem_size, bool was_allocated) {
-  dynamic_array_t array;
+  vector_t array;
 
   array.elem_size = elem_size;
   array.data = data;
@@ -47,14 +47,14 @@ dynamic_array_t dynamic_array_wrap(void *data, int len, int capacity,
 // Basic Operations
 //////////////////////////////
 
-void dynamic_array_append(dynamic_array_t *array, void *data) {
-  dynamic_array_insert(array, array->len, data);
+void vector_append(vector_t *array, void *data) {
+  vector_insert(array, array->len, data);
 }
 
-void dynamic_array_insert(dynamic_array_t *array, int index, void *data) {
+void vector_insert(vector_t *array, int index, void *data) {
   index = index_convert_negative(array->len, index);
   index = index_constrain(array->len + 1, index);
-  dynamic_array_make_space(array, array->len + 1);
+  vector_make_space(array, array->len + 1);
 
   void *elem = array_generic_get(array->data, index, array->elem_size);
 
@@ -70,22 +70,22 @@ void dynamic_array_insert(dynamic_array_t *array, int index, void *data) {
   array->len += 1;
 }
 
-void *dynamic_array_get(dynamic_array_t *array, int index) {
+void *vector_get(vector_t *array, int index) {
   index = index_convert_negative_safe(array->len, index);
   return offset(array->data, index * array->elem_size);
 }
 
-void dynamic_array_set(dynamic_array_t *array, int index, void *data) {
+void vector_set(vector_t *array, int index, void *data) {
   index = index_convert_negative_safe(array->len, index);
 
-  void *elem_start = dynamic_array_get(array, index);
+  void *elem_start = vector_get(array, index);
   assert(memcpy(elem_start, data, array->elem_size));
 }
 
-bool dynamic_array_remove(dynamic_array_t *array, void *elem,
+bool vector_remove(vector_t *array, void *elem,
                           int (*key)(void *elem1, void *elem2)) {
   for (int i = 0; i < array->len; i++) {
-    void *curr_elem = dynamic_array_get(array, i);
+    void *curr_elem = vector_get(array, i);
     if (key(curr_elem, elem) == 0) {
       // delete element data if enabled
       if (array->destroy_on_remove && array->destroy) {
@@ -93,7 +93,7 @@ bool dynamic_array_remove(dynamic_array_t *array, void *elem,
       }
 
       if (i != array->len - 1) {
-        void *next_elem = dynamic_array_get(array, i + 1);
+        void *next_elem = vector_get(array, i + 1);
         size_t bytes_to_move = (array->len - 1 - i) * array->elem_size;
         memmove(curr_elem, next_elem, bytes_to_move);
       }
@@ -104,11 +104,11 @@ bool dynamic_array_remove(dynamic_array_t *array, void *elem,
   return false;
 }
 
-void dynamic_array_remove_at(dynamic_array_t *array, int index) {
+void vector_remove_at(vector_t *array, int index) {
   // Converts negative indexes to positive and ensures the index is valid
   index = index_convert_negative_safe(array->len, index);
 
-  void *curr_elem = dynamic_array_get(array, index);
+  void *curr_elem = vector_get(array, index);
 
   // delete element data if enabled
   if (array->destroy_on_remove && array->destroy) {
@@ -117,7 +117,7 @@ void dynamic_array_remove_at(dynamic_array_t *array, int index) {
 
   // Shift all elements past this index down
   if (index != array->len - 1) {
-    void *next_elem = dynamic_array_get(array, index + 1);
+    void *next_elem = vector_get(array, index + 1);
     size_t bytes_to_move = (array->len - 1 - index) * array->elem_size;
     memmove(curr_elem, next_elem, bytes_to_move);
   }
@@ -125,25 +125,25 @@ void dynamic_array_remove_at(dynamic_array_t *array, int index) {
   array->len -= 1;
 }
 
-void *dynamic_array_copy_elem(dynamic_array_t *array, int index) {
-  void *elem = dynamic_array_get(array, index);
+void *vector_copy_elem(vector_t *array, int index) {
+  void *elem = vector_get(array, index);
   void *copy = safe_malloc(array->elem_size);
   assert(memcpy(copy, elem, array->elem_size));
   return copy;
 }
 
 // TODO re-write description for function, as it does not allocate memory
-void dynamic_array_pop(dynamic_array_t *array, void* dest, int index) {
-  void *elem = dynamic_array_get(array, index);
+void vector_pop(vector_t *array, void* dest, int index) {
+  void *elem = vector_get(array, index);
   assert(memcpy(dest, elem, array->elem_size));
-  dynamic_array_remove_at(array, index);
+  vector_remove_at(array, index);
 }
 
 //////////////////////////////
 // High Level Functoins
 //////////////////////////////
 
-array_t dynamic_array_to_array(dynamic_array_t *array) {
+array_t vector_to_array(vector_t *array) {
   array_t converted = array_new(array->len, array->elem_size);
 
   memcpy(converted.data, array->data, array->len * array->elem_size);
@@ -151,14 +151,14 @@ array_t dynamic_array_to_array(dynamic_array_t *array) {
   return converted;
 }
 
-void dynamic_array_resize(dynamic_array_t *array, int new_len, void *template) {
+void vector_resize(vector_t *array, int new_len, void *template) {
   if (new_len == array->len) {
     return;
   }
 
   if (new_len < 0) {
-    exit_error("Cannot resize a dynamic array to a negative value",
-               "std/c/dynamic_array.c", "dynamic_array_resize");
+    exit_error("Cannot resize a vector to a negative value",
+               "std/c/vector.c", "vector_resize");
   }
 
   int old_len = array->len;
@@ -167,15 +167,15 @@ void dynamic_array_resize(dynamic_array_t *array, int new_len, void *template) {
     // Resize the array up
     // Add new elements which are copies of "template" in all new spots
     array->len = new_len;
-    dynamic_array_make_space(array, new_len);
+    vector_make_space(array, new_len);
     if (template) {
       for (int i = old_len; i < new_len; i++) {
-        void *elem = dynamic_array_get(array, i);
+        void *elem = vector_get(array, i);
         assert(memcpy(elem, template, array->elem_size));
       }
     } else {
       // Set all new memory for the array past the old end of the array to 0
-      void *elem = dynamic_array_get(array, old_len);
+      void *elem = vector_get(array, old_len);
       memset(elem, 0, (new_len - old_len) * array->elem_size);
     }
   } else if (new_len < array->len) {
@@ -183,7 +183,7 @@ void dynamic_array_resize(dynamic_array_t *array, int new_len, void *template) {
     // Destroy elements removed by shrinking if enabled
     if (array->destroy_on_remove && array->destroy) {
       for (int i = new_len; i < old_len; i++) {
-        array->destroy(dynamic_array_get(array, i));
+        array->destroy(vector_get(array, i));
       }
     }
     array->len = new_len;
@@ -194,14 +194,14 @@ void dynamic_array_resize(dynamic_array_t *array, int new_len, void *template) {
 // Utility Functions
 //////////////////////////////
 
-void dynamic_array_set_capacity(dynamic_array_t *array, int req_len) {
+void vector_set_capacity(vector_t *array, int req_len) {
   // Ensure the requested capacity is valid for the array's state
   if (req_len < 0) {
-    exit_error("Cannot set negative capacity in a dynamic array",
-               "std/c/dynamic_array.c", "dynamic_array_set_capacity");
+    exit_error("Cannot set negative capacity in a vector",
+               "std/c/vector.c", "vector_set_capacity");
   } else if (req_len < array->len) {
-    exit_error("Cannot set dynamic array's capacity to lower than its length",
-               "std/c/dynamic_array.c", "dynamic_array_set_capacity");
+    exit_error("Cannot set vector's capacity to lower than its length",
+               "std/c/vector.c", "vector_set_capacity");
   } else if (req_len == array->capacity || req_len == 0) {
     return;
   }
@@ -224,18 +224,18 @@ void dynamic_array_set_capacity(dynamic_array_t *array, int req_len) {
   array->capacity = req_len;
 }
 
-static void dynamic_array_make_space(dynamic_array_t *array, int req_len) {
+static void vector_make_space(vector_t *array, int req_len) {
   if (array->capacity < req_len) {
 
     if (req_len > array->capacity + (array->capacity / 2)) {
-      dynamic_array_set_capacity(array, req_len);
+      vector_set_capacity(array, req_len);
     } else {
-      dynamic_array_extend(array);
+      vector_extend(array);
     }
   }
 }
 
-static void dynamic_array_extend(dynamic_array_t *array) {
+static void vector_extend(vector_t *array) {
   if (array->len < array->capacity) {
     return;
   }
@@ -266,15 +266,15 @@ static void dynamic_array_extend(dynamic_array_t *array) {
 // Cleanup
 //////////////////////////////
 
-void dynamic_array_clear(dynamic_array_t *array) {
-  dynamic_array_resize(array, 0, NULL);
+void vector_clear(vector_t *array) {
+  vector_resize(array, 0, NULL);
 }
 
-void dynamic_array_destroy(dynamic_array_t *array) {
+void vector_destroy(vector_t *array) {
   // Destroy the elements in the array if enabled
   if (array->destroy_on_remove && array->destroy) {
     for (int i = 0; i < array->len; i++) {
-      array->destroy(dynamic_array_get(array, i));
+      array->destroy(vector_get(array, i));
     }
   }
 

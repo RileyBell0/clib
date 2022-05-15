@@ -139,10 +139,10 @@ bool extract_field(string_t *str, unsigned int *pos, string_t *dest,
 // RE-CHECKED 01/05/2021
 config_t read_config_file(char *file_path) {
   // Storing the processed data
-  dynamic_array_t results = dynamic_array_new(sizeof(config_var_t));
+  vector_t results = vector_new(sizeof(config_var_t));
 
   // Stores the fields associated with the current variable
-  dynamic_array_t fields = dynamic_array_new(sizeof(string_t));
+  vector_t fields = vector_new(sizeof(string_t));
   config_var_t var;
   config_t config;
 
@@ -220,7 +220,7 @@ config_t read_config_file(char *file_path) {
         if (within_array_declaration || !var_has_value) {
           // Associate the current field with the current variable
           string_t field_value = string_copy(&field);
-          dynamic_array_append(&fields, &field_value);
+          vector_append(&fields, &field_value);
         }
         break;
       }
@@ -233,10 +233,10 @@ config_t read_config_file(char *file_path) {
       if (!current_var_finalised) {
 
         // Convert to an array
-        var.values = dynamic_array_to_array(&fields);
+        var.values = vector_to_array(&fields);
 
         // Save the current variable to the given array
-        dynamic_array_append(&results, &var);
+        vector_append(&results, &var);
 
         // Saved
         current_var_finalised = true;
@@ -255,16 +255,17 @@ config_t read_config_file(char *file_path) {
   if (!current_var_finalised) {
     // Convert to an array
     // Load the array into the var
-    var.values = dynamic_array_to_array(&fields);
+    var.values = vector_to_array(&fields);
 
     // Save the current var to the given array
-    dynamic_array_append(&results, &var);
+    vector_append(&results, &var);
   }
 
   // Sort the vars (ready for log(n) var retrieval time)
-  array_t unsorted_vars = dynamic_array_to_array(&results);
-  config.variables =
-      tree_sort(unsorted_vars, sizeof(config_var_t), config_var_compare);
+  array_t unsorted_vars = vector_to_array(&results);
+  // TODO needs to sort
+//   config.variables =
+//       tree_sort(unsorted_vars, sizeof(config_var_t), config_var_compare);
   array_destroy(&unsorted_vars);
 
   config.modified = false;
@@ -275,8 +276,8 @@ config_t read_config_file(char *file_path) {
   // Cleanup
   string_destroy(&buffer);
   string_destroy(&field);
-  dynamic_array_destroy(&results);
-  dynamic_array_destroy(&fields);
+  vector_destroy(&results);
+  vector_destroy(&fields);
 
   return config;
 }
