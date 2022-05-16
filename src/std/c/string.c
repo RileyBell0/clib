@@ -84,6 +84,21 @@ string_t string_new(unsigned int len) {
   return str;
 }
 
+bool cstring_contains(char* str, char c) {
+  int i = 0;
+
+  char current;
+  while ((current = str[i]) != '\0') {
+    if (current == c) {
+      return true;
+    }
+
+    i++;
+  }
+
+  return false;
+}
+
 // RE-CHECKED 30/04/2021
 // MEMORY_SAFE 06/05/2021
 // TODO check if nullstr safe

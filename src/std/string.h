@@ -114,6 +114,9 @@ void string_allocate(string_t *str, unsigned int newLen);
  */
 string_t string_make(char *src);
 
+// returns true if the given cstr contains char 'c'
+bool cstring_contains(char* str, char c);
+
 /*
  * takes a const cstring as an input
  * If the given cstring is not dynamically allocated DO NOT FREE

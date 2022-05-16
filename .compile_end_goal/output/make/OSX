@@ -1,10 +1,16 @@
-all: configtest
+all: projectMake projectScan
 
-configtest: configtest.o console.o avlBinTree.o list.o array.o vector.o vstack.o alist.o tree.o directory.o error.o argparse.o config.o memory.o fileIO.o string.o pointer.o index.o path.o int.o
-	clang -arch arm64 -Wall -o output/build/configtest output/objects/configtest.o output/objects/console.o output/objects/avlBinTree.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/vstack.o output/objects/alist.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/argparse.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/pointer.o output/objects/index.o output/objects/path.o output/objects/int.o -g
+projectMake: projectMake.o console.o avlBinTree.o list.o array.o vector.o vstack.o alist.o tree.o directory.o error.o argparse.o config.o memory.o fileIO.o string.o pointer.o index.o path.o int.o
+	clang -arch arm64 -Wall -o output/build/projectMake output/objects/projectMake.o output/objects/console.o output/objects/avlBinTree.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/vstack.o output/objects/alist.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/argparse.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/pointer.o output/objects/index.o output/objects/path.o output/objects/int.o -g
 
-configtest.o: src/main/configtest.c
-	clang -arch arm64 -Wall -c -o output/objects/configtest.o src/main/configtest.c -g
+projectScan: projectScan.o console.o avlBinTree.o list.o array.o vector.o vstack.o alist.o tree.o directory.o error.o argparse.o config.o memory.o fileIO.o string.o pointer.o index.o path.o int.o
+	clang -arch arm64 -Wall -o output/build/projectScan output/objects/projectScan.o output/objects/console.o output/objects/avlBinTree.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/vstack.o output/objects/alist.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/argparse.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/pointer.o output/objects/index.o output/objects/path.o output/objects/int.o -g
+
+projectMake.o: src/main/projectMake.c
+	clang -arch arm64 -Wall -c -o output/objects/projectMake.o src/main/projectMake.c -g
+
+projectScan.o: src/main/projectScan.c
+	clang -arch arm64 -Wall -c -o output/objects/projectScan.o src/main/projectScan.c -g
 
 console.o: src/std/cmd/c/console.c
 	clang -arch arm64 -Wall -c -o output/objects/console.o src/std/cmd/c/console.c -g
