@@ -157,6 +157,7 @@ static array_t config_load_array_values(config_var_t* var, string_t* line_buffer
     }
     else if (c == CONFIG_ARRAY_END_CHAR) {
       array_t values = vector_to_array(&fields);
+      values.destroy = void_string_destroy;
       
       vector_destroy(&fields);
       
@@ -204,6 +205,7 @@ static void config_load_field_value(config_var_t* var, string_t* line_buffer, in
       
       // Store the value in the config_var_t var
       array_t values = array_new(1, sizeof(string_t));
+      values.destroy = void_string_destroy;
       array_set(&values, 0, &field);
       var->values = values;
       
@@ -266,4 +268,48 @@ config_t config_read(char *file_path) {
   vector_destroy(&variables);
 
   return config;
+}
+
+
+
+
+bool config_contains(config_t* cfg, string_t* var_name) {
+  for (int i = 0; i < cfg->variables.len; i++) {
+    config_var_t* var = (config_var_t*)array_get(&cfg->variables, i);
+    if (string_equals(&var->var_name, var_name)) {
+       return true;
+    }
+  }
+  return false;
+}
+bool config_contains_c(config_t* cfg, char* var_name) {
+  for (int i = 0; i < cfg->variables.len; i++) {
+    config_var_t* var = (config_var_t*)array_get(&cfg->variables, i);
+    if (strcmp(cstr(&var->var_name), var_name) == 0) {
+       return true;
+    }
+  }
+  return false;
+}
+
+array_t config_get(config_t* cfg, string_t* var_name) {
+  for (int i = 0; i < cfg->variables.len; i++) {
+    config_var_t* var = (config_var_t*)array_get(&cfg->variables, i);
+    if (string_equals(&var->var_name, var_name)) {
+       return var->values;
+    }
+  }
+
+  return array_new(0, sizeof(string_t));
+}
+array_t config_get_c(config_t* cfg, char* var_name) {
+  for (int i = 0; i < cfg->variables.len; i++) {
+    config_var_t* var = (config_var_t*)array_get(&cfg->variables, i);
+    if (strcmp(cstr(&var->var_name), var_name)) {
+       return var->values;
+    }
+  }
+
+  return array_new(0, sizeof(string_t));
+
 }

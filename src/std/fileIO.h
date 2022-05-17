@@ -9,6 +9,7 @@
 #define EXTENSION_SEPERATING_CHAR '.'
 
 #include "struc/alist.h"
+#include "struc/vector.h"
 #include "path.h"
 #include "string.h"
 #include <stdio.h>
@@ -109,6 +110,8 @@ alist_t fileio_get_file_names_from_paths(alist_t *files);
  * /Folder/myFile.txt -> /Folder/myFile
  */
 void fileio_remove_file_extensions(alist_t *files);
+
+array_t fileio_read_all_lines(char *file_name);
 
 /*
  * Reads all lines in the given file into a list

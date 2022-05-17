@@ -229,6 +229,27 @@ alist_t fileio_get_file_names_from_paths(alist_t *files) {
   return file_names;
 }
 
+array_t fileio_read_all_lines(char *file_name) {
+
+  // Read in all lines and store in vector 'lines'
+  vector_t lines = vector_new(sizeof(string_t));
+  string_t buffer = string_new(DEFAULT_BUFFER_LEN);
+  FILE *file = fileio_open_safe(file_name, true);
+  while (fileio_next_line(file, &buffer)) {
+    string_t line = string_copy(&buffer);
+    vector_append(&lines, &line);
+  }
+  fileio_close(file);
+  string_destroy(&buffer);
+
+  // Convert to an array and return
+  array_t all_lines = vector_to_array(&lines);
+  all_lines.destroy = void_string_destroy;
+  vector_destroy(&lines);
+
+  return all_lines;
+}
+
 // RE-CHECKED 04/05/2021
 // MEMORY_SAFE 05/05/2021
 alist_t fileio_read_all_lines_alist(char *file_name) {

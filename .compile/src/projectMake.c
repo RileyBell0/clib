@@ -3,8 +3,9 @@
  * makefile
  */
 
-#include "../std/alist.h"
-#include "../std/config.h"
+#include "../std/struc/vector.h"
+#include "../std/adv/argparse.h"
+#include "../std/adv/config.h"
 #include "../std/fileIO.h"
 #include "../std/path.h"
 #include "../std/string.h"
@@ -21,6 +22,7 @@
 #define DEFAULT_STR_LEN_PROJMAKE 16
 
 // Variables expected in the config file
+#define FLAG_INDICATOR "-"
 #define VAR_OBJ_OUT "COMPONENT_OUT"
 #define VAR_MAKE_NAME "MAKEFILE_NAME"
 #define VAR_COMPILER "COMPILER"
@@ -37,176 +39,58 @@
 #define VAR_COMPONENT_OUT "COMPONENT_OUT"
 
 typedef struct make_instructions_t {
-  // The name of the compiler to use, Confirmed to work with "gcc"
-  config_var_t *compiler;
+  string_t compiler;  // The name of the compiler to use
+  string_t makefile_name;
 
-  // Flags to compile programs intended to be objects
-  config_var_t *flags;
+  string_t prog_files_list_loc;
+  string_t obj_files_list_loc;
 
-  // Flags to compile programs with 'int main()'
-  config_var_t *prog_flags;
+  string_t common_flags; // Commmon flags
+  string_t prog_flags; // Flags specific for the program
+  string_t obj_flags; // Flags specific for objects
+  string_t debug_flags; // Debug specific flags
 
-  // Flags required if debugging, reccomended "-g"
-  config_var_t *debug_flags;
+  string_t obj_ext; // The extension to give the compiled objects
 
-  /*
-   * The extension to give the compiled objects. ".o" is
-   * reccomended
-   */
-  config_var_t *obj_ext;
-
-  // Where to put the compiled objects
-  config_var_t *obj_out;
-
-  // flags specific for making object files
-  config_var_t *obj_flags;
+  string_t obj_out; // Where to put the compiled objects
 } make_instructions_t;
 
-void write_make_call(FILE *out_file, string_t *name);
-void write_make_name_with_extension(FILE *out_file, string_t *name,
-                                    string_t *extension);
-void write_make_compiler(FILE *out_file, config_var_t *var_compiler);
-void write_make_flags(FILE *out_file, config_var_t *var_flags);
-void write_make_all_components(FILE *out_file, alist_t *component_names);
-void write_make_all_call(FILE *out_file, alist_t *prog_names);
-config_var_t *safe_cfg_get_var(config_t *config, char *name);
+string_t* get_val_from_cfg(config_t* cfg, char* var_name);
+string_t load_flags_from_cfg(config_t* cfg, char* var_name);
+make_instructions_t load_make_instructions(config_t* cfg);
 
-config_var_t *safe_cfg_get_var(config_t *config, char *name) {
-  config_var_t *returnedVar = config_get_var(config, name);
-  if (!returnedVar) {
-    printf("ERROR - %s could not be found in config file\n", name);
-    exit(EXIT_ERROR);
-  }
-  return returnedVar;
-}
-
-void write_make_all_call(FILE *out_file, alist_t *prog_names) {
-  fprintf(out_file, "all:");
-
-  alist_iterator_t it = alist_iterator_new(prog_names, true);
-  for (string_t *element = it.first(&it); !it.done(&it);
-       element = it.next(&it)) {
-    fprintf(out_file, " %s", cstr(element));
-  }
-
-  fprintf(out_file, "\n");
-}
-
-// Add the start of the call to make the current prog -> prog: prog.o
-void write_make_call(FILE *out_file, string_t *name) {
-  fprintf(out_file, "%s:", cstr(name));
-}
-
-void write_make_name_with_extension(FILE *out_file, string_t *name,
-                                    string_t *extension) {
-  fprintf(out_file, " %s%s", cstr(name), cstr(extension));
-}
-
-void write_make_compiler(FILE *out_file, config_var_t *var_compiler) {
-  // Only care about the compiler in the first position in the config var
-  fprintf(out_file, "\t%s", cstr(var_compiler->values.data));
-}
-
-void write_make_flags(FILE *out_file, config_var_t *var_flags) {
-  for (unsigned int i = 0; i < var_flags->values.len; i++) {
-    fprintf(out_file, " -%s", cstr(&var_flags->values.data[i]));
-  }
-}
-
-void write_make_all_components(FILE *out_file, alist_t *component_names) {
-  // Add calls for the compilation of all components
-  // comp1.o comp2.o ... compn.o
-  alist_iterator_t it = alist_iterator_new(component_names, true);
-  for (string_t *element = it.first(&it); !it.done(&it);
-       element = it.next(&it)) {
-    fprintf(out_file, " %s", cstr(element));
-  }
-}
 
 /*
  * Program Entry Point
  */
 int main(int argc, char **argv) {
-  /*
-   * Validate input arguments
-   */
   if (argc < REQUIRED_ARGS + 1) {
     printf("USAGE:  %s  Path_To_Config  Is_Debugging\n", argv[0]);
     exit(EXIT_ERROR);
   }
 
-  /*
-   * Loading in the config file
-   */
-  config_t cfg = read_config_file(argv[ARG_CONFIG_LOC]);
-
+  // Constants
   string_t flag_start = string_make("-");
-  /*
-   * Setting up varaibles
-   */
   string_t path_sep = string_make(PATH_SEPERATOR);
-  unsigned int path_sep_len = path_sep.len;
-  config_var_t *var_makeName = safe_cfg_get_var(&cfg, VAR_MAKE_NAME);
-  config_var_t *var_cfg_dir = safe_cfg_get_var(&cfg, VAR_CFG_DIR);
-  config_var_t *var_prog_files = safe_cfg_get_var(&cfg, VAR_PROG_FILES);
-  config_var_t *var_obj_files = safe_cfg_get_var(&cfg, VAR_COMPONENT_FILES);
-  config_var_t *var_obj_flags = safe_cfg_get_var(&cfg, VAR_OBJ_FLAGS);
-
-  config_var_t *var_obj_ext = safe_cfg_get_var(&cfg, VAR_OBJ_EXT);
-  string_t *obj_ext = var_obj_ext->values.data;
-
-  config_var_t *var_obj_out = safe_cfg_get_var(&cfg, VAR_OBJ_OUT);
-  string_t *obj_out = var_obj_out->values.data;
-
-  config_var_t *var_prog_out = safe_cfg_get_var(&cfg, VAR_PROG_OUT);
-  config_var_t *var_compiler = safe_cfg_get_var(&cfg, VAR_COMPILER);
-  config_var_t *var_flags = safe_cfg_get_var(&cfg, VAR_FLAGS);
-  config_var_t *var_debug = safe_cfg_get_var(&cfg, VAR_DEBUG);
   string_t ext_seperator = string_make("."); // Extension seperator
-  config_var_t *var_prog_flags = safe_cfg_get_var(&cfg, VAR_PROG_FLAGS);
-  string_t extension = string_new_concat(&ext_seperator, var_obj_ext->values.data);
-  alist_iterator_t it, it_2;
-  unsigned int req_str_len;
 
-  // config dir / component_files_name_storage_file
-  req_str_len = ((string_t *)var_cfg_dir->values.data)->len + path_sep_len +
-                ((string_t *)var_obj_files->values.data)->len;
+  // Read in the cfg file
+  config_t cfg = config_read(argv[ARG_CONFIG_LOC]);
+  make_instructions_t instr = load_make_instructions(&cfg);
 
-  string_t component_files_path = string_new(req_str_len);
+  string_t component_files_path = string_new(0);.compile/cfg/
   string_write_multi(&component_files_path, var_cfg_dir->values.data, &path_sep,
                      var_obj_files->values.data, NULL);
 
-  // config dir / program_files_name_storage_file
-  req_str_len = ((string_t *)var_cfg_dir->values.data)->len + path_sep_len +
-                ((string_t *)var_prog_files->values.data)->len;
-  string_t prog_files_path = string_new(req_str_len);
+  string_t prog_files_path = string_new(0);
   string_write_multi(&prog_files_path, var_cfg_dir->values.data, &path_sep,
                      var_prog_files->values.data, NULL);
 
   /*
    * Reading in from files
    */
-  alist_t prog_file_paths = fileio_read_all_lines_alist(cstr(&prog_files_path));
-  alist_t obj_file_paths =
-      fileio_read_all_lines_alist(cstr(&component_files_path));
-
-  /*
-  // list of object src_files with path
-  // list of program src files with path
-  // list of program names
-  // list of object names
-  // object directory
-  // flags n stuff
-
-  // all: all_program_names
-
-  // program_name: program_name all_object_names
-  // compiler global_flags program_flags prog_out prog_obj_location
-  all_object_locations
-
-  // object_name.o: object_src_file
-  // compiler global_flags object_flags dest src debugging
-  */
+  array_t prog_file_paths = fileio_read_all_lines(cstr(&prog_files_paths));
+  alist_t obj_file_paths = fileio_read_all_lines(cstr(&component_files_path));
 
   /*
    * Parsing read data
@@ -215,70 +99,6 @@ int main(int argc, char **argv) {
   alist_t obj_names = get_file_names_from_paths(&obj_file_paths);
   remove_file_extensions(&prog_names);
   remove_file_extensions(&obj_names);
-
-  /*
-  alist_t prog_out_names = alist_new(sizeof(string_t));
-  it = alist_iterator_new(&prog_names, TRUE);
-  for (string_t* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
-    // Make a string with enough space for the out name
-    string_t out_name = string_new(var_prog_out->data->len +
-                                   path_sep_len +
-                                   node->len);
-
-    // Make the out name
-    string_write_multi(&out_name,
-                       var_prog_out->data,
-                       &path_seperator,
-                       node,
-                       NULL);
-
-    // Save the out name
-    alist_append(&prog_out_names, &out_name);
-  }
-
-  // This takes all program names, such as 'projectMake' and turns it into
-  // objects/projectMake.o
-  alist_t prog_obj_out = alist_new(sizeof(string_t));
-  it = alist_iterator_new(&prog_names, TRUE);
-  for (string_t* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
-    // Allocating enought space to store the new string
-    string_t out_name = string_new(var_obj_out->data->len +
-                                   path_sep_len +
-                                   node->len +
-                                   extension.len);
-
-    // Combinging strings to make the new string
-    string_write_multi(&out_name,
-                       var_obj_out->data,
-                       &path_seperator,
-                       node,
-                       &extension,
-                       NULL);
-
-    // Save the new name
-    alist_append(&prog_obj_out, &out_name);
-  }
-
-  // Turns object names from stuff like 'alist' to
-  // 'objects/alist
-  alist_t obj_out_names = alist_new(sizeof(string_t));
-  it = alist_iterator_new(&obj_names, TRUE);
-  for (string_t* node = it.first(&it); !it.done(&it); node = it.next(&it)) {
-    // Allocating enough space to store the string
-    string_t out_name = string_new(var_obj_out->data->len +
-                                   path_sep_len +
-                                   node->len);
-
-    // Writing the new string
-    string_write_multi(&out_name,
-                       var_obj_out->data,
-                       &path_seperator,
-                       node,
-                       NULL);
-
-    // Saving the new string
-    alist_append(&obj_out_names, &out_name);
-  } */
 
   // Write all obj names to a string, as need to use this multiple times
   string_t all_obj_names = string_new(DEFAULT_BUFFER_LEN);
@@ -418,4 +238,48 @@ int main(int argc, char **argv) {
   config_destroy(cfg);
 
   return (0);
+}
+
+
+string_t* get_val_from_cfg(config_t* cfg, char* var_name) {
+  array_t result = config_get(cfg, var_name);
+  if (result.len == 0) {
+    fprintf(stderr, "Error - \"%s\" not in config %s\n", var_name, cstr(&cfg->path_to_cfg));
+    exit_error("Value not in config", "projectMake.c", "get_val_from_cfg");
+  }
+
+  return (string_t*)array_get(&result, 0);
+}
+
+// There will be a trailing whitespace in the resultant string
+string_t load_flags_from_cfg(config_t* cfg, char* var_name) {
+  string_t flags = string_new(0);
+
+  array_t vars = config_get(cfg, var_name);
+  for (int i = 0; i < vars.len; i++) {
+    string_t* var = array_get(&vars, i);
+    string_write_c(&flags, FLAG_INDICATOR);
+    string_write(&flags, var);
+    string_write_c(&flags, " ");
+  }
+
+  return flags;
+}
+
+make_instructions_t load_make_instructions(config_t* cfg) {
+  make_instructions_t instr;
+  instr.compiler = string_copy(get_val_from_cfg(cfg, VAR_COMPILER));
+  instr.makefile_name = string_copy(get_val_from_cfg(cfg, VAR_MAKE_NAME));
+
+  instr.prog_files_list_loc = string_copy(get_val_from_cfg(&cfg, VAR_PROG_FILES));
+  instr.obj_files_list_loc = string_copy(get_val_from_cfg(&cfg, VAR_COMPONENT_FILES));
+  
+  instr.common_flags = load_flags_from_cfg(cfg, VAR_FLAGS);
+  instr.debug_flags = load_flags_from_cfg(cfg, VAR_DEBUG);
+  instr.obj_flags = load_flags_from_cfg(cfg, VAR_OBJ_FLAGS);
+  instr.prog_flags = load_flags_from_cfg(cfg, VAR_PROG_FLAGS);
+
+  instr.obj_out = string_copy(get_val_from_cfg(cfg, VAR_OBJ_OUT));
+  instr.obj_ext = string_copy(get_val_from_cfg(cfg, VAR_OBJ_EXT));
+  instr.prog_out = string_copy(get_val_from_cfg(cfg, VAR_PROG_OUT));
 }

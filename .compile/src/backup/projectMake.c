@@ -3,8 +3,8 @@
  * makefile
  */
 
-#include "../std/struc/alist.h"
-#include "../std/adv/config.h"
+#include "../std/alist.h"
+#include "../std/config.h"
 #include "../std/fileIO.h"
 #include "../std/path.h"
 #include "../std/string.h"

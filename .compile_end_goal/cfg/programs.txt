@@ -1,2 +1,0 @@
-src/main/projectMake.c
-src/main/projectScan.c

@@ -77,4 +77,13 @@ typedef struct config_t {
 
 config_t config_read(char *file_path);
 
+bool config_contains(config_t* cfg, string_t* var_name);
+bool config_contains_c(config_t* cfg, char* var_name);
+
+// Returns an empty array if the requested varaible is not in the config
+array_t config_get(config_t* cfg, string_t* var_name);
+
+// Returns an empty array if the requested varaible is not in the config
+array_t config_get_c(config_t* cfg, char* var_name);
+
 #endif
