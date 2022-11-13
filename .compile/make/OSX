@@ -1,16 +1,10 @@
-all: configtest
+all: main
 
-configtest: configtest.o console.o avlBinTree.o list.o array.o vector.o vstack.o alist.o tree.o directory.o error.o argparse.o config.o memory.o fileIO.o string.o pointer.o index.o path.o int.o
-	clang -arch arm64 -Wall -o output/build/configtest output/objects/configtest.o output/objects/console.o output/objects/avlBinTree.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/vstack.o output/objects/alist.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/argparse.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/pointer.o output/objects/index.o output/objects/path.o output/objects/int.o -g
+main: main.o list.o array.o vector.o vstack.o tree.o error.o memory.o fileIO.o string.o pointer.o index.o int.o
+	clang -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/vstack.o output/objects/tree.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/pointer.o output/objects/index.o output/objects/int.o -g
 
-configtest.o: src/main/configtest.c
-	clang -arch arm64 -Wall -c -o output/objects/configtest.o src/main/configtest.c -g
-
-console.o: src/std/cmd/c/console.c
-	clang -arch arm64 -Wall -c -o output/objects/console.o src/std/cmd/c/console.c -g
-
-avlBinTree.o: src/std/struc/c/avlBinTree.c
-	clang -arch arm64 -Wall -c -o output/objects/avlBinTree.o src/std/struc/c/avlBinTree.c -g
+main.o: src/main/main.c
+	clang -arch arm64 -Wall -c -o output/objects/main.o src/main/main.c -g
 
 list.o: src/std/struc/c/list.c
 	clang -arch arm64 -Wall -c -o output/objects/list.o src/std/struc/c/list.c -g
@@ -24,23 +18,11 @@ vector.o: src/std/struc/c/vector.c
 vstack.o: src/std/struc/c/vstack.c
 	clang -arch arm64 -Wall -c -o output/objects/vstack.o src/std/struc/c/vstack.c -g
 
-alist.o: src/std/struc/c/alist.c
-	clang -arch arm64 -Wall -c -o output/objects/alist.o src/std/struc/c/alist.c -g
-
 tree.o: src/std/struc/c/tree.c
 	clang -arch arm64 -Wall -c -o output/objects/tree.o src/std/struc/c/tree.c -g
 
-directory.o: src/std/sys/c/directory.c
-	clang -arch arm64 -Wall -c -o output/objects/directory.o src/std/sys/c/directory.c -g
-
 error.o: src/std/sys/c/error.c
 	clang -arch arm64 -Wall -c -o output/objects/error.o src/std/sys/c/error.c -g
-
-argparse.o: src/std/adv/c/argparse.c
-	clang -arch arm64 -Wall -c -o output/objects/argparse.o src/std/adv/c/argparse.c -g
-
-config.o: src/std/adv/c/config.c
-	clang -arch arm64 -Wall -c -o output/objects/config.o src/std/adv/c/config.c -g
 
 memory.o: src/std/c/memory.c
 	clang -arch arm64 -Wall -c -o output/objects/memory.o src/std/c/memory.c -g
@@ -56,9 +38,6 @@ pointer.o: src/std/c/pointer.c
 
 index.o: src/std/c/index.c
 	clang -arch arm64 -Wall -c -o output/objects/index.o src/std/c/index.c -g
-
-path.o: src/std/c/path.c
-	clang -arch arm64 -Wall -c -o output/objects/path.o src/std/c/path.c -g
 
 int.o: src/std/c/int.c
 	clang -arch arm64 -Wall -c -o output/objects/int.o src/std/c/int.c -g

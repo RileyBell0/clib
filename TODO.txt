@@ -1,3 +1,14 @@
-make the compile program put the "components.txt" and "programs.txt" into output/scan_results
-make configurations loaded overwritable so you can load config1 and overload it with config2
-make a dictionary
+Files to add
+- dictionary
+- Config reader
+
+Files to re-write
+- string
+- list
+  - Add error (exit_error) to dependencies
+- vector
+- fileIO
+- index.c
+
+
+Re-work .compile's src
