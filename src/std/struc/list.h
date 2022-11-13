@@ -2,6 +2,7 @@
 #define CLIB_STD_STRUC_LIST_H
 
 #include "./array.h"
+#include "../sys/error.h"
 #include <stdbool.h>
 #include <stdio.h>
 

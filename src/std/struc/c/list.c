@@ -9,6 +9,8 @@ list_node_t *list_new_node(void *element, size_t element_size);
  * accordingly
  */
 void list_remove_node(list_t *list, list_node_t *node, void *dest);
+bool list_iterator_done(list_iterator_t *it);
+void *list_iterator_next(list_iterator_t *it);
 
 list_iterator_t new_list_iterator(list_t list, bool from_start)
 {
@@ -30,6 +32,7 @@ list_iterator_t new_list_iterator(list_t list, bool from_start)
   {
     it.node = NULL;
   }
+  return it;
 }
 
 /*
@@ -104,7 +107,7 @@ list_node_t *list_new_node(void *element, size_t element_size)
   node->prev = NULL;
 
   // Copy the data into the generated space
-  assert(memcpy(&node[LIST_ELEMENT], element, element_size));
+  assert(memcpy(&node[1], element, element_size));
 
   return node;
 }
@@ -160,7 +163,7 @@ void list_pop(list_t *list, void *dest, int index)
 
   // Find the node at the index requested and remove it
   list_iterator_t it = new_list_iterator(*list, from_start);
-  for (void *elem = it.node; !it.done(&it); elem = it.next(&it))
+  for (; !it.done(&it); it.next(&it))
   {
     if (index == it.index)
     {
@@ -180,7 +183,7 @@ void list_remove_at(list_t *list, int index)
 
   // Find the node at the index requested and remove it
   list_iterator_t it = new_list_iterator(*list, from_start);
-  for (void *elem = it.node; !it.done(&it); elem = it.next(&it))
+  for (; !it.done(&it); it.next(&it))
   {
     if (index == it.index)
     {
