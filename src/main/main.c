@@ -26,7 +26,18 @@ void dest(list_t *list)
 
 void options()
 {
-  printf("OPTIONS:\n------\n1: append\n2: delete\n3: delete at\n4: exit\n5: destroy\n");
+  printf("OPTIONS:\n------\n1: append\n2: delete\n3: delete at\n4: exit\n5: destroy\n6: pop\n");
+}
+
+void pop(list_t *list)
+{
+  string_t buffer = empty_string();
+  printf("Enter an index: ");
+  fileio_next_line(stdin, &buffer);
+  int ind = atoi(cstr(&buffer));
+  int dest = -1;
+  list_pop(list, &dest, ind);
+  printf("Popped %d\n", dest);
 }
 
 void deleteone(list_t *list, string_t *buf)
@@ -126,6 +137,8 @@ int main(int argc, char **argv)
         string_destroy(buf);
         dest(&list);
         break;
+      case 6:
+        pop(&list);
       default:
         break;
       }

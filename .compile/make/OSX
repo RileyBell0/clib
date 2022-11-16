@@ -1,7 +1,7 @@
 all: main
 
-main: main.o list.o array.o vector.o vstack.o tree.o error.o memory.o fileIO.o string.o pointer.o index.o int.o
-	clang -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/vstack.o output/objects/tree.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/pointer.o output/objects/index.o output/objects/int.o -g
+main: main.o list.o array.o vector.o vstack.o tree.o error.o memory.o fileIO.o string.o index.o int.o
+	clang -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/vstack.o output/objects/tree.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o output/objects/int.o -g
 
 main.o: src/main/main.c
 	clang -arch arm64 -Wall -c -o output/objects/main.o src/main/main.c -g
@@ -32,9 +32,6 @@ fileIO.o: src/std/c/fileIO.c
 
 string.o: src/std/c/string.c
 	clang -arch arm64 -Wall -c -o output/objects/string.o src/std/c/string.c -g
-
-pointer.o: src/std/c/pointer.c
-	clang -arch arm64 -Wall -c -o output/objects/pointer.o src/std/c/pointer.c -g
 
 index.o: src/std/c/index.c
 	clang -arch arm64 -Wall -c -o output/objects/index.o src/std/c/index.c -g

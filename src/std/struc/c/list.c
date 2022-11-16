@@ -283,13 +283,12 @@ list_t *list_combine(list_t *base, list_t *extension)
   if (base->size == 0)
   {
     base->first_node = extension->first_node;
-    base->last_node = extension->last_node;
   }
   else
   {
     // Patch endings
     base->last_node->next = extension->first_node;
-    extension->first_node->prev = base->last_node->next;
+    extension->first_node->prev = base->last_node;
   }
 
   // Update the last element of the list
@@ -304,20 +303,6 @@ list_t *list_combine(list_t *base, list_t *extension)
   extension->size = 0;
 
   return base;
-}
-
-array_t list_to_array(list_t *list)
-{
-  array_t converted = array_new(list->size, list->element_size);
-
-  // Copy all elements across
-  list_iterator_t it = new_list_iterator(*list, true);
-  for (void *elem = it.node; !it.done(&it); elem = it.next(&it))
-  {
-    array_set(&converted, it.index, elem);
-  }
-
-  return converted;
 }
 
 //////////////////////////////
@@ -336,21 +321,19 @@ void list_destroy(list_t *list, void (*delete_data)(void *data))
     return;
   }
 
-  if (delete_data)
-  {
-    list_iterator_t it = new_list_iterator(*list, true);
-    for (; !it.done(&it); it.next(&it))
-    {
-      void *data = list_node_get_data(it.node);
-
-      delete_data(data);
-    }
-  }
-
   // Free the memory of all nodes
   list_node_t *node = list->first_node;
   list_node_t *next = NULL;
-  while (node) {
+  while (node)
+  {
+    // Free dynamically allocated memory within the stored element
+    if (delete_data)
+    {
+      void *data = list_node_get_data(node);
+      delete_data(data);
+    }
+
+    // Free the node's memory
     next = node->next;
     free(node);
     node = next;

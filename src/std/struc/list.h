@@ -100,11 +100,6 @@ bool list_remove(list_t *list, void *elem);
 list_t *list_combine(list_t *base, list_t *extension);
 
 /*
- * Converts the given list into an array
- */
-array_t list_to_array(list_t *list);
-
-/*
  * Free all dynamically allocated memory in a list.
  * delete_data should be a pointer to a function responsible for
  * freeing any heap allocated memory within each an element
