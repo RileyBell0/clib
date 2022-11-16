@@ -53,6 +53,8 @@ void *list_iterator_next(list_iterator_t *it)
   {
     if (it->from_start)
     {
+      printf("node %p\n", it->node);
+      printf("node %p\n", it->node->next);
       it->node = it->node->next;
       it->index += 1;
     }
@@ -63,7 +65,14 @@ void *list_iterator_next(list_iterator_t *it)
     }
   }
 
-  return list_node_get_data(it->node);
+  if (it->node)
+  {
+    return list_node_get_data(it->node);
+  }
+  else
+  {
+    return NULL;
+  }
 }
 
 list_t list_new(size_t element_size)
@@ -327,9 +336,9 @@ void list_destroy(list_t *list, void (*delete_data)(void *data))
     return;
   }
 
-  list_iterator_t it = new_list_iterator(*list, true);
   if (delete_data)
   {
+    list_iterator_t it = new_list_iterator(*list, true);
     for (; !it.done(&it); it.next(&it))
     {
       void *data = list_node_get_data(it.node);
@@ -338,10 +347,13 @@ void list_destroy(list_t *list, void (*delete_data)(void *data))
     }
   }
 
-  // Free the entire node
-  for (; !it.done(&it); it.next(&it))
-  {
-    free(it.node);
+  // Free the memory of all nodes
+  list_node_t *node = list->first_node;
+  list_node_t *next = NULL;
+  while (node) {
+    next = node->next;
+    free(node);
+    node = next;
   }
 
   list->size = 0;

@@ -64,7 +64,7 @@ void fileio_close(FILE *file)
 
 bool fileio_next_line(FILE *file, string_t *buffer)
 {
-  char c;
+  int c;
   char *buffer_str = cstr(buffer);
   unsigned int chars_written = 0;
   while ((c = getc(file)) != EOF && c != '\n' && c != '\r')
