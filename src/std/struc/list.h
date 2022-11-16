@@ -35,7 +35,6 @@ typedef struct list_iterator_t
   bool from_start;
   struct list_node_t *node;
   int index; // current node's index in the list
-  bool first;
   void *(*next)(struct list_iterator_t *iterator);
   bool (*done)(struct list_iterator_t *iterator);
 } list_iterator_t;

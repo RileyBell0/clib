@@ -18,7 +18,6 @@ list_iterator_t new_list_iterator(list_t list, bool from_start)
   it.next = list_iterator_next;
   it.done = list_iterator_done;
   it.from_start = from_start;
-  it.first = true;
   if (from_start)
   {
     it.node = list.first_node;
@@ -41,24 +40,7 @@ list_iterator_t new_list_iterator(list_t list, bool from_start)
  */
 bool list_iterator_done(list_iterator_t *it)
 {
-  if (it->node == NULL)
-  {
-    return true;
-  }
-  else if (it->first)
-  {
-    return false;
-  }
-
-  // If the next node is empty, the list is done
-  if (it->from_start)
-  {
-    return it->node->next == NULL;
-  }
-  else
-  {
-    return it->node->prev == NULL;
-  }
+  return it->node == NULL;
 }
 
 /*
@@ -66,7 +48,6 @@ bool list_iterator_done(list_iterator_t *it)
  */
 void *list_iterator_next(list_iterator_t *it)
 {
-  it->first = false;
   // Move in the direction of the elem
   if (it->node != NULL)
   {
