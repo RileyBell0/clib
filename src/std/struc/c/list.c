@@ -18,6 +18,7 @@ list_iterator_t new_list_iterator(list_t list, bool from_start)
   it.next = list_iterator_next;
   it.done = list_iterator_done;
   it.from_start = from_start;
+  it.first = true;
   if (from_start)
   {
     it.node = list.first_node;
@@ -44,6 +45,10 @@ bool list_iterator_done(list_iterator_t *it)
   {
     return true;
   }
+  else if (it->first)
+  {
+    return false;
+  }
 
   // If the next node is empty, the list is done
   if (it->from_start)
@@ -61,6 +66,7 @@ bool list_iterator_done(list_iterator_t *it)
  */
 void *list_iterator_next(list_iterator_t *it)
 {
+  it->first = false;
   // Move in the direction of the elem
   if (it->node != NULL)
   {
@@ -79,15 +85,11 @@ void *list_iterator_next(list_iterator_t *it)
   return list_node_get_data(it->node);
 }
 
-list_t list_new(size_t element_size,
-                void (*delete_data)(void *data),
-                int (*compare)(const void *first, const void *second))
+list_t list_new(size_t element_size)
 {
   list_t list = {0};
 
   list.element_size = element_size;
-  list.delete_data = delete_data;
-  list.compare = compare;
 
   return list;
 }
@@ -180,6 +182,11 @@ void list_remove_at(list_t *list, int index)
 {
   // Determine which end of the list is closer to the index
   bool from_start = index_closer_to_start(list->size, index);
+
+  if (index >= list->size)
+  {
+    exit_error("List Index out of range", "std/c/list.c", "list_remove_at");
+  }
 
   // Find the node at the index requested and remove it
   list_iterator_t it = new_list_iterator(*list, from_start);
@@ -301,9 +308,10 @@ list_t *list_combine(list_t *base, list_t *extension)
   // Update the new list size
   base->size = base->size + extension->size;
 
-  // Empty extension list
-  extension->delete_data = NULL;
-  list_clear(extension);
+  // Clear the extension list
+  extension->first_node = NULL;
+  extension->last_node = NULL;
+  extension->size = 0;
 
   return base;
 }
@@ -322,8 +330,6 @@ array_t list_to_array(list_t *list)
   return converted;
 }
 
-void list_clear(list_t *list) { list_destroy(list); }
-
 //////////////////////////////
 // Cleanup
 //////////////////////////////
@@ -333,25 +339,29 @@ void list_clear(list_t *list) { list_destroy(list); }
  * a 'delete_data' function which will be responsible
  * for destroying your dynamically allocated data
  */
-void list_destroy(list_t *list)
+void list_destroy(list_t *list, void (*delete_data)(void *data))
 {
   if (list->size == 0)
   {
     return;
   }
 
-  // list_iterator_t it = list_new_iterator(list, true);
-  // if (list->delete_data) {
-  //   for (void *node = it.first(&it); !it.done(&it); node = it.next(&it)) {
-  //     void *data = list_node_get_data(node);
-  //     list->delete_data(data);
-  //   }
-  // }
+  list_iterator_t it = new_list_iterator(*list, true);
+  if (delete_data)
+  {
+    for (; !it.done(&it); it.next(&it))
+    {
+      void *data = list_node_get_data(it.node);
 
-  // // Free the entire node
-  // for (void *node = it.first(&it); !it.done(&it); node = it.next(&it)) {
-  //   free(node);
-  // }
+      delete_data(data);
+    }
+  }
+
+  // Free the entire node
+  for (; !it.done(&it); it.next(&it))
+  {
+    free(it.node);
+  }
 
   list->size = 0;
   list->first_node = NULL;

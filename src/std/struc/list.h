@@ -28,8 +28,6 @@ typedef struct list_t
   struct list_node_t *last_node;
   size_t element_size;
   int size;
-  void (*delete_data)(void *data);
-  int (*compare)(const void *first, const void *second);
 } list_t;
 
 typedef struct list_iterator_t
@@ -37,6 +35,7 @@ typedef struct list_iterator_t
   bool from_start;
   struct list_node_t *node;
   int index; // current node's index in the list
+  bool first;
   void *(*next)(struct list_iterator_t *iterator);
   bool (*done)(struct list_iterator_t *iterator);
 } list_iterator_t;
@@ -44,9 +43,7 @@ typedef struct list_iterator_t
 /*
  * Returns a new list where the stored elements will be of size (elementSize)
  */
-list_t list_new(size_t element_size,
-                void (*delete_data)(void *data),
-                int (*compare)(const void *first, const void *second));
+list_t list_new(size_t element_size);
 
 //////////////////////////////
 // Basic Operations
@@ -93,9 +90,6 @@ void list_remove_at(list_t *list, int index);
  */
 bool list_remove(list_t *list, void *elem);
 
-// TODO implement, write help info
-void list_clear(list_t *list);
-
 //////////////////////////////
 // High-level functions
 //////////////////////////////
@@ -111,15 +105,11 @@ list_t *list_combine(list_t *base, list_t *extension);
  */
 array_t list_to_array(list_t *list);
 
-//////////////////////////////
-// Cleanup
-//////////////////////////////
-
 /*
  * Free all dynamically allocated memory in a list.
- * Variable delete_data should be a pointer to a function responsible for
+ * delete_data should be a pointer to a function responsible for
  * freeing any heap allocated memory within each an element
  */
-void list_destroy(list_t *list);
+void list_destroy(list_t *list, void (*delete_data)(void *data));
 
 #endif
