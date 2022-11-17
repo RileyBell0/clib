@@ -14,10 +14,8 @@
  */
 typedef struct array_t
 {
-  bool allocated;
   void *data;
-  int len;
-  bool destroy_on_remove;
+  size_t len;
   void (*destroy)(void *data);
   size_t element_size;
 } array_t;
@@ -29,15 +27,7 @@ typedef struct array_t
 /*
  * returns a new array with the length set to 'elements'
  */
-array_t array_new(int elements, size_t element_size);
-
-/*
- * Given a pointer to an existing array, wraps it into an array_t
- * If the memory was dynamically allocated and should be managed here,
- * input true for was_allocated, false otherwise
- */
-array_t array_wrap(void *array, int len, size_t element_size,
-                   bool was_allocated);
+array_t array_new(size_t len, size_t element_size, void (*destroy)(void *data));
 
 //////////////////////////////
 // Basic Operations
@@ -48,23 +38,13 @@ array_t array_wrap(void *array, int len, size_t element_size,
  * the array provided
  * Negative Indexes are Supported
  */
-void *array_get(array_t *array, int index);
+void *array_get(array_t *array, size_t index);
 
 /*
  * Sets the given index in the array to the data provided
  * Negative Indexes are Supported
  */
-void array_set(array_t *array, int index, void *data);
-
-//////////////////////////////
-// High Level functions
-//////////////////////////////
-
-/*
- * Resizes the array to the given length, destroying removed elements if
- * enabled.
- */
-void array_resize(array_t *array, int new_len, void *template);
+void array_set(array_t *array, size_t index, void *data);
 
 //////////////////////////////
 // Generic Arrays
@@ -74,14 +54,14 @@ void array_resize(array_t *array, int new_len, void *template);
  * Method to set a given element from an array of an unknown type
  * Intended for use with array structures that know their element size
  */
-void array_generic_set(void *array, void *data, unsigned int element,
+void array_generic_set(void *array, void *elem, size_t index,
                        size_t element_size);
 
 /*
  * Method to get a given element from an array of an unknown type
  * Intended for use with array structures that know their element size
  */
-void *array_generic_get(void *array, unsigned int element,
+void *array_generic_get(void *array, size_t index,
                         size_t element_size);
 
 //////////////////////////////

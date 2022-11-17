@@ -61,9 +61,6 @@ list_iterator_t list_iterator_new(list_t list, bool from_start)
 
 void *list_get(list_t *list, int index)
 {
-  // Convert negative index into a positive index
-  index = index_convert_negative_safe(list->size, index);
-
   // Determine which end of the list is closer to the index
   bool from_start = index_closer_to_start(list->size, index);
   list_iterator_t it = list_iterator_new(*list, from_start);

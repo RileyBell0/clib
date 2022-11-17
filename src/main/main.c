@@ -97,30 +97,33 @@ void print_list(list_t list)
   {
     last = *(int *)(&list.last_node[1]);
   }
-  printf("Size: %d | First: %d  Last %d\n\n", list.size, first, last);
+  printf("Size: %d | First: %d  Last %d\n", list.size, first, last);
 
-  list_node_t *node = list.first_node;
-  while (node)
+  if (list.size > 0)
   {
-    printf("%s", cstr((string_t *)&node[1]));
-    if (node->next)
+    list_node_t *node = list.first_node;
+    while (node)
     {
-      printf(" > ");
+      printf("%s", cstr((string_t *)&node[1]));
+      if (node->next)
+      {
+        printf(" > ");
+      }
+      node = node->next;
     }
-    node = node->next;
-  }
-  node = list.last_node;
-  printf("\n");
-  while (node)
-  {
-    printf("%s", cstr((string_t *)&node[1]));
-    if (node->prev)
+    node = list.last_node;
+    printf("\n");
+    while (node)
     {
-      printf(" < ");
+      printf("%s", cstr((string_t *)&node[1]));
+      if (node->prev)
+      {
+        printf(" < ");
+      }
+      node = node->prev;
     }
-    node = node->prev;
+    printf("\n");
   }
-  printf("\n");
 
   printf("\n");
 }

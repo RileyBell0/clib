@@ -1,13 +1,19 @@
 all: main
 
-main: main.o list.o tree.o error.o memory.o fileIO.o string.o index.o
-	clang -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/list.o output/objects/tree.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+main: main.o list.o array.o vector.o tree.o error.o memory.o fileIO.o string.o index.o
+	clang -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
 
 main.o: src/main/main.c
 	clang -arch arm64 -Wall -c -o output/objects/main.o src/main/main.c -g
 
 list.o: src/std/struc/c/list.c
 	clang -arch arm64 -Wall -c -o output/objects/list.o src/std/struc/c/list.c -g
+
+array.o: src/std/struc/c/array.c
+	clang -arch arm64 -Wall -c -o output/objects/array.o src/std/struc/c/array.c -g
+
+vector.o: src/std/struc/c/vector.c
+	clang -arch arm64 -Wall -c -o output/objects/vector.o src/std/struc/c/vector.c -g
 
 tree.o: src/std/struc/c/tree.c
 	clang -arch arm64 -Wall -c -o output/objects/tree.o src/std/struc/c/tree.c -g
