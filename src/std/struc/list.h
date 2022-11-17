@@ -4,7 +4,6 @@
 #include "./array.h"
 #include "../sys/error.h"
 #include <stdbool.h>
-#include <stdio.h>
 
 #define ERROR -1
 #define NO_INDEX -1
@@ -28,11 +27,13 @@ typedef struct list_t
   struct list_node_t *last_node;
   size_t element_size;
   int size;
+  void (*destroy)(void *data);
 } list_t;
 
 typedef struct list_iterator_t
 {
   bool from_start;
+  void *elem;
   struct list_node_t *node;
   int index; // current node's index in the list
   void *(*next)(struct list_iterator_t *iterator);
@@ -42,7 +43,13 @@ typedef struct list_iterator_t
 /*
  * Returns a new list where the stored elements will be of size (elementSize)
  */
-list_t list_new(size_t element_size);
+list_t list_new(size_t element_size, void (*destroy)(void *data));
+
+/*
+ * Creates a new list iterator
+ * Usage: for (void *elem = it.elem; !it.done(&it); elem = it.next(&it))
+ */
+list_iterator_t list_iterator_new(list_t list, bool from_start);
 
 //////////////////////////////
 // Basic Operations
@@ -87,7 +94,7 @@ void list_remove_at(list_t *list, int index);
  *
  * Returns true if an element was removed, false otherwise
  */
-bool list_remove(list_t *list, void *elem);
+bool list_remove(list_t *list, void *key, int (*compare)(void *elem1, void *elem2));
 
 //////////////////////////////
 // High-level functions
@@ -104,6 +111,6 @@ list_t *list_combine(list_t *base, list_t *extension);
  * delete_data should be a pointer to a function responsible for
  * freeing any heap allocated memory within each an element
  */
-void list_destroy(list_t *list, void (*delete_data)(void *data));
+void list_destroy(list_t *list);
 
 #endif

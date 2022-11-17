@@ -1,5 +1,5 @@
 #include "../list.h"
-void *list_node_get_data(list_node_t *node);
+
 /*
  * Returns a pointer to a new list Node with the relevant data attached
  */
@@ -9,10 +9,24 @@ list_node_t *list_new_node(void *element, size_t element_size);
  * accordingly
  */
 void list_remove_node(list_t *list, list_node_t *node, void *dest);
+void *list_node_get_data(list_node_t *node);
 bool list_iterator_done(list_iterator_t *it);
 void *list_iterator_next(list_iterator_t *it);
 
-list_iterator_t new_list_iterator(list_t list, bool from_start)
+////////////////////////////////////////
+////////////////////////////////////////
+
+list_t list_new(size_t element_size, void (*destroy)(void *data))
+{
+  list_t list = {0};
+
+  list.element_size = element_size;
+  list.destroy = destroy;
+
+  return list;
+}
+
+list_iterator_t list_iterator_new(list_t list, bool from_start)
 {
   list_iterator_t it;
   it.next = list_iterator_next;
@@ -28,6 +42,13 @@ list_iterator_t new_list_iterator(list_t list, bool from_start)
     it.node = list.last_node;
     it.index = list.size - 1;
   }
+
+  it.elem = NULL;
+  if (it.node)
+  {
+    it.elem = list_node_get_data(it.node);
+  }
+
   if (list.size == 0)
   {
     it.node = NULL;
@@ -35,74 +56,8 @@ list_iterator_t new_list_iterator(list_t list, bool from_start)
   return it;
 }
 
-/*
- * returns true if the list has no more elements
- */
-bool list_iterator_done(list_iterator_t *it)
-{
-  return it->node == NULL;
-}
-
-/*
- * Move to (and return) the next elem in the list
- */
-void *list_iterator_next(list_iterator_t *it)
-{
-  // Move in the direction of the elem
-  if (it->node != NULL)
-  {
-    if (it->from_start)
-    {
-      printf("node %p\n", it->node);
-      printf("node %p\n", it->node->next);
-      it->node = it->node->next;
-      it->index += 1;
-    }
-    else
-    {
-      it->node = it->node->prev;
-      it->index -= 1;
-    }
-  }
-
-  if (it->node)
-  {
-    return list_node_get_data(it->node);
-  }
-  else
-  {
-    return NULL;
-  }
-}
-
-list_t list_new(size_t element_size)
-{
-  list_t list = {0};
-
-  list.element_size = element_size;
-
-  return list;
-}
-
-list_node_t *list_new_node(void *element, size_t element_size)
-{
-  // Ensure the element is non-null
-  if (!element)
-  {
-    exit_error("Null value recieved creating list node", "std/c/list.c",
-               "list_new_node");
-  }
-
-  // Allocate memory for the node
-  list_node_t *node = safe_calloc(sizeof(list_node_t) + element_size);
-  node->next = NULL;
-  node->prev = NULL;
-
-  // Copy the data into the generated space
-  assert(memcpy(&node[1], element, element_size));
-
-  return node;
-}
+////////////////////////////////////////
+////////////////////////////////////////
 
 void *list_get(list_t *list, int index)
 {
@@ -111,8 +66,8 @@ void *list_get(list_t *list, int index)
 
   // Determine which end of the list is closer to the index
   bool from_start = index_closer_to_start(list->size, index);
-  list_iterator_t it = new_list_iterator(*list, from_start);
-  for (void *elem = it.node; !it.done(&it); elem = it.next(&it))
+  list_iterator_t it = list_iterator_new(*list, from_start);
+  for (void *elem = it.elem; !it.done(&it); elem = it.next(&it))
   {
     // When we get to the required element, return it
     if (it.index == index)
@@ -154,7 +109,7 @@ void list_pop(list_t *list, void *dest, int index)
   bool from_start = index_closer_to_start(list->size, index);
 
   // Find the node at the index requested and remove it
-  list_iterator_t it = new_list_iterator(*list, from_start);
+  list_iterator_t it = list_iterator_new(*list, from_start);
   for (; !it.done(&it); it.next(&it))
   {
     if (index == it.index)
@@ -179,7 +134,7 @@ void list_remove_at(list_t *list, int index)
   }
 
   // Find the node at the index requested and remove it
-  list_iterator_t it = new_list_iterator(*list, from_start);
+  list_iterator_t it = list_iterator_new(*list, from_start);
   for (; !it.done(&it); it.next(&it))
   {
     if (index == it.index)
@@ -193,79 +148,38 @@ void list_remove_at(list_t *list, int index)
              "std/c/list.c", "list_remove_at");
 }
 
-bool list_remove(list_t *list, void *elem)
+bool list_remove(list_t *list, void *key, int (*compare)(void *elem1, void *elem2))
 {
-  if (!list || !elem || list->size == 0)
+  if (!key || list->size == 0)
   {
     return false;
   }
 
-  list_node_t *current_node = list->first_node;
-
-  while (current_node)
+  // Find and remove the matching element
+  list_iterator_t it = list_iterator_new(*list, true);
+  for (void *elem = it.elem; !it.done(&it); elem = it.next(&it))
   {
-    if (memcmp(&current_node[1], elem, list->element_size) == 0)
+    if (compare)
     {
-      list_remove_node(list, current_node, NULL);
-      return true;
+      // Compare using provided method
+      if (compare(elem, key) == 0)
+      {
+        list_remove_node(list, it.node, NULL);
+        return true;
+      }
     }
-
-    current_node = current_node->next;
+    else
+    {
+      // Compare element and key memory
+      if (memcmp(elem, key, list->element_size) == 0)
+      {
+        list_remove_node(list, it.node, NULL);
+        return true;
+      }
+    }
   }
 
   return false;
-}
-
-void *list_node_get_data(list_node_t *node)
-{
-  if (node == NULL)
-  {
-    return NULL;
-  }
-  else
-  {
-    return (void *)&(node[1]);
-  }
-}
-
-/*
- * Removes a given node from the list it is contained within and
- * patches surrounding references. If a delete_data function is
- * provided, the node's associated data is deleted
- */
-void list_remove_node(list_t *list, list_node_t *node, void *dest)
-{
-  list_node_t *prev = node->prev;
-  list_node_t *next = node->next;
-
-  // list gymnastics
-  list->size -= 1;
-
-  if (prev)
-  {
-    prev->next = next;
-  }
-  else
-  {
-    list->first_node = next;
-  }
-
-  if (next)
-  {
-    next->prev = prev;
-  }
-  else
-  {
-    list->last_node = prev;
-  }
-
-  // Copy the data out of the node so it can be returned
-  if (dest)
-  {
-    assert(memcpy(dest, &node[1], list->element_size));
-  }
-
-  free(node);
 }
 
 //////////////////////////////
@@ -305,16 +219,12 @@ list_t *list_combine(list_t *base, list_t *extension)
   return base;
 }
 
-//////////////////////////////
-// Cleanup
-//////////////////////////////
-
 /*
  * If you have dynamically allocated data, you must send
  * a 'delete_data' function which will be responsible
  * for destroying your dynamically allocated data
  */
-void list_destroy(list_t *list, void (*delete_data)(void *data))
+void list_destroy(list_t *list)
 {
   if (list->size == 0)
   {
@@ -327,10 +237,10 @@ void list_destroy(list_t *list, void (*delete_data)(void *data))
   while (node)
   {
     // Free dynamically allocated memory within the stored element
-    if (delete_data)
+    if (list->destroy)
     {
       void *data = list_node_get_data(node);
-      delete_data(data);
+      list->destroy(data);
     }
 
     // Free the node's memory
@@ -342,4 +252,124 @@ void list_destroy(list_t *list, void (*delete_data)(void *data))
   list->size = 0;
   list->first_node = NULL;
   list->last_node = NULL;
+}
+
+//////////////////////////////
+// Utilities
+//////////////////////////////
+
+/*
+ * returns true if the list has no more elements
+ */
+bool list_iterator_done(list_iterator_t *it)
+{
+  return it->node == NULL;
+}
+
+/*
+ * Move to (and return) the next elem in the list
+ */
+void *list_iterator_next(list_iterator_t *it)
+{
+  // Move in the direction of the elem
+  if (it->node != NULL)
+  {
+    if (it->from_start)
+    {
+      it->node = it->node->next;
+      it->index += 1;
+    }
+    else
+    {
+      it->node = it->node->prev;
+      it->index -= 1;
+    }
+  }
+
+  if (it->node)
+  {
+    it->elem = list_node_get_data(it->node);
+    return it->elem;
+  }
+  else
+  {
+    return NULL;
+  }
+}
+
+list_node_t *list_new_node(void *element, size_t element_size)
+{
+  // Ensure the element is non-null
+  if (!element)
+  {
+    exit_error("Null value recieved creating list node", "std/c/list.c",
+               "list_new_node");
+  }
+
+  // Allocate memory for the node
+  list_node_t *node = safe_malloc(sizeof(list_node_t) + element_size);
+  node->next = NULL;
+  node->prev = NULL;
+
+  // Copy the data into the generated space
+  assert(memcpy(&node[1], element, element_size));
+
+  return node;
+}
+
+void *list_node_get_data(list_node_t *node)
+{
+  if (node == NULL)
+  {
+    return NULL;
+  }
+  else
+  {
+    return (void *)&(node[1]);
+  }
+}
+
+/*
+ * Removes a given node from the list it is contained within and
+ * patches surrounding references. If a delete_data function is
+ * provided, the node's associated data is deleted
+ */
+void list_remove_node(list_t *list, list_node_t *node, void *dest)
+{
+  list_node_t *prev = node->prev;
+  list_node_t *next = node->next;
+
+  // Patch surrounding nodes together, and patch the list endings
+  list->size -= 1;
+
+  if (prev)
+  {
+    prev->next = next;
+  }
+  else
+  {
+    list->first_node = next;
+  }
+
+  if (next)
+  {
+    next->prev = prev;
+  }
+  else
+  {
+    list->last_node = prev;
+  }
+
+  // Copy OR Destroy the element
+  void *elem = list_node_get_data(node);
+  if (dest)
+  {
+    assert(memcpy(dest, elem, list->element_size));
+  }
+  else if (list->destroy)
+  {
+    list->destroy(elem);
+  }
+
+  free(node);
 }
