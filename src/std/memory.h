@@ -1,8 +1,3 @@
-/*
- * Author:          Riley Bell
- * Creation Date:   16/10/2020
- */
-
 #ifndef CLIB_STD_MEMORY_H
 #define CLIB_STD_MEMORY_H
 #define BITS_PER_BYTE 8
