@@ -8,7 +8,7 @@ typedef vector_t vstack_t;
 
 vstack_t vstack_new(size_t elem_size);
 
-void vstack_push(vstack_t *stack, void *data);
+vstack_t *vstack_push(vstack_t *stack, void *data);
 
 bool vstack_pop(vstack_t *stack, void *dest);
 
