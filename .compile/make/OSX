@@ -1,37 +1,46 @@
-all: main
+all: main2 main
 
-main: main.o list.o array.o vector.o tree.o error.o memory.o fileIO.o string.o index.o
-	clang -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+main2: main2.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/main2 output/objects/main2.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+
+main: main.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+
+main2.o: src/main/main2.c
+	gcc -arch arm64 -Wall -c -o output/objects/main2.o src/main/main2.c -g
 
 main.o: src/main/main.c
-	clang -arch arm64 -Wall -c -o output/objects/main.o src/main/main.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/main.o src/main/main.c -g
 
 list.o: src/std/struc/c/list.c
-	clang -arch arm64 -Wall -c -o output/objects/list.o src/std/struc/c/list.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/list.o src/std/struc/c/list.c -g
 
 array.o: src/std/struc/c/array.c
-	clang -arch arm64 -Wall -c -o output/objects/array.o src/std/struc/c/array.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/array.o src/std/struc/c/array.c -g
 
 vector.o: src/std/struc/c/vector.c
-	clang -arch arm64 -Wall -c -o output/objects/vector.o src/std/struc/c/vector.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/vector.o src/std/struc/c/vector.c -g
 
 tree.o: src/std/struc/c/tree.c
-	clang -arch arm64 -Wall -c -o output/objects/tree.o src/std/struc/c/tree.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/tree.o src/std/struc/c/tree.c -g
+
+directory.o: src/std/sys/c/directory.c
+	gcc -arch arm64 -Wall -c -o output/objects/directory.o src/std/sys/c/directory.c -g
 
 error.o: src/std/sys/c/error.c
-	clang -arch arm64 -Wall -c -o output/objects/error.o src/std/sys/c/error.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/error.o src/std/sys/c/error.c -g
 
 memory.o: src/std/c/memory.c
-	clang -arch arm64 -Wall -c -o output/objects/memory.o src/std/c/memory.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/memory.o src/std/c/memory.c -g
 
 fileIO.o: src/std/c/fileIO.c
-	clang -arch arm64 -Wall -c -o output/objects/fileIO.o src/std/c/fileIO.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/fileIO.o src/std/c/fileIO.c -g
 
 string.o: src/std/c/string.c
-	clang -arch arm64 -Wall -c -o output/objects/string.o src/std/c/string.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/string.o src/std/c/string.c -g
 
 index.o: src/std/c/index.c
-	clang -arch arm64 -Wall -c -o output/objects/index.o src/std/c/index.c -g
+	gcc -arch arm64 -Wall -c -o output/objects/index.o src/std/c/index.c -g
 
 clean:
 	rm output/objects/*.o output/build/*

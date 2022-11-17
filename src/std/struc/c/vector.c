@@ -124,7 +124,10 @@ array_t vector_to_array(vector_t *vec)
 {
   array_t converted = array_new(vec->len, vec->elem_size, vec->destroy);
 
-  memcpy(converted.data, vec->data, vec->len * vec->elem_size);
+  if (vec->len > 0)
+  {
+    memcpy(converted.data, vec->data, vec->len * vec->elem_size);
+  }
 
   return converted;
 }
@@ -133,6 +136,9 @@ array_t vector_to_array(vector_t *vec)
 // Utility Functions
 //////////////////////////////
 
+/*
+ * Ensures the vector has at lesat req_len total capacity
+ */
 void vector_set_capacity(vector_t *vec, size_t req_len)
 {
   // Ensure the requested capacity is valid for the array's state
@@ -216,6 +222,21 @@ static void vector_extend(vector_t *vec)
   // Update vector information
   vec->data = new_mem;
   vec->capacity = new_len;
+}
+
+vector_t *vector_combine(vector_t *vec, vector_t *ext)
+{
+  // Make space for the new elems
+  vector_set_capacity(vec, vec->len + ext->len);
+
+  // Append "ext" to the end of "vec"
+  void *vec_end = array_generic_get(vec->data, vec->len, vec->elem_size);
+  assert(memcpy(vec_end, ext->data, ext->elem_size * ext->len));
+  vec->len = vec->len + ext->len;
+
+  // Cleanup
+  vector_clear(ext);
+  return vec;
 }
 
 //////////////////////////////

@@ -67,6 +67,11 @@ void vector_remove_at(vector_t *array, size_t index);
 void vector_pop(vector_t *array, void *dest, size_t index);
 
 /*
+ * Appends ext to vec, then clears ext
+ */
+vector_t *vector_combine(vector_t *vec, vector_t *ext);
+
+/*
  * Copies vector data into an array
  */
 array_t vector_to_array(vector_t *vec);
