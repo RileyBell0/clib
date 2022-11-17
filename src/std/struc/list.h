@@ -1,9 +1,11 @@
 #ifndef CLIB_STD_STRUC_LIST_H
 #define CLIB_STD_STRUC_LIST_H
 
-#include "./array.h"
 #include "../sys/error.h"
+#include "../index.h"
+#include "../memory.h"
 #include <stdbool.h>
+#include <string.h>
 
 #define ERROR -1
 #define NO_INDEX -1

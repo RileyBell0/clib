@@ -21,31 +21,41 @@ void delete_func(void *elem)
 
 void dest(list_t *list)
 {
-  list_destroy(list, delete_func);
+  list_destroy(list);
 }
 
 void options()
 {
-  printf("OPTIONS:\n------\n1: append\n2: delete\n3: delete at\n4: exit\n5: destroy\n6: pop\n");
+  printf("OPTIONS:\n------\n1: append\n2: delete\n3: delete at\n4: exit\n5: destroy\n6: pop\n7: get");
 }
 
 void pop(list_t *list)
 {
   string_t buffer = empty_string();
+
   printf("Enter an index: ");
   fileio_next_line(stdin, &buffer);
+
   int ind = atoi(cstr(&buffer));
-  int dest = -1;
+  string_t dest = empty_string();
   list_pop(list, &dest, ind);
-  printf("Popped %d\n", dest);
+
+  printf("Popped %s\n", cstr(&dest));
+
+  string_destroy(&dest);
+  string_destroy(&buffer);
+}
+
+int void_string_compare(void *str1, void *str2)
+{
+  return string_compare((string_t *)str1, (string_t *)str2);
 }
 
 void deleteone(list_t *list, string_t *buf)
 {
   printf("Enter a number: ");
   fileio_next_line(stdin, buf);
-  int del = atoi(cstr(buf));
-  list_remove(list, &del);
+  list_remove(list, (void *)buf, void_string_compare);
 }
 void deleteat(list_t *list, string_t *buf)
 {
@@ -59,8 +69,19 @@ void addone(list_t *list, string_t *buf)
 {
   printf("Enter a number: ");
   fileio_next_line(stdin, buf);
-  int add = atoi(cstr(buf));
+  string_t add = string_copy(buf);
   list_append(list, &add);
+}
+
+void get(list_t *list)
+{
+  printf("Enter an index: ");
+  string_t buffer = empty_string();
+  fileio_next_line(stdin, &buffer);
+  int del = atoi(cstr(&buffer));
+  string_t *elem = (string_t *)list_get(list, del);
+  printf("Got '%s'\n", cstr(elem));
+  string_destroy(&buffer);
 }
 
 void print_list(list_t list)
@@ -81,7 +102,7 @@ void print_list(list_t list)
   list_node_t *node = list.first_node;
   while (node)
   {
-    printf("%d", *(int *)&node[1]);
+    printf("%s", cstr((string_t *)&node[1]));
     if (node->next)
     {
       printf(" > ");
@@ -92,7 +113,7 @@ void print_list(list_t list)
   printf("\n");
   while (node)
   {
-    printf("%d", *(int *)&node[1]);
+    printf("%s", cstr((string_t *)&node[1]));
     if (node->prev)
     {
       printf(" < ");
@@ -106,9 +127,9 @@ void print_list(list_t list)
 
 int main(int argc, char **argv)
 {
-  string_t str = string_new(DEFAULT_BUFFER_LEN);
+  string_t str = empty_string();
   string_t *buf = &str;
-  list_t list = list_new(sizeof(int));
+  list_t list = list_new(sizeof(string_t), void_string_destroy);
 
   while (true)
   {
@@ -130,7 +151,7 @@ int main(int argc, char **argv)
         break;
       case 4:
         string_destroy(buf);
-        list_destroy(&list, NULL);
+        list_destroy(&list);
         return 0;
         break;
       case 5:
@@ -139,6 +160,10 @@ int main(int argc, char **argv)
         break;
       case 6:
         pop(&list);
+        break;
+      case 7:
+        get(&list);
+        break;
       default:
         break;
       }

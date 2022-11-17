@@ -75,7 +75,7 @@ string_t *string_append_char(string_t *base, char to_add)
 {
   if (to_add == '\0')
   {
-    return;
+    return base;
   }
 
   string_set_max_len(base, base->len + 1);
@@ -111,7 +111,7 @@ string_t *string_append_c_multi(string_t *base, char *source, ...)
   char *str = source;
   while (str)
   {
-    string_write_c(base, str);
+    string_append_c(base, str);
     str = va_arg(vargs, char *);
   }
 
@@ -152,7 +152,7 @@ string_t *string_append(string_t *base, string_t *source)
 
   // Allocate enough space to fit the extension
   string_set_max_len(base, base->len + source->len);
-  strncpy(&cstr(base)[base->len], source, source->len);
+  strncpy(&cstr(base)[base->len], cstr(source), source->len);
   base->len += source->len;
   cstr(base)[base->len] = '\0';
 
@@ -167,7 +167,7 @@ string_t *string_append_multi(string_t *base, string_t *source, ...)
   string_t *str = source;
   while (str)
   {
-    string_write(base, str);
+    string_append(base, str);
     str = va_arg(vargs, string_t *);
   }
 
@@ -181,7 +181,7 @@ string_t string_copy(string_t *source)
   string_t str = string_new(NULL);
   string_set_max_len(&str, source->len);
 
-  string_write(&str, source);
+  string_append(&str, source);
 
   return str;
 }
@@ -229,7 +229,7 @@ void string_destroy(string_t *str)
   // Destroy string data
   if (!str->local)
   {
-    destroy(str->_str);
+    free(str->_str);
   }
 
   // Clear the string

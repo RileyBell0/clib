@@ -3,9 +3,9 @@
 
 #define EXTENSION_SEPERATING_CHAR '.'
 
-#include "struc/vector.h"
 #include "string.h"
 #include <stdio.h>
+#include <assert.h>
 
 #define MODE_READ "r"
 #define MODE_WRITE "w"
@@ -34,7 +34,5 @@ void fileio_close(FILE *file);
  * to fit the whole line
  * returns TRUE (1) on success or FALSE (0) on failure */
 bool fileio_next_line(FILE *file, string_t *buffer);
-
-array_t fileio_read_all_lines(char *file_name);
 
 #endif

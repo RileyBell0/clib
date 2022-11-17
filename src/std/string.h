@@ -1,12 +1,13 @@
 #ifndef CLIB_STD_STRING_H
 #define CLIB_STD_STRING_H
 
-#include "struc/array.h"
+#include "./memory.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define CSTR_EQUAL 0
 #define SPACE_FOR_NULL 1
@@ -43,12 +44,12 @@ string_t empty_string();
 /*
  * Resets a string to empty_string (also frees the string memory)
  */
-string_t* string_clear(string_t *to_clear);
+string_t *string_clear(string_t *to_clear);
 
 /*
  * limits the given string to the new length.
  */
-string_t* string_limit(string_t *source, size_t new_len);
+string_t *string_limit(string_t *source, size_t new_len);
 
 /*
  * strcmp() called on both cstring components of the strings given
@@ -61,7 +62,7 @@ int string_compare(string_t *str1, string_t *str2);
 bool string_equals(string_t *str1, string_t *str2);
 
 // Writes the given char to the end of the string
-string_t* string_append_char(string_t *base, char to_add);
+string_t *string_append_char(string_t *base, char to_add);
 
 /*
  * Appends the cstring to the string 'base'
