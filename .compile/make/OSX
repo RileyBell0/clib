@@ -1,16 +1,25 @@
-all: main2 main
+all: dir_test main list_test
 
-main2: main2.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/main2 output/objects/main2.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+dir_test: dir_test.o dict.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/dir_test output/objects/dir_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
 
-main: main.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+main: main.o dict.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
 
-main2.o: src/main/main2.c
-	gcc -arch arm64 -Wall -c -o output/objects/main2.o src/main/main2.c -g
+list_test: list_test.o dict.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/list_test output/objects/list_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+
+dir_test.o: src/main/dir_test.c
+	gcc -arch arm64 -Wall -c -o output/objects/dir_test.o src/main/dir_test.c -g
 
 main.o: src/main/main.c
 	gcc -arch arm64 -Wall -c -o output/objects/main.o src/main/main.c -g
+
+list_test.o: src/main/list_test.c
+	gcc -arch arm64 -Wall -c -o output/objects/list_test.o src/main/list_test.c -g
+
+dict.o: src/std/struc/c/dict.c
+	gcc -arch arm64 -Wall -c -o output/objects/dict.o src/std/struc/c/dict.c -g
 
 list.o: src/std/struc/c/list.c
 	gcc -arch arm64 -Wall -c -o output/objects/list.o src/std/struc/c/list.c -g
