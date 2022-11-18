@@ -40,7 +40,7 @@ void set(dict_t *dict)
   fileio_next_line(stdin, buf);
   string_t value = string_copy(buf);
 
-  dict_set(dict, &key, &value);
+  dict_set(dict, cstr(&key), &value);
 
   string_destroy(&key);
   string_destroy(buf);
@@ -52,7 +52,7 @@ void contains(dict_t *dict)
   printf("Enter a key: ");
   fileio_next_line(stdin, buf);
 
-  if (dict_contains(dict, buf))
+  if (dict_contains(dict, cstr(buf)))
   {
     printf("TRUE - CONTAINS %s\n", cstr(buf));
   }
@@ -69,7 +69,7 @@ void get(dict_t *dict)
   string_t *buf = &buffer;
   printf("Enter a key: ");
   fileio_next_line(stdin, buf);
-  string_t *res = (string_t *)dict_get(dict, buf);
+  string_t *res = (string_t *)dict_get(dict, cstr(buf));
   printf("RESULT: {\"%s\": \"%s\"}\n", cstr(buf), cstr(res));
 
   string_destroy(buf);

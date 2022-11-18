@@ -215,6 +215,51 @@ string_t string_concat_multi(string_t *base, string_t *extension, ...)
   return combined;
 }
 
+string_t *string_trim(string_t *base)
+{
+  // Determine how many chars to remove from the end of the string
+  size_t final_char = base->len - 1;
+  char *str = cstr(base);
+  for (; final_char >= 0; final_char--)
+  {
+    char c = str[final_char];
+    if (c != ' ' && c != '\t')
+    {
+      break;
+    }
+  }
+  size_t final_len = final_char + 1;
+  string_limit(base, final_len);
+
+  // Determine the number of chars to remove from the start of the string
+  size_t start_trim = 0;
+  str = cstr(base);
+  for (; start_trim < base->len; start_trim++)
+  {
+    char c = str[start_trim];
+    if (c != ' ' && c != '\t')
+    {
+      break;
+    }
+  }
+
+  // Shift the string back to trim the start
+  if (start_trim != 0)
+  {
+    memmove(cstr(base), &cstr(base)[start_trim], base->len - start_trim);
+    base->len = base->len - start_trim;
+    cstr(base)[base->len] = '\0';
+  }
+
+  // Free up string memory (if it's now empty)
+  if (base->len == 0)
+  {
+    string_clear(base);
+  }
+
+  return base;
+}
+
 char *cstr(string_t *str)
 {
   if (str->local)

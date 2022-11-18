@@ -25,11 +25,11 @@ typedef struct dict_t
  */
 dict_t dict_new(size_t value_size, void (*value_destroy)(void *elem));
 
-void *dict_get(dict_t *dict, string_t *key);
+void *dict_get(dict_t *dict, char *key);
 
-void dict_set(dict_t *dict, string_t *key, void *value);
+void dict_set(dict_t *dict, char *key, void *value);
 
-bool dict_contains(dict_t *dict, string_t *key);
+bool dict_contains(dict_t *dict, char *key);
 
 void dict_destroy(dict_t *dict);
 

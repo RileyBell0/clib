@@ -1,6 +1,6 @@
 #include "../dict.h"
 
-dict_node_t dict_node_new(dict_t *dict, string_t *key, void *value);
+dict_node_t dict_node_new(dict_t *dict, char *key, void *value);
 
 /*
  * Creates a new dict, requires the element size of a value, element size of a
@@ -17,23 +17,23 @@ dict_t dict_new(size_t value_size, void (*value_destroy)(void *elem))
   return dict;
 }
 
-dict_node_t dict_node_new(dict_t *dict, string_t *key, void *value)
+dict_node_t dict_node_new(dict_t *dict, char *key, void *value)
 {
   dict_node_t node;
 
-  node.key = string_copy(key);
+  node.key = string_new(key);
   node.value = safe_malloc(dict->value_size);
   memcpy(node.value, value, dict->value_size);
 
   return node;
 }
 
-static void *dict_vector_find(vector_t vec, string_t *key)
+static void *dict_vector_find(vector_t vec, char *key)
 {
   for (size_t i = 0; i < vec.len; i++)
   {
     dict_node_t *node = (dict_node_t *)vector_get(&vec, i);
-    if (string_equals(&node->key, key))
+    if (strcmp(cstr(&node->key), key) == 0)
     {
       return node->value;
     }
@@ -42,7 +42,7 @@ static void *dict_vector_find(vector_t vec, string_t *key)
   return NULL;
 }
 
-void *dict_get(dict_t *dict, string_t *key)
+void *dict_get(dict_t *dict, char *key)
 {
   void *val = dict_vector_find(dict->data, key);
   if (!val)
@@ -52,7 +52,7 @@ void *dict_get(dict_t *dict, string_t *key)
   return val;
 }
 
-void dict_set(dict_t *dict, string_t *key, void *value)
+void dict_set(dict_t *dict, char *key, void *value)
 {
   void *val = dict_vector_find(dict->data, key);
   if (val)
@@ -72,7 +72,7 @@ void dict_set(dict_t *dict, string_t *key, void *value)
   }
 }
 
-bool dict_contains(dict_t *dict, string_t *key)
+bool dict_contains(dict_t *dict, char *key)
 {
   if (dict_vector_find(dict->data, key))
   {

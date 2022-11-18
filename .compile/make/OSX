@@ -1,19 +1,25 @@
-all: dir_test main list_test
+all: dir_test cfg_test dict_test list_test
 
-dir_test: dir_test.o dict.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/dir_test output/objects/dir_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+dir_test: dir_test.o dict.o list.o array.o vector.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/dir_test output/objects/dir_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
 
-main: main.o dict.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+cfg_test: cfg_test.o dict.o list.o array.o vector.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/cfg_test output/objects/cfg_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
 
-list_test: list_test.o dict.o list.o array.o vector.o tree.o directory.o error.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/list_test output/objects/list_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+dict_test: dict_test.o dict.o list.o array.o vector.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/dict_test output/objects/dict_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+
+list_test: list_test.o dict.o list.o array.o vector.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/list_test output/objects/list_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
 
 dir_test.o: src/main/dir_test.c
 	gcc -arch arm64 -Wall -c -o output/objects/dir_test.o src/main/dir_test.c -g
 
-main.o: src/main/main.c
-	gcc -arch arm64 -Wall -c -o output/objects/main.o src/main/main.c -g
+cfg_test.o: src/main/cfg_test.c
+	gcc -arch arm64 -Wall -c -o output/objects/cfg_test.o src/main/cfg_test.c -g
+
+dict_test.o: src/main/dict_test.c
+	gcc -arch arm64 -Wall -c -o output/objects/dict_test.o src/main/dict_test.c -g
 
 list_test.o: src/main/list_test.c
 	gcc -arch arm64 -Wall -c -o output/objects/list_test.o src/main/list_test.c -g
@@ -38,6 +44,9 @@ directory.o: src/std/sys/c/directory.c
 
 error.o: src/std/sys/c/error.c
 	gcc -arch arm64 -Wall -c -o output/objects/error.o src/std/sys/c/error.c -g
+
+config.o: src/std/adv/c/config.c
+	gcc -arch arm64 -Wall -c -o output/objects/config.o src/std/adv/c/config.c -g
 
 memory.o: src/std/c/memory.c
 	gcc -arch arm64 -Wall -c -o output/objects/memory.o src/std/c/memory.c -g

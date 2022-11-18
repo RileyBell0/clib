@@ -111,6 +111,11 @@ string_t string_concat(string_t *base, string_t *extension);
 string_t string_concat_multi(string_t *base, string_t *extension, ...);
 
 /*
+ * Trim whitespaces and tabs from the ends of the string
+ */
+string_t *string_trim(string_t *base);
+
+/*
  * Returns a pointer to the start of the cstring component
  * MUST BE USED IN ALL INSTANCES WHERE A CSTR IS REQUIRED
  */
