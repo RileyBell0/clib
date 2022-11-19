@@ -2,6 +2,7 @@
 #define CLIB_STD_STRING_H
 
 #include "./memory.h"
+#include "./sys/error.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -111,9 +112,21 @@ string_t string_concat(string_t *base, string_t *extension);
 string_t string_concat_multi(string_t *base, string_t *extension, ...);
 
 /*
+ * Combines the provided strings into one new string. Memory is allocated
+ * NULL must be sent after your last string
+ */
+char *cstr_cat(char *str, char *str2, ...);
+
+/*
  * Trim whitespaces and tabs from the ends of the string
  */
 string_t *string_trim(string_t *base);
+
+/*
+ * replace all occurances of 'src' with 'replacement';
+ * You cannot use '\0' for the replacement char
+ */
+string_t *string_replace(string_t *base, char src, char replacement);
 
 /*
  * Returns a pointer to the start of the cstring component

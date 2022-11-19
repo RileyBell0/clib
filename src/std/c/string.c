@@ -215,6 +215,33 @@ string_t string_concat_multi(string_t *base, string_t *extension, ...)
   return combined;
 }
 
+char *cstr_cat(char *start, char *extension, ...)
+{
+  va_list vargs;
+  va_start(vargs, extension);
+
+  // Combine all received strings
+  string_t combined = string_new(start);
+  char *str = extension;
+  while (str)
+  {
+    string_append_c(&combined, str);
+    str = va_arg(vargs, char *);
+  }
+
+  // Ensure memory is allocated for the result
+  char *result = cstr(&combined);
+  if (combined.local)
+  {
+    size_t result_len = (combined.len + 1) * sizeof(char);
+    result = safe_malloc(result_len);
+    memcpy(result, cstr(&combined), result_len);
+  }
+
+  va_end(vargs);
+  return result;
+}
+
 string_t *string_trim(string_t *base)
 {
   // Determine how many chars to remove from the end of the string
@@ -255,6 +282,25 @@ string_t *string_trim(string_t *base)
   if (base->len == 0)
   {
     string_clear(base);
+  }
+
+  return base;
+}
+
+string_t *string_replace(string_t *base, char src, char replacement)
+{
+  if (replacement == '\0')
+  {
+    exit_error("Cannot replace chars with '\0'", "std/c/string.c", "string_replace");
+  }
+
+  char *str = cstr(base);
+  for (size_t i = 0; i < base->len; i++)
+  {
+    if (str[i] == src)
+    {
+      str[i] = replacement;
+    }
   }
 
   return base;

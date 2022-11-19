@@ -11,6 +11,11 @@
 #define CONFIG_STRING '"'
 #define CONFIG_EQUALS '='
 
+#define CONFIG_LOOKING_FOR_KEY 1
+#define CONFIG_LOOKING_FOR_DECLARATION 2
+#define CONFIG_LOOKING_FOR_VALUE 3
+#define CONFIG_LOOKING_FOR_VALUE_ARRAY 4
+
 dict_t config_read(char *path);
 
 #endif

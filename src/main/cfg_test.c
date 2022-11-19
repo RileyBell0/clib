@@ -19,13 +19,13 @@ int main(int argc, char **argv)
       for (size_t i = 0; i < res.data.len; i++)
       {
         dict_node_t *node = (dict_node_t *)vector_get(&res.data, i);
-        printf("{%s: %s}", cstr(&node->key), cstr((string_t *)node->value));
-        if (i != res.data.len - 1)
+        printf("%s\n", cstr(&node->key));
+        array_t *values = node->value;
+        for (size_t i = 0; i < values->len; i++)
         {
-          printf(" > ");
+          printf("\t%s\n", cstr((string_t *)array_get(values, i)));
         }
       }
-      printf("\n");
       dict_destroy(&res);
       break;
     case 2:
