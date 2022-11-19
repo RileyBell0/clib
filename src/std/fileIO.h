@@ -3,6 +3,8 @@
 
 #define EXTENSION_SEPERATING_CHAR '.'
 
+#include "./struc/vector.h"
+#include "./struc/array.h"
 #include "string.h"
 #include <stdio.h>
 #include <assert.h>
@@ -34,5 +36,10 @@ void fileio_close(FILE *file);
  * to fit the whole line
  * returns TRUE (1) on success or FALSE (0) on failure */
 bool fileio_next_line(FILE *file, string_t *buffer);
+
+/*
+ * Returns an array[string_t] containing all lines in the file
+ */
+array_t fileio_read_all_lines(char *path);
 
 #endif

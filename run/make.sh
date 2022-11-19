@@ -5,12 +5,13 @@ echo "Only warnings will be shown"
 echo ""
 
 # Changeable Vars
-COMPILE_BASE=".compile"
-MAKE_FOLDER="make"
-MAKEFILE_NAME_BASE=""
+MAKEFILE_LOC="Makefile"
 
 ###############################################################################
 ###############################################################################
+
+mkdir -p output/build
+mkdir -p output/objects
 
 MAKE_PATH="$COMPILE_BASE/$MAKE_FOLDER/"
 CURRENT_OS="Unknown"
@@ -24,8 +25,8 @@ case "$OSTYPE" in
   *)        echo "unknown os type: $OSTYPE" ;;
 esac
 
-echo make -f"$MAKE_PATH$MAKEFILE_NAME_BASE$CURRENT_OS" -s
-make -f"$MAKE_PATH$MAKEFILE_NAME_BASE$CURRENT_OS" -s
+echo make -f"$MAKEFILE_LOC" -s
+make -f"$MAKEFILE_LOC" -s
 
 echo ""
 echo "Finished running makefile!"

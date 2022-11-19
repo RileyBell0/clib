@@ -81,6 +81,30 @@ bool fileio_next_line(FILE *file, string_t *buffer)
   return true;
 }
 
+array_t fileio_read_all_lines(char *path)
+{
+  string_t buffer = empty_string();
+  string_t *buf = &buffer;
+  vector_t lines = vector_new(sizeof(string_t), void_string_destroy);
+
+  // Read all lines of the file into "lines"
+  FILE *file = fileio_open_safe(path, true);
+  while (fileio_next_line(file, buf))
+  {
+    string_t line = string_copy(buf);
+    vector_append(&lines, &line);
+  }
+  fclose(file);
+  array_t all_lines = vector_to_array(&lines);
+
+  // Cleanup
+  string_destroy(buf);
+  lines.destroy = NULL;
+  vector_destroy(&lines);
+
+  return all_lines;
+}
+
 // array_t fileio_read_all_lines(char *file_name)
 // {
 

@@ -1,10 +1,10 @@
-all: projectScan
+all: main 
 
-projectScan: projectScan.o dict.o list.o array.o vector.o filter.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/projectScan output/objects/projectScan.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/filter.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+main: main.o dict.o list.o array.o vector.o filter.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/main output/objects/main.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/filter.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
 
-projectScan.o: src/main/projectScan.c
-	gcc -arch arm64 -Wall -c -o output/objects/projectScan.o src/main/projectScan.c -g
+main.o: src/main/main.c
+	gcc -arch arm64 -Wall -c -o output/objects/main.o src/main/main.c -g
 
 dict.o: src/std/struc/c/dict.c
 	gcc -arch arm64 -Wall -c -o output/objects/dict.o src/std/struc/c/dict.c -g
@@ -46,4 +46,4 @@ index.o: src/std/c/index.c
 	gcc -arch arm64 -Wall -c -o output/objects/index.o src/std/c/index.c -g
 
 clean:
-	rm output/objects/*.o output/build/*
+	rm output/objects/*o output/build/*

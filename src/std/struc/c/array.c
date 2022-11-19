@@ -6,12 +6,6 @@
 
 array_t array_new(size_t len, size_t element_size, void (*destroy)(void *elem))
 {
-  if (len <= 0)
-  {
-    exit_error("Array must be initialised with a size of at least 1",
-               "std/c/array.c", "array_new");
-  }
-
   array_t array;
 
   array.data = safe_malloc(len * element_size);

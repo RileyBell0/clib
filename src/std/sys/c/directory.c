@@ -63,7 +63,7 @@ static vector_t dir_all_files_recur_vector(char *path)
   {
     struct dirent *entry = (struct dirent *)array_get(&entries, i);
     string_limit(&entry_path, path_len);
-    string_append_c_multi(&entry_path, PATH_SEP, entry->d_name, NULL);
+    string_append_c_multi(&entry_path, "/", entry->d_name, NULL);
 
     // Save all contained files to "files"
     if (!is_relative_dir_entry(entry->d_name))

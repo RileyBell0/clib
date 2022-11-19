@@ -2,15 +2,15 @@
  * Gets all 'c' files that are to be compiled
  */
 
-#include "clib/fileIO.h"
-#include "clib/string.h"
-#include "clib/string.h"
-#include "clib/adv/config.h"
-#include "clib/sys/directory.h"
-#include "clib/sys/system.h"
-#include "clib/struc/filter.h"
-#include "clib/struc/dict.h"
-#include "clib/struc/array.h"
+#include "../std/fileIO.h"
+#include "../std/string.h"
+#include "../std/string.h"
+#include "../std/adv/config.h"
+#include "../std/sys/directory.h"
+#include "../std/sys/system.h"
+#include "../std/struc/filter.h"
+#include "../std/struc/dict.h"
+#include "../std/struc/array.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +23,7 @@
 #define VAR_EXTENSION "PROGRAM_TYPE"
 #define VAR_COMPONENT_OUT "COMPONENT_OUT"
 #define VAR_MAIN_OUT "MAIN_OUT"
-#define VAR_CONFIG_DIR "CONFIG_DIR"
+#define VAR_OUTPUT_DIR "OUTPUT_DIR"
 
 #define EXIT_ERROR 1
 #define SPACE_FOR_PERIOD 1
@@ -115,12 +115,12 @@ int main(int argc, char **argv)
   string_t *extension = cfg_get_value(cfg, VAR_EXTENSION);
   string_t *component_out = cfg_get_value(cfg, VAR_COMPONENT_OUT);
   string_t *main_out = cfg_get_value(cfg, VAR_MAIN_OUT);
-  string_t *config_dir = cfg_get_value(cfg, VAR_CONFIG_DIR);
+  string_t *output_dir = cfg_get_value(cfg, VAR_OUTPUT_DIR);
 
   // Making input args more usable
-  string_t path_sep = string_new(PATH_SEP);
-  string_t components_file_loc = string_concat_multi(config_dir, &path_sep, component_out, NULL);
-  string_t programs_file_loc = string_concat_multi(config_dir, &path_sep, main_out, NULL);
+  string_t path_sep = string_new("/");
+  string_t components_file_loc = string_concat_multi(output_dir, &path_sep, component_out, NULL);
+  string_t programs_file_loc = string_concat_multi(output_dir, &path_sep, main_out, NULL);
 
   // Discover and write the paths to all component files
   FILE *components_file = fileio_open_safe(cstr(&components_file_loc), false);
