@@ -1,6 +1,6 @@
 
-echo "Running Makefile for Project..."
 echo "---------------------------------"
+echo "Running Makefile for Project..."
 echo "Only warnings will be shown"
 echo ""
 

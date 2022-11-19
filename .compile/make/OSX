@@ -1,28 +1,10 @@
-all: dir_test cfg_test dict_test list_test
+all: projectScan
 
-dir_test: dir_test.o dict.o list.o array.o vector.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/dir_test output/objects/dir_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
+projectScan: projectScan.o dict.o list.o array.o vector.o filter.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
+	gcc -arch arm64 -Wall -o output/build/projectScan output/objects/projectScan.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/filter.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
 
-cfg_test: cfg_test.o dict.o list.o array.o vector.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/cfg_test output/objects/cfg_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
-
-dict_test: dict_test.o dict.o list.o array.o vector.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/dict_test output/objects/dict_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
-
-list_test: list_test.o dict.o list.o array.o vector.o tree.o directory.o error.o config.o memory.o fileIO.o string.o index.o
-	gcc -arch arm64 -Wall -o output/build/list_test output/objects/list_test.o output/objects/dict.o output/objects/list.o output/objects/array.o output/objects/vector.o output/objects/tree.o output/objects/directory.o output/objects/error.o output/objects/config.o output/objects/memory.o output/objects/fileIO.o output/objects/string.o output/objects/index.o -g
-
-dir_test.o: src/main/dir_test.c
-	gcc -arch arm64 -Wall -c -o output/objects/dir_test.o src/main/dir_test.c -g
-
-cfg_test.o: src/main/cfg_test.c
-	gcc -arch arm64 -Wall -c -o output/objects/cfg_test.o src/main/cfg_test.c -g
-
-dict_test.o: src/main/dict_test.c
-	gcc -arch arm64 -Wall -c -o output/objects/dict_test.o src/main/dict_test.c -g
-
-list_test.o: src/main/list_test.c
-	gcc -arch arm64 -Wall -c -o output/objects/list_test.o src/main/list_test.c -g
+projectScan.o: src/main/projectScan.c
+	gcc -arch arm64 -Wall -c -o output/objects/projectScan.o src/main/projectScan.c -g
 
 dict.o: src/std/struc/c/dict.c
 	gcc -arch arm64 -Wall -c -o output/objects/dict.o src/std/struc/c/dict.c -g
@@ -35,6 +17,9 @@ array.o: src/std/struc/c/array.c
 
 vector.o: src/std/struc/c/vector.c
 	gcc -arch arm64 -Wall -c -o output/objects/vector.o src/std/struc/c/vector.c -g
+
+filter.o: src/std/struc/c/filter.c
+	gcc -arch arm64 -Wall -c -o output/objects/filter.o src/std/struc/c/filter.c -g
 
 tree.o: src/std/struc/c/tree.c
 	gcc -arch arm64 -Wall -c -o output/objects/tree.o src/std/struc/c/tree.c -g

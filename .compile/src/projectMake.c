@@ -3,12 +3,11 @@
  * makefile
  */
 
-#include "../std/struc/vector.h"
-#include "../std/adv/argparse.h"
-#include "../std/adv/config.h"
-#include "../std/fileIO.h"
-#include "../std/path.h"
-#include "../std/string.h"
+#include "clib/struc/vector.h"
+#include "clib/adv/config.h"
+#include "clib/fileIO.h"
+#include "clib/string.h"
+#include "clib/sys/system.h"
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -38,49 +37,72 @@
 #define VAR_PROG_OUT "PROG_OUT"
 #define VAR_COMPONENT_OUT "COMPONENT_OUT"
 
-typedef struct make_instructions_t {
-  string_t compiler;  // The name of the compiler to use
-  string_t makefile_name;
+string_t load_flags_from_cfg(dict_t *cfg, char *var_name);
+string_t *cfg_get_value(dict_t *cfg, char *key);
+array_t *cfg_get_values(dict_t *cfg, char *key);
 
-  string_t prog_files_list_loc;
-  string_t obj_files_list_loc;
+string_t *cfg_get_value(dict_t *cfg, char *key)
+{
+  return (string_t *)((array_t *)dict_get(cfg, key))->data;
+}
+array_t *cfg_get_values(dict_t *cfg, char *key)
+{
+  return (array_t *)dict_get(cfg, key);
+}
 
-  string_t common_flags; // Commmon flags
-  string_t prog_flags; // Flags specific for the program
-  string_t obj_flags; // Flags specific for objects
-  string_t debug_flags; // Debug specific flags
+// no leading or trailing whitespaces
+string_t load_flags_from_cfg(dict_t *cfg, char *var_name)
+{
+  string_t flags = empty_string();
 
-  string_t obj_ext; // The extension to give the compiled objects
+  array_t *vars = (array_t *)dict_get(cfg, var_name);
+  for (size_t i = 0; i < vars->len; i++)
+  {
+    string_t *var = (string_t *)array_get(&vars, i);
+    string_write_c(&flags, FLAG_INDICATOR);
+    string_write(&flags, var);
+    if (i != vars->len - 1)
+    {
+      string_write_c(&flags, " ");
+    }
+  }
 
-  string_t obj_out; // Where to put the compiled objects
-} make_instructions_t;
+  return flags;
+}
 
-string_t* get_val_from_cfg(config_t* cfg, char* var_name);
-string_t load_flags_from_cfg(config_t* cfg, char* var_name);
-make_instructions_t load_make_instructions(config_t* cfg);
-
-
-/*
- * Program Entry Point
- */
-int main(int argc, char **argv) {
-  if (argc < REQUIRED_ARGS + 1) {
+int main(int argc, char **argv)
+{
+  if (argc < REQUIRED_ARGS + 1)
+  {
     printf("USAGE:  %s  Path_To_Config  Is_Debugging\n", argv[0]);
     exit(EXIT_ERROR);
   }
 
   // Constants
-  string_t flag_start = string_make("-");
-  string_t path_sep = string_make(PATH_SEPERATOR);
-  string_t ext_seperator = string_make("."); // Extension seperator
+  string_t flag_start = string_new("-");
+  string_t path_sep = string_new(PATH_SEP);
+  string_t ext_seperator = string_new(".");
 
   // Read in the cfg file
-  config_t cfg = config_read(argv[ARG_CONFIG_LOC]);
-  make_instructions_t instr = load_make_instructions(&cfg);
+  dict_t config = config_read(argv[ARG_CONFIG_LOC]);
+  dict_t *cfg = &config;
 
-  string_t component_files_path = string_new(0);.compile/cfg/
-  string_write_multi(&component_files_path, var_cfg_dir->values.data, &path_sep,
-                     var_obj_files->values.data, NULL);
+  // Extract variables from the config
+  string_t *compiler = cfg_get_value(cfg, VAR_COMPILER);
+  string_t *makefile_name = cfg_get_value(cfg, VAR_MAKE_NAME);
+  string_t *prog_files_list_loc = cfg_get_value(cfg, VAR_PROG_FILES);
+  string_t *obj_files_list_loc = cfg_get_value(cfg, VAR_COMPONENT_FILES);
+  string_t common_flags = load_flags_from_cfg(cfg, VAR_FLAGS);
+  string_t debug_flags = load_flags_from_cfg(cfg, VAR_DEBUG);
+  string_t obj_flags = load_flags_from_cfg(cfg, VAR_OBJ_FLAGS);
+  string_t prog_flags = load_flags_from_cfg(cfg, VAR_PROG_FLAGS);
+  string_t *obj_out = cfg_get_value(cfg, VAR_OBJ_OUT);
+  string_t *obj_ext = cfg_get_value(cfg, VAR_OBJ_EXT);
+  string_t *prog_out = cfg_get_value(cfg, VAR_PROG_OUT);
+
+  string_t component_files_path = string_concat_multi()
+      string_write_multi(&component_files_path, var_cfg_dir->values.data, &path_sep,
+                         var_obj_files->values.data, NULL);
 
   string_t prog_files_path = string_new(0);
   string_write_multi(&prog_files_path, var_cfg_dir->values.data, &path_sep,
@@ -105,7 +127,8 @@ int main(int argc, char **argv) {
   it = alist_iterator_new(&obj_names, true);
   string_t whitespace = string_make(" ");
   for (string_t *element = it.first(&it); !it.done(&it);
-       element = it.next(&it)) {
+       element = it.next(&it))
+  {
     string_write_multi(&all_obj_names, element, &ext_seperator, obj_ext,
                        &whitespace, NULL);
   }
@@ -116,7 +139,8 @@ int main(int argc, char **argv) {
   string_t all_obj_paths = string_new(DEFAULT_BUFFER_LEN);
   it = alist_iterator_new(&obj_names, true);
   for (string_t *element = it.first(&it); !it.done(&it);
-       element = it.next(&it)) {
+       element = it.next(&it))
+  {
     string_write_multi(&all_obj_paths, obj_out, &path_sep, element,
                        &ext_seperator, obj_ext, &whitespace, NULL);
   }
@@ -126,7 +150,8 @@ int main(int argc, char **argv) {
   string_t *compiler = var_compiler->values.data;
 
   string_t global_flags = string_new(DEFAULT_BUFFER_LEN);
-  for (unsigned int i = 0; i < var_flags->values.len; i++) {
+  for (unsigned int i = 0; i < var_flags->values.len; i++)
+  {
     string_write_multi(&global_flags, &flag_start,
                        &((string_t *)var_flags->values.data)[i], &whitespace,
                        NULL);
@@ -135,7 +160,8 @@ int main(int argc, char **argv) {
                global_flags.len - 1); // Remove the trailing whitespace
 
   string_t obj_flags = string_new(DEFAULT_BUFFER_LEN);
-  for (unsigned int i = 0; i < var_obj_flags->values.len; i++) {
+  for (unsigned int i = 0; i < var_obj_flags->values.len; i++)
+  {
     string_write_multi(&obj_flags, &flag_start,
                        &((string_t *)var_obj_flags->values.data)[i],
                        &whitespace, NULL);
@@ -144,16 +170,18 @@ int main(int argc, char **argv) {
                obj_flags.len - 1); // Remove the trailing whitespace
 
   string_t prog_flags = string_new(DEFAULT_BUFFER_LEN);
-  for (unsigned int i = 0; i < var_prog_flags->values.len; i++) {
-    string_write_multi(&prog_flags, &flag_start, &((string_t*)var_prog_flags->values.data)[i],
+  for (unsigned int i = 0; i < var_prog_flags->values.len; i++)
+  {
+    string_write_multi(&prog_flags, &flag_start, &((string_t *)var_prog_flags->values.data)[i],
                        &whitespace, NULL);
   }
   string_limit(&prog_flags,
                prog_flags.len - 1); // Remove the trailing whitespace
 
   string_t debug_flags = string_new(DEFAULT_BUFFER_LEN);
-  for (unsigned int i = 0; i < var_debug->values.len; i++) {
-    string_write_multi(&debug_flags, &flag_start, &((string_t*)var_debug->values.data)[i],
+  for (unsigned int i = 0; i < var_debug->values.len; i++)
+  {
+    string_write_multi(&debug_flags, &flag_start, &((string_t *)var_debug->values.data)[i],
                        &whitespace, NULL);
   }
   string_limit(&debug_flags,
@@ -169,7 +197,8 @@ int main(int argc, char **argv) {
   // Writing the make instructions for the programs
   it = alist_iterator_new(&prog_names, true);
   for (string_t *prog_name = it.first(&it); !it.done(&it);
-       prog_name = it.next(&it)) {
+       prog_name = it.next(&it))
+  {
     fprintf(out_file, "%s: %s%s%s %s\n", cstr(prog_name), cstr(prog_name),
             cstr(&ext_seperator), cstr(obj_ext), cstr(&all_obj_names));
     fprintf(out_file, "\t%s %s %s %s%s%s %s%s%s%s%s %s %s\n\n", cstr(compiler),
@@ -184,7 +213,8 @@ int main(int argc, char **argv) {
   it_2 = alist_iterator_new(&prog_file_paths, true);
   it_2.first(&it_2);
   for (string_t *prog_name = it.first(&it); !it.done(&it);
-       prog_name = it.next(&it)) {
+       prog_name = it.next(&it))
+  {
     // Write call line
     fprintf(out_file, "%s%s%s: %s\n", cstr(prog_name), cstr(&ext_seperator),
             cstr(obj_ext), cstr(it_2.element));
@@ -203,7 +233,8 @@ int main(int argc, char **argv) {
   it_2 = alist_iterator_new(&obj_file_paths, true);
   it_2.first(&it_2);
   for (string_t *obj_name = it.first(&it); !it.done(&it);
-       obj_name = it.next(&it)) {
+       obj_name = it.next(&it))
+  {
     fprintf(out_file, "%s%s%s: %s\n", cstr(obj_name), cstr(&ext_seperator),
             cstr(obj_ext), cstr(it_2.element));
     fprintf(out_file, "\t%s %s %s %s%s%s%s%s %s %s\n\n", cstr(compiler),
@@ -238,48 +269,4 @@ int main(int argc, char **argv) {
   config_destroy(cfg);
 
   return (0);
-}
-
-
-string_t* get_val_from_cfg(config_t* cfg, char* var_name) {
-  array_t result = config_get(cfg, var_name);
-  if (result.len == 0) {
-    fprintf(stderr, "Error - \"%s\" not in config %s\n", var_name, cstr(&cfg->path_to_cfg));
-    exit_error("Value not in config", "projectMake.c", "get_val_from_cfg");
-  }
-
-  return (string_t*)array_get(&result, 0);
-}
-
-// There will be a trailing whitespace in the resultant string
-string_t load_flags_from_cfg(config_t* cfg, char* var_name) {
-  string_t flags = string_new(0);
-
-  array_t vars = config_get(cfg, var_name);
-  for (int i = 0; i < vars.len; i++) {
-    string_t* var = array_get(&vars, i);
-    string_write_c(&flags, FLAG_INDICATOR);
-    string_write(&flags, var);
-    string_write_c(&flags, " ");
-  }
-
-  return flags;
-}
-
-make_instructions_t load_make_instructions(config_t* cfg) {
-  make_instructions_t instr;
-  instr.compiler = string_copy(get_val_from_cfg(cfg, VAR_COMPILER));
-  instr.makefile_name = string_copy(get_val_from_cfg(cfg, VAR_MAKE_NAME));
-
-  instr.prog_files_list_loc = string_copy(get_val_from_cfg(&cfg, VAR_PROG_FILES));
-  instr.obj_files_list_loc = string_copy(get_val_from_cfg(&cfg, VAR_COMPONENT_FILES));
-  
-  instr.common_flags = load_flags_from_cfg(cfg, VAR_FLAGS);
-  instr.debug_flags = load_flags_from_cfg(cfg, VAR_DEBUG);
-  instr.obj_flags = load_flags_from_cfg(cfg, VAR_OBJ_FLAGS);
-  instr.prog_flags = load_flags_from_cfg(cfg, VAR_PROG_FLAGS);
-
-  instr.obj_out = string_copy(get_val_from_cfg(cfg, VAR_OBJ_OUT));
-  instr.obj_ext = string_copy(get_val_from_cfg(cfg, VAR_OBJ_EXT));
-  instr.prog_out = string_copy(get_val_from_cfg(cfg, VAR_PROG_OUT));
 }

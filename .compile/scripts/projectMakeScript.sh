@@ -1,38 +1,12 @@
-echo "Creating Makefile from Project Information..."
 echo "---------------------------------------------"
-echo ""
+echo "Creating Makefile from Project Information..."
 
-# Changeable Vars
-
-BASE_NAME=".compile"
-PROG_FOLDER="prog"
-CONFIG_FOLDER="cfg"
-PROG_NAME="projectMake"
-CFG_EXT=".cfg"
+# Required Variables
+CONFIG=".compile/cfg/make.cfg"
+EXECUTABLE="./.compile/prog/make"
 
 ###############################################################################
-###############################################################################
 
-PROGNAME_START="./$BASE_NAME/$PROG_FOLDER/$PROG_NAME"
-MAKE_CONFIG_LOC="$BASE_NAME/$CONFIG_FOLDER/"
-PROGNAME_END="Unknown"
-EXTENSION=""
-
-case "$OSTYPE" in
-  solaris*) PROGNAME_END="SOLARIS" ;;
-  darwin*)  PROGNAME_END="OSX" ;; 
-  linux*)   PROGNAME_END="LINUX" ;;
-  bsd*)     PROGNAME_END="BSD" ;;
-  msys*)    PROGNAME_END="WINDOWS" EXTENSION=".exe" ;;
-  *)        echo "unknown os type: $OSTYPE" ;;
-esac
-
-echo "Os Type: $PROGNAME_END"
-
-EXECUTABLE="$PROGNAME_START$PROGNAME_END$EXTENSION"
-CONFIG="$MAKE_CONFIG_LOC$PROGNAME_END$CFG_EXT"
-
-echo 
 echo "Running \"$EXECUTABLE $CONFIG\""
 echo 
 
