@@ -11,7 +11,7 @@ static DIR *dir_open_safe(char *path)
 
   if (!d)
   {
-    exit_error("Could not open directory", "std/dir/c/directory.c",
+    exit_error(cstr_cat("Could not open directory \"", path, "\"", NULL), "std/dir/c/directory.c",
                "dir_open_safe_c");
   }
 

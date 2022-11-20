@@ -32,10 +32,10 @@
 #define VAR_OBJ_EXT "OBJ_EXTENSION"
 #define VAR_CFG_DIR "CONFIG_DIRECTORY"
 #define VAR_PROG_FLAGS "PROGRAM_FLAGS"
-#define VAR_PROG_FILES "PROGRAM_FILES"
-#define VAR_COMPONENT_FILES "COMPONENT_FILES"
 #define VAR_PROG_OUT "PROG_OUT"
 #define VAR_COMPONENT_OUT "COMPONENT_OUT"
+#define VAR_PROG_FILES "PROGRAMS_OUT"
+#define VAR_COMPONENT_FILES "COMPONENTS_OUT"
 
 string_t load_flags_from_cfg(dict_t *cfg, char *var_name);
 string_t *cfg_get_value(dict_t *cfg, char *key);
@@ -45,12 +45,12 @@ string_t *cfg_get_value(dict_t *cfg, char *key)
 {
   return (string_t *)((array_t *)dict_get(cfg, key))->data;
 }
+
 array_t *cfg_get_values(dict_t *cfg, char *key)
 {
   return (array_t *)dict_get(cfg, key);
 }
 
-// no leading or trailing whitespaces
 string_t load_flags_from_cfg(dict_t *cfg, char *var_name)
 {
   string_t flags = empty_string();
@@ -141,8 +141,8 @@ int main(int argc, char **argv)
   // Extract variables from the config
   string_t *compiler = cfg_get_value(cfg, VAR_COMPILER);
   string_t *makefile_name = cfg_get_value(cfg, VAR_MAKE_NAME);
-  string_t *programs = cfg_get_value(cfg, VAR_PROG_FILES);
-  string_t *components = cfg_get_value(cfg, VAR_COMPONENT_FILES);
+  string_t *prog_files_path = cfg_get_value(cfg, VAR_PROG_FILES);
+  string_t *component_files_path = cfg_get_value(cfg, VAR_COMPONENT_FILES);
   string_t common_flags = load_flags_from_cfg(cfg, VAR_FLAGS);
   string_t debug_flags = load_flags_from_cfg(cfg, VAR_DEBUG);
   string_t obj_flags = load_flags_from_cfg(cfg, VAR_OBJ_FLAGS);
@@ -151,22 +151,9 @@ int main(int argc, char **argv)
   string_t *obj_ext = cfg_get_value(cfg, VAR_OBJ_EXT);
   string_t *prog_out = cfg_get_value(cfg, VAR_PROG_OUT);
 
-  // Determine the location of the files containing prog and src file names
-  string_t component_files_path = string_new(".compile/output/");
-  string_append(&component_files_path, components);
-  string_t prog_files_path = string_new(".compile/output/");
-  string_append(&prog_files_path, programs);
-
   // Load component and program file names
-  array_t prog_files = fileio_read_all_lines(cstr(&prog_files_path));
-  if (prog_files.len == 0)
-  {
-    FILE *makefile = fileio_open_safe(cstr(makefile_name), false);
-    fclose(makefile);
-    return 0;
-  }
-
-  array_t component_files = fileio_read_all_lines(cstr(&component_files_path));
+  array_t prog_files = fileio_read_all_lines(cstr(prog_files_path));
+  array_t component_files = fileio_read_all_lines(cstr(component_files_path));
 
   // Extract just the file names
   array_t prog_names = get_file_names(&prog_files);

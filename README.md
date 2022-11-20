@@ -1,11 +1,26 @@
-# C Data Structures and Helpers
+# clib
+
+## Dependencies
+
+Requires "make"
+
+## Setup
+
+1. Run setup.sh to setup the auto-compiler
+2. Run build.sh to compile your program(s)
 
 ## How to use
 
-Add program entrypoint files to src/main/YOUR_FILE_HERE.c
+Add program files to src/main, and supporting files to src/std
 
-Run the following command in terminal to compile
+clib standard files such as string.h are included in "src/std"
 
-```
-./run/prepare.sh
-```
+## Customising Compilation
+
+- Edit .config/cfg/config.cfg to change
+  - Where to look for main files (project entry points)
+  - Where to look for component files (not project entry points)
+  - Where program files are output
+  - Where object files are output
+  - Where to save the Makefile
+  - Make instructions

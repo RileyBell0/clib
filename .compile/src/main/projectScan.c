@@ -1,7 +1,3 @@
-/*
- * Gets all 'c' files that are to be compiled
- */
-
 #include "../std/fileIO.h"
 #include "../std/string.h"
 #include "../std/string.h"
@@ -20,10 +16,9 @@
 
 #define VAR_SRC_DIRS "SRC_DIRS"
 #define VAR_MAIN_DIRS "MAIN_DIRS"
-#define VAR_EXTENSION "PROGRAM_TYPE"
-#define VAR_COMPONENT_OUT "COMPONENT_OUT"
-#define VAR_MAIN_OUT "MAIN_OUT"
-#define VAR_OUTPUT_DIR "OUTPUT_DIR"
+#define VAR_EXTENSION "SRC_EXTENSION"
+#define VAR_COMPONENTS_OUT "COMPONENTS_OUT"
+#define VAR_PROGRAMS_OUT "PROGRAMS_OUT"
 
 #define EXIT_ERROR 1
 #define SPACE_FOR_PERIOD 1
@@ -91,6 +86,7 @@ string_t *cfg_get_value(dict_t *cfg, char *key)
 {
   return (string_t *)((array_t *)dict_get(cfg, key))->data;
 }
+
 array_t *cfg_get_values(dict_t *cfg, char *key)
 {
   return (array_t *)dict_get(cfg, key);
@@ -111,19 +107,12 @@ int main(int argc, char **argv)
   // ------------ SETTING UP VARAIBLES
   array_t *src_dirs = cfg_get_values(cfg, VAR_SRC_DIRS);
   array_t *main_dirs = cfg_get_values(cfg, VAR_MAIN_DIRS);
-
   string_t *extension = cfg_get_value(cfg, VAR_EXTENSION);
-  string_t *component_out = cfg_get_value(cfg, VAR_COMPONENT_OUT);
-  string_t *main_out = cfg_get_value(cfg, VAR_MAIN_OUT);
-  string_t *output_dir = cfg_get_value(cfg, VAR_OUTPUT_DIR);
-
-  // Making input args more usable
-  string_t path_sep = string_new("/");
-  string_t components_file_loc = string_concat_multi(output_dir, &path_sep, component_out, NULL);
-  string_t programs_file_loc = string_concat_multi(output_dir, &path_sep, main_out, NULL);
+  string_t *components_file_loc = cfg_get_value(cfg, VAR_COMPONENTS_OUT);
+  string_t *programs_file_loc = cfg_get_value(cfg, VAR_PROGRAMS_OUT);
 
   // Discover and write the paths to all component files
-  FILE *components_file = fileio_open_safe(cstr(&components_file_loc), false);
+  FILE *components_file = fileio_open_safe(cstr(components_file_loc), false);
   for (size_t i = 0; i < src_dirs->len; i++)
   {
     string_t *component_dir_base_path = (string_t *)array_get(src_dirs, i);
@@ -133,7 +122,7 @@ int main(int argc, char **argv)
   fclose(components_file);
 
   // Discover and write the paths to all program files
-  FILE *programs_file = fileio_open_safe(cstr(&programs_file_loc), false);
+  FILE *programs_file = fileio_open_safe(cstr(programs_file_loc), false);
   for (size_t i = 0; i < main_dirs->len; i++)
   {
     string_t *program_dir_base_path = (string_t *)array_get(main_dirs, i);
@@ -142,9 +131,6 @@ int main(int argc, char **argv)
   fclose(programs_file);
 
   // Cleanup
-  string_destroy(&path_sep);
-  string_destroy(&components_file_loc);
-  string_destroy(&programs_file_loc);
   dict_destroy(cfg);
 
   return 0;
