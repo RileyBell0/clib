@@ -2,7 +2,11 @@
 
 ## Dependencies
 
-Requires "make"
+make
+
+gcc or clang
+
+- Other compilers may work, though they'll need configuration in .compile/cfg/config.cfg and .compile/scripts/Makefile
 
 ## Setup
 
